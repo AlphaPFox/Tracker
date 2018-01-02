@@ -1,0 +1,75 @@
+<resources>
+    <string name="app_name">Tracker</string>
+    <string name="title_activity_maps">Tracker</string>
+    <string name="action_add">Adicionar</string>
+    <string name="action_refresh">Atualizar</string>
+    <string name="action_settings">Configurações</string>
+
+    <string name="navigation_drawer_open">Abrir barra de navegação</string>
+    <string name="navigation_drawer_close">Fechar barra de navegação</string>
+
+    <string name="title_activity_main">Map</string>
+    <string name="TrackerImageDescription">Modelo do rastreador</string>
+    <string name="title_activity_cards">Tracker</string>
+
+    //Main activity strings
+    <string name="txtNoTracker">Nenhum rastreador</string>
+    <string name="txtNoTrackerDescription">Você pode utilizar o botão abaixo para adicionar novos rastreadores na unidade.</string>
+    <string name="btnAddTracker">Adicionar rastreador</string>
+    <string name="imgNoTracker">Nenhum rastreador localizado</string>
+
+    //CardView item strings
+    <string name="imgTracker">Modelo do rastreador</string>
+    <string name="imgBatteryLevel">Nível da bateria</string>
+    <string name="imgSignalLevel">Nível do sinal</string>
+    <string name="imgMap">Imagem do mapa</string>
+
+    //Register activity
+    <string name="menu_include">Incluir</string>
+    <string name="title_activity_register">Cadastrar rastreador</string>
+    <string name="txtBasicConfig">Configurações básicas</string>
+    <string name="lblTrackerName">Nome do rastreador:</string>
+    <string name="txtTrackerName">(Nome)</string>
+    <string name="lblPhoneNumber">Número de telefone:</string>
+    <string name="txtModel">Modelo</string>
+    <string name="txtColorID">Cor padrão</string>
+    <string name="txtNotification">Notificações</string>
+    <string name="lblLowBattery">Bateria fraca</string>
+    <string name="txtLowBattery">Envia notificação quando a bateria do rastreador está abaixo de 30% da capacidade.</string>
+    <string name="lblMovement">Movimentação</string>
+    <string name="txtMovement">Notifica quando o rastreador se movimenta mais de 200m de sua posição atual.</string>
+    <string name="lblSOS">SOS help</string>
+    <string name="txtSOS">Alerta quando o botão SOS presente no rastreador é pressionado.</string>
+    <string name="tk102">TK 102B</string>
+    <string name="pt39">PT-39</string>
+    <string name="gt02">GT-02</string>
+    <string name="TrackerLabel">Rastreador: %s</string>
+    <string name="txtLoading">Carregando informações...</string>
+    <string name="imgLoading">Carregando...</string>
+    <string name="title_activity_detail">DetailActivity</string>
+
+
+    //Detail activity
+    <string name="transition_drawable">BackgroundTransition</string>
+    <string name="transition_icon">IconTransition</string>
+    <string name="transition_title">TitleTransition</string>
+    <string name="transition_subtitle">SubTitleTransition</string>
+
+    <string name="action_hide">Hide Panel</string>
+    <string name="action_show">Show Panel</string>
+    <string name="action_anchor_enable">Enable Anchor Point</string>
+    <string name="action_anchor_disable">Disable Anchor Point</string>
+    <string name="imgInfo">Informações sobre a localização.</string>
+    <string name="txtWaitingTitle">Aguardando dados...</string>
+    <string name="txtWaitingSubtitle">Nenhuma resposta do rastreador foi recebida até o momento. Certifique-se que o mesmo esteja ligado e com sinal da rede de celular.</string>
+
+    <string-array name="weekdays">
+        <item>Domingo</item>
+        <item>Segunda-feira</item>
+        <item>Terça-feira</item>
+        <item>Quarta-feira</item>
+        <item>Quinta-feira</item>
+        <item>Sexta-feira</item>
+        <item>Sábado</item>
+    </string-array>
+</resources>

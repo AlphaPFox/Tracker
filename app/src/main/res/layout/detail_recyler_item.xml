@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="70dp"
+    android:background="#efefef">
+
+    <TextView
+        android:id="@+id/txtNumberID"
+        android:layout_width="65dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/dashed_top"
+        android:gravity="center"
+        android:layerType="software"
+        android:textAppearance="@style/Marker"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="1" />
+
+    <TextView
+        android:id="@+id/txtDatetime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textColor="#000"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/txtNumberID"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="01/12/2018 - 11:20" />
+
+    <TextView
+        android:id="@+id/txtAddress"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="2dp"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toStartOf="@+id/imgInfo"
+        app:layout_constraintStart_toEndOf="@+id/txtNumberID"
+        app:layout_constraintTop_toBottomOf="@+id/txtDatetime"
+        tools:text="Av. Mato Grosso, 1215, , Centro, Naviraí/MS, Centro, Naviraí/MS, Centro, Naviraí/MS" />
+
+    <ImageView
+        android:id="@+id/imgInfo"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:contentDescription="@string/imgInfo"
+        android:src="@drawable/ic_info_outline_black_24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</android.support.constraint.ConstraintLayout>

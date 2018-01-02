@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "550578036766",
+    "firebase_url": "https://tracker-d3d7e.firebaseio.com",
+    "project_id": "tracker-d3d7e",
+    "storage_bucket": "tracker-d3d7e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:550578036766:android:6414d47af72a2968",
+        "android_client_info": {
+          "package_name": "br.gov.dpf.tracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "550578036766-etp6ic5o45t2iilogpa8n4gl9ooctteo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "br.gov.dpf.tracker",
+            "certificate_hash": "9e340a277891ecc85da46c91babe25899ba2860b"
+          }
+        },
+        {
+          "client_id": "550578036766-4l2755a3h689uvib7gl6ogmc3e3t2gm4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTIOjxUV98f4zad76vqNUOyBLY6NWBP0U"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "550578036766-4l2755a3h689uvib7gl6ogmc3e3t2gm4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
