@@ -67,7 +67,7 @@
                         android:layout_centerVertical="true"
                         android:layout_marginEnd="5dp"
                         android:scaleType="centerCrop"
-                        android:src="@mipmap/tk102"
+                        android:src="@drawable/ic_image_grey_24dp"
                         app:civ_fill_color="#ac5959" />
 
                     <TextView

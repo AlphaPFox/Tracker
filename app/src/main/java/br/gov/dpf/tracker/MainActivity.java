@@ -31,6 +31,7 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 
 import br.gov.dpf.tracker.Components.GridAutoLayoutManager;
+import br.gov.dpf.tracker.Entities.Model;
 import br.gov.dpf.tracker.Entities.Tracker;
 import br.gov.dpf.tracker.Firestore.TrackerAdapter;
 
@@ -38,7 +39,6 @@ public class MainActivity
         extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, TrackerAdapter.OnTrackerSelectedListener {
 
-    private ActionBarDrawerToggle mDrawerToggle;
     private RecyclerView mRecyclerView;
     public GridAutoLayoutManager mRecyclerLayoutManager;
     private View mEmptyView, mLoadingView;
@@ -69,8 +69,7 @@ public class MainActivity
         setSupportActionBar(toolbar);
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        mDrawerToggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
 
         drawer.addDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
@@ -199,14 +198,28 @@ public class MainActivity
                         .add(tracker)
                         .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                             @Override
-                            public void onSuccess(DocumentReference documentReference) {
-                                Log.d("LOG", "DocumentSnapshot added with ID: " + documentReference.getId());
+                            public void onSuccess(final DocumentReference documentReference) {
+
+                                Snackbar
+                                    .make(findViewById(R.id.coordinator_layout), "Rastreador cadastrado!", Snackbar.LENGTH_LONG)
+                                    .setAction("CANCELAR", new View.OnClickListener()
+                                    {
+                                        @Override
+                                        public void onClick(View view)
+                                        {
+                                            //Undo tracker insert
+                                            documentReference.delete();
+
+                                            //Show message to user
+                                            Snackbar.make(findViewById(R.id.coordinator_layout), "Inclusão cancelada com sucesso.", Snackbar.LENGTH_LONG).show();
+                                        }
+                                    }).show();
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
-                                Log.w("LOG", "Error adding document", e);
+                                Snackbar.make(findViewById(R.id.coordinator_layout), "Erro durante o cadastramento: " + e.toString(), Snackbar.LENGTH_LONG).show();
                             }
                         });
             }
@@ -309,7 +322,7 @@ public class MainActivity
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 

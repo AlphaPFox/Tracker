@@ -1,6 +1,7 @@
 package br.gov.dpf.tracker.Firestore;
 
 import android.content.res.Resources;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
@@ -20,6 +21,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.firestore.Query;
 import com.google.maps.android.ui.IconGenerator;
+
+import java.io.File;
 
 import br.gov.dpf.tracker.Entities.Tracker;
 import br.gov.dpf.tracker.MainActivity;
@@ -92,6 +95,17 @@ public class TrackerAdapter
 
         //Set user defined color
         holder.imageView.setCircleBackgroundColor(Color.parseColor(tracker.getBackgroundColor()));
+
+        //File path to model image
+        File imgFile = new File(mActivity.getFilesDir(), tracker.getModel());
+
+        //Check If image was already downloaded
+        if(imgFile.exists())
+        {
+            //Return image disk path
+            holder.imageView.setImageBitmap(BitmapFactory.decodeFile(imgFile.getAbsolutePath()));
+        }
+
         holder.progressBar.getIndeterminateDrawable().setColorFilter(holder.imageView.getCircleBackgroundColor(), android.graphics.PorterDuff.Mode.SRC_IN);
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {

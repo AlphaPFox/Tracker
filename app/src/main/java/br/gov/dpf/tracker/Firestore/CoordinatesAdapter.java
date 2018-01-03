@@ -1,6 +1,5 @@
 package br.gov.dpf.tracker.Firestore;
 
-import android.app.Activity;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -45,7 +44,7 @@ public class CoordinatesAdapter extends BaseAdapter<CoordinatesAdapter.ViewHolde
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
         // Inflate the custom layout
-        return new CoordinatesAdapter.ViewHolder(inflater.inflate(R.layout.detail_recyler_item, parent, false));
+        return new CoordinatesAdapter.ViewHolder(inflater.inflate(R.layout.detail_recycler_item, parent, false));
     }
 
     // Replace the contents of a view (invoked by the layout manager)

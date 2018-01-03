@@ -143,6 +143,17 @@ public class DetailActivity extends AppCompatActivity implements OnMapReadyCallb
             mLoadingBackground = findViewById(R.id.loadingBackground);
 
             imgToolbarIcon.setCircleBackgroundColor(Color.parseColor(i.getStringExtra("DetailActivity_TrackerColor")));
+
+            //File path to model image
+            File imgFile = new File(getFilesDir(), i.getStringExtra("DetailActivity_TrackerModel"));
+
+            //Check If image was already downloaded
+            if(imgFile.exists())
+            {
+                //Return image disk path
+                imgToolbarIcon.setImageBitmap(BitmapFactory.decodeFile(imgFile.getAbsolutePath()));
+            }
+
             progressBar.getIndeterminateDrawable().setColorFilter(imgToolbarIcon.getCircleBackgroundColor(), android.graphics.PorterDuff.Mode.SRC_IN);
 
             txtToolbarTitle.setText(i.getStringExtra("DetailActivity_TrackerName"));
@@ -179,9 +190,6 @@ public class DetailActivity extends AppCompatActivity implements OnMapReadyCallb
             @Override
             protected void onDataChanged()
             {
-                float scale = getApplicationContext().getResources().getDisplayMetrics().density;
-                mMap.clear();
-
                 //Get how many items in recycler view
                 if(getItemCount() == 0)
                 {
@@ -213,7 +221,10 @@ public class DetailActivity extends AppCompatActivity implements OnMapReadyCallb
                         //Else, show the first two items
                         mLayout.setPanelHeight(getResources().getDimensionPixelSize(R.dimen.panel_multiple_row_height));
                     }
+
                     positions = new ArrayList<>();
+
+                    mMap.clear();
 
                     IconGenerator iconFactory = new IconGenerator(getApplicationContext());
                     iconFactory.setColor(Color.parseColor(getIntent().getStringExtra("DetailActivity_TrackerColor")));

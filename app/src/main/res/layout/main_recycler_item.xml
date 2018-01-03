@@ -7,8 +7,12 @@
     android:layout_margin="8dp"
     app:cardCornerRadius="2dp"
     app:cardElevation="2dp"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    android:stateListAnimator="@animator/card_elevation"
     android:clickable="true"
-    android:focusable="true">
+    app:cardPreventCornerOverlap="false"
+    app:cardUseCompatPadding="true">
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
@@ -20,7 +24,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:scaleType="centerCrop"
-            android:src="@mipmap/tk102"
+            android:src="@drawable/ic_image_grey_24dp"
             app:civ_fill_color="#ac5959"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="parent" />
