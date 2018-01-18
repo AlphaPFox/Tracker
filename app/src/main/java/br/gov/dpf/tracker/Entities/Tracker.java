@@ -8,17 +8,25 @@ public class Tracker {
 
     private String mName;
 
-    private String mPhoneNumber;
+    private String mDescription;
+
+    private String mIdentification;
 
     private String mModel;
 
-    private String mBatteryLevel;
+    private int mBatteryLevel;
 
-    private String mSignalLevel;
+    private int mSignalLevel;
+
+    private int mUpdateInterval;
 
     private Date mLastUpdate;
 
+    private Date mLastCheck;
+
     private GeoPoint mLastCoordinate;
+
+    private String mLastCoordinateType;
 
     private String mBackgroundColor;
 
@@ -28,29 +36,57 @@ public class Tracker {
 
     }
 
-    public Tracker(String mName, String mModel, String mPhoneNumber, String mBatteryLevel, String mSignalLevel, String mBackgroundColor) {
+    public Tracker(String mName, String mDescription, String mModel, String mIdentification, int mUpdateInterval, String mBackgroundColor) {
         this.mName = mName;
         this.mModel = mModel;
-        this.mPhoneNumber = mPhoneNumber;
-        this.mBatteryLevel = mBatteryLevel;
-        this.mSignalLevel = mSignalLevel;
+        this.mDescription = mDescription;
+        this.mIdentification = mIdentification;
         this.mBackgroundColor = mBackgroundColor;
+        this.mLastUpdate = new Date();
+        this.mUpdateInterval = mUpdateInterval;
     }
 
     public String getName() {
         return mName;
     }
 
+    public String getTitleName()
+    {
+        if(mName.length() > 10)
+            return mName;
+        else
+            return "Rastreador: " + mName;
+    }
+
     public void setName(String mName) {
         this.mName = mName;
     }
 
-    public String getPhoneNumber() {
-        return mPhoneNumber;
+
+    public String getDescription() {
+        return mDescription;
     }
 
-    public void setPhoneNumber(String mPhoneNumber) {
-        this.mPhoneNumber = mPhoneNumber;
+    public void setDescription(String mDescription) {
+        this.mDescription = mDescription;
+    }
+
+    public String getIdentification() {
+        return mIdentification;
+    }
+
+    public void setIdentification(String mIdentification) {
+        this.mIdentification = mIdentification;
+    }
+
+    public int getUpdateInterval()
+    {
+        return mUpdateInterval;
+    }
+
+    public void setUpdateInterval(int mUpdateInterval)
+    {
+        this.mUpdateInterval = mUpdateInterval;
     }
 
     public String getModel() {
@@ -69,19 +105,42 @@ public class Tracker {
         this.mBackgroundColor = mBackgroundColor;
     }
 
-    public String getBatteryLevel() {
+    public int getBatteryLevel() {
         return mBatteryLevel;
     }
 
-    public void setBatteryLevel(String mBatteryLevel) {
+    public String getStringBatteryLevel() {
+        if (mBatteryLevel != 0)
+            return String.valueOf(mBatteryLevel) + "%";
+        else
+            return "N/D";
+    }
+
+
+    public void setBatteryLevel(int mBatteryLevel) {
         this.mBatteryLevel = mBatteryLevel;
     }
 
-    public String getSignalLevel() {
+    public int getSignalLevel() {
         return mSignalLevel;
     }
 
-    public void setSignalLevel(String mSignalLevel) {
+    public String getStringSignalLevel() {
+        if (mSignalLevel != 0)
+            return String.valueOf(mSignalLevel) + "%";
+        else
+            return "N/D";
+    }
+
+    public String getLastCoordinateType() {
+        return mLastCoordinateType;
+    }
+
+    public void setLastCoordinateType(String mLastCoordinateType) {
+        this.mLastCoordinateType = mLastCoordinateType;
+    }
+
+    public void setSignalLevel(int mSignalLevel) {
         this.mSignalLevel = mSignalLevel;
     }
 
@@ -91,6 +150,14 @@ public class Tracker {
 
     public void setLastUpdate(Date mLastUpdate) {
         this.mLastUpdate = mLastUpdate;
+    }
+
+    public Date getLastCheck() {
+        return mLastCheck;
+    }
+
+    public void setLastCheck(Date mLastCheck) {
+        this.mLastCheck = mLastCheck;
     }
 
     public GeoPoint getLastCoordinate() {

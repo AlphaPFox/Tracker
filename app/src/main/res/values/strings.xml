@@ -5,63 +5,87 @@
     <string name="action_refresh">Atualizar</string>
     <string name="action_settings">Configurações</string>
 
+    <!--  Main activity strings -->
     <string name="navigation_drawer_open">Abrir barra de navegação</string>
     <string name="navigation_drawer_close">Fechar barra de navegação</string>
-
     <string name="title_activity_main">Map</string>
     <string name="TrackerImageDescription">Modelo do rastreador</string>
     <string name="title_activity_cards">Tracker</string>
-
-    //Main activity strings
     <string name="txtNoTracker">Nenhum rastreador</string>
     <string name="txtNoTrackerDescription">Você pode utilizar o botão abaixo para adicionar novos rastreadores na unidade.</string>
     <string name="btnAddTracker">Adicionar rastreador</string>
     <string name="imgNoTracker">Nenhum rastreador localizado</string>
 
-    //CardView item strings
+    <!--  CardView item strings -->
     <string name="imgTracker">Modelo do rastreador</string>
     <string name="imgBatteryLevel">Nível da bateria</string>
     <string name="imgSignalLevel">Nível do sinal</string>
     <string name="imgMap">Imagem do mapa</string>
 
-    //Register activity
+    <!--  Register activity -->
     <string name="menu_include">Incluir</string>
+    <string name="menu_delete">Excluir</string>
     <string name="title_activity_register">Cadastrar rastreador</string>
     <string name="txtBasicConfig">Configurações básicas</string>
     <string name="lblTrackerName">Nome do rastreador:</string>
     <string name="txtTrackerName">(Nome)</string>
+    <string name="lblTrackerDescription">Descrição (opcional):</string>
     <string name="lblPhoneNumber">Número de telefone:</string>
+    <string name="txtPhoneNumberHint">67 9999 8888</string>
+    <string name="lblPhoneNumberSubtitle">Confirme que o número informado possua saldo suficiente para responder solicitações por mensagens de texto.</string>
+    <string name="lblFeedID">Chave do Feed ID:</string>
+    <string name="txtFieldIDHint">0I48pmHmVsrh88oe38f0etUjB8pJglLOp</string>
+    <string name="lblFeedIDSubtitle">O campo acima deve ser preenchido com o valor do FEED ID, disponível na página de compartilhamento da SPOT.</string>
     <string name="txtModel">Modelo</string>
     <string name="txtColorID">Cor padrão</string>
     <string name="txtNotification">Notificações</string>
     <string name="lblLowBattery">Bateria fraca</string>
-    <string name="txtLowBattery">Envia notificação quando a bateria do rastreador está abaixo de 30% da capacidade.</string>
-    <string name="lblMovement">Movimentação</string>
-    <string name="txtMovement">Notifica quando o rastreador se movimenta mais de 200m de sua posição atual.</string>
-    <string name="lblSOS">SOS help</string>
-    <string name="txtSOS">Alerta quando o botão SOS presente no rastreador é pressionado.</string>
-    <string name="tk102">TK 102B</string>
-    <string name="pt39">PT-39</string>
-    <string name="gt02">GT-02</string>
+    <string name="txtLowBattery">Quando o rastreador informar que a bateria está abaixo de 30%, uma notificação será exibida neste aparelho.</string>
+    <string name="lblTrackerStatus">Status do rastreador</string>
+    <string name="txtTrackerStatus">Mostra uma notificação quando o rastreador informar o percentual de bateria e sinal de GSM.</string>
+    <string name="lblMovementStatus">Alerta de movimentação</string>
+    <string name="txtMovementStatus">Exibe notificação quando o rastreador se movimentar mais de 50m de sua posição atual.</string>
+    <string name="lblStoppedStatus">Alerta de permanência</string>
+    <string name="txtStoppedStatus">Exibe notificação mesmo quando a localização informada pelo rastreador for a mesma da anterior.</string>
+    <string name="lblAvailable">Alerta de disponibilidade</string>
+    <string name="txtAvailable">Notifica assim que a operadora de telefonia confirmar se foi possível ou não entregar um SMS ao rastreador.</string>
+    <string name="lblSMSResponse">Recebimento de SMS</string>
+    <string name="txtSMSResponse">Mostra uma notificação toda vez que o servidor receber qualquer comunicação em SMS deste rastreador.</string>
     <string name="TrackerLabel">Rastreador: %s</string>
-    <string name="txtLoading">Carregando informações...</string>
-    <string name="imgLoading">Carregando...</string>
+    <string name="txtLoading">Carregando informações&#8230;</string>
+    <string name="imgLoading">Carregando&#8230;</string>
     <string name="title_activity_detail">DetailActivity</string>
 
-
-    //Detail activity
+    <!--  Detail activity -->
     <string name="transition_drawable">BackgroundTransition</string>
     <string name="transition_icon">IconTransition</string>
     <string name="transition_title">TitleTransition</string>
     <string name="transition_subtitle">SubTitleTransition</string>
-
-    <string name="action_hide">Hide Panel</string>
-    <string name="action_show">Show Panel</string>
-    <string name="action_anchor_enable">Enable Anchor Point</string>
-    <string name="action_anchor_disable">Disable Anchor Point</string>
+    <string name="action_hide">Ocultar Painel</string>
+    <string name="action_show">Exibir Painel</string>
+    <string name="action_filter">Filtar resultados</string>
+    <string name="action_edit">Editar rastreador</string>
     <string name="imgInfo">Informações sobre a localização.</string>
-    <string name="txtWaitingTitle">Aguardando dados...</string>
+    <string name="txtWaitingTitle">Aguardando dados&#8230;</string>
     <string name="txtWaitingSubtitle">Nenhuma resposta do rastreador foi recebida até o momento. Certifique-se que o mesmo esteja ligado e com sinal da rede de celular.</string>
+    <string name="txtFilterResult">Nenhuma coordenada disponível</string>
+    <string name="txtFilterResultSubtitle">Não foram encontradas coordenadas com os filtros selecionados. Altere as opções de filtros para exibir mais resultados.</string>
+    <string name="txtTrackerID">Identificação do aparelho</string>
+    <string name="txtInterval">Intervalo de atualização</string>
+    <string name="txtIntervalSubtitle"> <b>Alerta:</b> Quanto menor o intervalo de atualização, mais preciso será o rastreamento. Porém, a duração da bateria é afetada diretamente por esta opção.</string>
+
+    <!-- Filter activity -->
+    <string name="txtFilterTitle">Opções de exibição</string>
+    <string name="lblItemCount">Quantidade de itens</string>
+    <string name="swShowPolyline">Exibir linha entre as coordenadas</string>
+    <string name="swShowCircle">Exibir raio de cobertura GSM</string>
+    <string name="txtCoordinatesNumber">Exibir até %1$d coordenadas simultaneamente.</string>
+    <string name="lblItemCountDescription">Escolha quantas coordenadas serão exibidas simultaneamente. Um valor elevado pode dificultar a visualização do mapa.</string>
+    <string name="lblShowPolylineDesc">Exibe uma linha tracejada no mapa para demonstrar a sequência entre as coordenadas disponíveis.</string>
+    <string name="lblShowCircleDesc">Exibe um círculo no mapa representando o raio de cobertura da antena GSM mais próxima do rastreador (quando não há sinal GPS).</string>
+    <string name="txtDatetimeTitle">Intervalo de datas</string>
+    <string name="lblInitialDate">Data inicial</string>
+    <string name="lblEndingDate">Data final</string>
 
     <string-array name="weekdays">
         <item>Domingo</item>
@@ -70,6 +94,16 @@
         <item>Quarta-feira</item>
         <item>Quinta-feira</item>
         <item>Sexta-feira</item>
+        <item>Sábado</item>
+    </string-array>
+
+    <string-array name="short_weekdays">
+        <item>Domingo</item>
+        <item>Segunda</item>
+        <item>Terça</item>
+        <item>Quarta</item>
+        <item>Quinta</item>
+        <item>Sexta</item>
         <item>Sábado</item>
     </string-array>
 </resources>

@@ -73,7 +73,7 @@
                     <TextView
                         android:id="@+id/txtToolbarTitle"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="22dp"
                         android:layout_alignTop="@+id/imgToolbarIcon"
                         android:layout_toEndOf="@+id/imgToolbarIcon"
                         android:textColor="#333"

@@ -1,12 +1,8 @@
 package br.gov.dpf.tracker.Firestore;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.widget.ImageView;
 
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -16,9 +12,6 @@ import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -26,8 +19,6 @@ import java.util.Date;
 import java.util.Locale;
 
 import br.gov.dpf.tracker.R;
-
-import static com.google.firebase.firestore.FieldValue.delete;
 
 public abstract class BaseAdapter<VH extends RecyclerView.ViewHolder>
         extends RecyclerView.Adapter<VH>
@@ -139,7 +130,7 @@ public abstract class BaseAdapter<VH extends RecyclerView.ViewHolder>
 
     protected void onDataChanged() {}
 
-    public String formatDateTime(Date datetime)
+    public String formatDateTime(Date datetime, boolean short_weekdays)
     {
         //Check if received any update yet
         if(datetime == null)
@@ -169,7 +160,10 @@ public abstract class BaseAdapter<VH extends RecyclerView.ViewHolder>
                 }
                 else if (date1.get(Calendar.DAY_OF_MONTH) - date2.get(Calendar.DAY_OF_MONTH) < 7)
                 {
-                    dateFormat = new SimpleDateFormat("'"+ mActivity.getResources().getStringArray(R.array.weekdays)[date2.get(Calendar.DAY_OF_WEEK) - 1] +"' - HH:mm", Locale.getDefault());
+                    if(short_weekdays)
+                        dateFormat = new SimpleDateFormat("'"+ mActivity.getResources().getStringArray(R.array.short_weekdays)[date2.get(Calendar.DAY_OF_WEEK) - 1] +"' - HH:mm", Locale.getDefault());
+                    else
+                        dateFormat = new SimpleDateFormat("'"+ mActivity.getResources().getStringArray(R.array.weekdays)[date2.get(Calendar.DAY_OF_WEEK) - 1] +"' - HH:mm", Locale.getDefault());
                 }
                 else
                 {
@@ -182,6 +176,43 @@ public abstract class BaseAdapter<VH extends RecyclerView.ViewHolder>
             }
 
             return dateFormat.format(datetime);
+        }
+    }
+
+    public String formatDateTime(Date datetime1, Date datetime2)
+    {
+        //Check if received any update yet
+        if(datetime1 == null || datetime2 == null)
+        {
+            //Default waiting message
+            return mActivity.getString(R.string.txtWaitingTitle);
+        }
+        else
+        {
+            Calendar date1 = Calendar.getInstance();
+            date1.setTime(datetime1);
+
+            Calendar date2 = Calendar.getInstance();
+            date2.setTime(datetime2);
+
+            //If two dates are in the same day
+            if(date1.get(Calendar.DAY_OF_YEAR) == date2.get(Calendar.DAY_OF_YEAR) && date1.get(Calendar.YEAR) == date2.get(Calendar.YEAR))
+            {
+                //Use default value
+                return formatDateTime(datetime1, false) + " até " + formatTime(datetime2);
+            }
+            else
+            {
+                //Get value from second date time
+                String formatted_text = formatDateTime(datetime2, true);
+
+                //If dates in same year
+                if(date1.get(Calendar.YEAR) == date2.get(Calendar.YEAR))
+                    formatted_text = formatted_text.replace("/" + String.valueOf(date1.get(Calendar.YEAR)), "");
+
+                //Format text to adapt two dates representation
+                return formatDateTime(datetime1, true) + " até " + formatted_text.substring(0,1).toLowerCase() + formatted_text.substring(1);
+            }
         }
     }
 

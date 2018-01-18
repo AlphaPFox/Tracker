@@ -8,15 +8,19 @@ public class Coordinates
 {
     private GeoPoint mPosition;
 
+    private String mCellID;
+
     private String mAddress;
 
-    private String mBatteryLevel;
+    private int mBatteryLevel;
 
-    private String mSignalLevel;
+    private int mSignalLevel;
+
+    private float mSpeed;
 
     private Date mDatetime;
 
-    private String mSpeed;
+    private Date mLastDatetime;
 
     //Required by FireStore DB
     public Coordinates()
@@ -40,19 +44,23 @@ public class Coordinates
         this.mAddress = mAddress;
     }
 
-    public String getBatteryLevel() {
+    public int getBatteryLevel() {
+
         return mBatteryLevel;
     }
 
-    public void setBatteryLevel(String mBatteryLevel) {
+    public void setBatteryLevel(int mBatteryLevel) {
+
         this.mBatteryLevel = mBatteryLevel;
     }
 
-    public String getSignalLevel() {
+    public int getSignalLevel() {
+
         return mSignalLevel;
     }
 
-    public void setSignalLevel(String mSignalLevel) {
+    public void setSignalLevel(int mSignalLevel) {
+
         this.mSignalLevel = mSignalLevel;
     }
 
@@ -61,14 +69,33 @@ public class Coordinates
     }
 
     public void setDatetime(Date mDatetime) {
+
         this.mDatetime = mDatetime;
     }
 
-    public String getSpeed() {
+    public Date getLastDatetime() {
+        return mLastDatetime;
+    }
+
+    public void setLastDatetime(Date mLastDatetime) {
+        this.mLastDatetime = mLastDatetime;
+    }
+
+    public float getSpeed() {
+
         return mSpeed;
     }
 
-    public void setSpeed(String mSpeed) {
+    public void setSpeed(float mSpeed) {
+
         this.mSpeed = mSpeed;
+    }
+
+    public String getCellID() {
+        return mCellID;
+    }
+
+    public void setCellID(String mCellID) {
+        this.mCellID = mCellID;
     }
 }

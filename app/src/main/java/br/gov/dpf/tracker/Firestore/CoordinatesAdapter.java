@@ -56,7 +56,20 @@ public class CoordinatesAdapter extends BaseAdapter<CoordinatesAdapter.ViewHolde
 
         // - replace the contents of the view with that element
         holder.txtNumberID.setText(String.valueOf(getItemCount() - position));
-        holder.txtDatetime.setText(formatDateTime(coordinates.getDatetime()));
+
+        // Check if coordinate has an updated time
+        if(coordinates.getLastDatetime() != null)
+        {
+            //Specify period of time
+            holder.txtDatetime.setText(formatDateTime(coordinates.getDatetime(), coordinates.getLastDatetime()));
+        }
+        else
+        {
+            //Single time
+            holder.txtDatetime.setText(formatDateTime(coordinates.getDatetime(), false));
+        }
+
+        //Set address
         holder.txtAddress.setText(coordinates.getAddress());
 
         //Background for coordinates number ID
@@ -102,10 +115,10 @@ public class CoordinatesAdapter extends BaseAdapter<CoordinatesAdapter.ViewHolde
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mActivity != null)
-                {
-                    mActivity.OnCoordinatesSelected(getSnapshot(holder.getAdapterPosition()), holder.itemView);
-                }
+            if (mActivity != null)
+            {
+                mActivity.OnCoordinatesSelected(getSnapshot(holder.getAdapterPosition()), holder.itemView);
+            }
             }
         });
     }

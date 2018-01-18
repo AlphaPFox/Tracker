@@ -38,8 +38,7 @@
             <android.support.v7.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_marginStart="8dp"
+                android:layout_margin="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
@@ -49,7 +48,7 @@
                     android:layout_height="match_parent">
 
                     <TextView
-                        android:id="@+id/txtBasicConfig"
+                        android:id="@+id/txtFilterTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
@@ -74,18 +73,18 @@
                         android:background="#82b3d6"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/txtBasicConfig">
+                        app:layout_constraintTop_toBottomOf="@+id/txtFilterTitle">
 
                     </View>
 
                     <TextView
-                        android:id="@+id/lblTrackerName"
+                        android:id="@+id/lblItemCount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
+                        android:layout_marginStart="16dp"
                         android:layout_marginTop="16dp"
                         android:fontFamily="serif"
-                        android:labelFor="@+id/lblTrackerName"
+                        android:labelFor="@+id/lblItemCount"
                         android:text="@string/lblTrackerName"
                         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                         app:layout_constraintStart_toStartOf="parent"
@@ -93,26 +92,25 @@
                         tools:text="Nome do rastreador:" />
 
                     <TextView
-                        android:id="@+id/lblPhoneNumber"
+                        android:id="@+id/lblDescription"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        android:layout_marginStart="8dp"
+                        android:layout_marginStart="16dp"
                         android:layout_marginTop="24dp"
                         android:fontFamily="serif"
-                        android:labelFor="@id/txtPhoneNumber"
-                        android:text="@string/lblPhoneNumber"
+                        android:labelFor="@id/txtTrackerDescription"
+                        android:text="@string/lblTrackerDescription"
                         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/lblTrackerName"
-                        tools:text="Número de telefone: " />
+                        app:layout_constraintTop_toBottomOf="@+id/lblItemCount"
+                        tools:text="Descrição (opcional):" />
 
                     <EditText
                         android:id="@+id/txtTrackerName"
-                        style="@style/Widget.AppCompat.EditText"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="38dp"
                         android:layout_marginEnd="16dp"
                         android:layout_marginStart="16dp"
                         android:layout_marginTop="2dp"
@@ -124,29 +122,238 @@
                         android:singleLine="true"
                         android:textAlignment="viewStart"
                         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                        android:textColor="#999"
                         android:textSize="14sp"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/lblTrackerName"
+                        app:layout_constraintStart_toEndOf="@+id/lblItemCount"
                         app:layout_constraintTop_toBottomOf="@+id/splitter" />
 
                     <EditText
-                        android:id="@+id/txtPhoneNumber"
+                        android:id="@+id/txtTrackerDescription"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
                         android:layout_marginEnd="16dp"
-                        android:layout_marginStart="16dp"
                         android:ems="10"
-                        android:inputType="phone"
+                        android:inputType="text"
+                        android:textColor="#999"
                         android:textSize="14sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/lblPhoneNumber"
-                        app:layout_constraintTop_toBottomOf="@+id/lblTrackerName" />
+                        app:layout_constraintStart_toStartOf="@+id/txtTrackerName"
+                        app:layout_constraintTop_toBottomOf="@+id/lblItemCount" />
 
                 </android.support.constraint.ConstraintLayout>
 
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="16dp"
+                        android:fontFamily="serif"
+                        android:text="@string/txtTrackerID"
+                        android:textAllCaps="true"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                        android:textSize="14sp"
+                        android:typeface="monospace" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="2dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:background="#82b3d6" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/lblTrackerID"
+                            android:layout_width="150dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="2dp"
+                            android:fontFamily="serif"
+                            android:labelFor="@id/txtTrackerID"
+                            android:text="@string/lblPhoneNumber"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/lblItemCount" />
+
+                        <EditText
+                            android:id="@+id/txtTrackerID"
+                            style="@style/Widget.AppCompat.EditText"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:ems="10"
+                            android:focusable="true"
+                            android:focusableInTouchMode="true"
+                            android:hint="@string/txtPhoneNumberHint"
+                            android:inputType="phone"
+                            android:singleLine="true"
+                            android:textAlignment="viewStart"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                            android:textSize="14sp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@+id/lblItemCount"
+                            app:layout_constraintTop_toBottomOf="@+id/splitter" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/lblTrackerIDSubtitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:layout_marginStart="16dp"
+                        android:text="@string/lblPhoneNumberSubtitle"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txtModel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="16dp"
+                        android:fontFamily="serif"
+                        android:text="@string/txtModel"
+                        android:textAllCaps="true"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                        android:textSize="14sp"
+                        android:typeface="monospace" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="2dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:background="#82b3d6" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:gravity="center">
+
+                        <HorizontalScrollView
+                            android:id="@+id/vwModelScroll"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fadeScrollbars="false"
+                            android:scrollbarSize="4dp">
+
+                            <LinearLayout
+                                android:id="@+id/vwModels"
+                                android:layout_width="wrap_content"
+                                android:layout_height="150dp"
+                                android:orientation="horizontal">
+
+                            </LinearLayout>
+
+                        </HorizontalScrollView>
+
+                    </LinearLayout>
+                </LinearLayout>
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="16dp"
+                        android:fontFamily="serif"
+                        android:text="@string/txtInterval"
+                        android:textAllCaps="true"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                        android:textSize="14sp"
+                        android:typeface="monospace" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="2dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:background="#82b3d6" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="16dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/txtIntervalAlert"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/txtIntervalSubtitle"
+                            android:layout_marginBottom="8dp"
+                            android:textSize="12sp" />
+
+                        <com.xw.repo.BubbleSeekBar
+                            android:id="@+id/seekBar"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            app:bsb_bubble_color="@color/colorAccent"
+                            app:bsb_bubble_text_color="@color/colorPrimaryDark"
+                            app:bsb_max="6"
+                            app:bsb_min="0"
+                            app:bsb_progress="2"
+                            app:bsb_touch_to_seek="true"
+                            app:bsb_hide_bubble="true"
+                            app:bsb_auto_adjust_section_mark="true"
+                            app:bsb_second_track_color="@color/colorAccent"
+                            app:bsb_section_count="6"
+                            app:bsb_section_text_position="below_section_mark"
+                            app:bsb_show_section_mark="true"
+                            app:bsb_show_section_text="true"
+                            app:bsb_track_color="#888"/>
+
+                    </LinearLayout>
+                </LinearLayout>
             </android.support.v7.widget.CardView>
 
             <android.support.v7.widget.CardView
@@ -204,86 +411,70 @@
                             android:layout_width="250dp"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="12dp"
-                            android:checked="false"
-                            android:text="@string/lblMovement" />
+                            android:checked="true"
+                            android:text="@string/lblMovementStatus" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/txtMovement"
+                            android:text="@string/txtMovementStatus"
                             android:textSize="12sp" />
 
                         <android.support.v7.widget.SwitchCompat
-                            android:id="@+id/swSOS"
+                            android:id="@+id/swStopped"
+                            android:layout_width="250dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:checked="true"
+                            android:text="@string/lblStoppedStatus" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/txtStoppedStatus"
+                            android:textSize="12sp" />
+
+                        <android.support.v7.widget.SwitchCompat
+                            android:id="@+id/swTrackerStatus"
                             android:layout_width="250dp"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="12dp"
                             android:checked="false"
-                            android:text="@string/lblSOS" />
+                            android:text="@string/lblTrackerStatus" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/txtSOS"
+                            android:text="@string/txtTrackerStatus"
                             android:textSize="12sp" />
 
-                    </LinearLayout>
-                </LinearLayout>
-            </android.support.v7.widget.CardView>
+                        <android.support.v7.widget.SwitchCompat
+                            android:id="@+id/swAvailable"
+                            android:layout_width="250dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:checked="false"
+                            android:text="@string/lblAvailable" />
 
-            <android.support.v7.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/txtModel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginTop="16dp"
-                        android:fontFamily="serif"
-                        android:text="@string/txtModel"
-                        android:textAllCaps="true"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                        android:textSize="14sp"
-                        android:typeface="monospace"
-                        tools:text="Modelo" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="2dp"
-                        android:layout_marginEnd="8dp"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginTop="8dp"
-                        android:background="#82b3d6" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp"
-                        android:layout_marginStart="8dp"
-                        android:gravity="center">
-
-                        <HorizontalScrollView
+                        <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:scrollbarSize="4dp">
+                            android:text="@string/txtAvailable"
+                            android:textSize="12sp" />
 
-                            <LinearLayout
-                                android:id="@+id/vwModels"
-                                android:layout_width="wrap_content"
-                                android:layout_height="150dp"
-                                android:orientation="horizontal">
+                        <android.support.v7.widget.SwitchCompat
+                            android:id="@+id/swSMSResponse"
+                            android:layout_width="250dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:checked="false"
+                            android:text="@string/lblSMSResponse" />
 
-                            </LinearLayout>
-
-                        </HorizontalScrollView>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/txtSMSResponse"
+                            android:textSize="12sp" />
 
                     </LinearLayout>
                 </LinearLayout>
@@ -309,8 +500,7 @@
                         android:textAllCaps="true"
                         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                         android:textSize="14sp"
-                        android:typeface="monospace"
-                        tools:text="Cor padrão" />
+                        android:typeface="monospace" />
 
                     <View
                         android:layout_width="match_parent"
@@ -336,9 +526,9 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_margin="3dp"
-                            android:checked="true"
-                            app:buttonTint="#ff0000"
-                            android:tag="#99ff0000" />
+                            android:checked="false"
+                            android:tag="#99ff0000"
+                            app:buttonTint="#ff0000" />
 
                         <android.support.v7.widget.AppCompatCheckBox
                             android:layout_width="wrap_content"

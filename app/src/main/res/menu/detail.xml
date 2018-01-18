@@ -2,23 +2,20 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <item android:id="@+id/action_filter"
+        app:showAsAction="ifRoom"
+        android:title="@string/action_filter"
+        android:icon="@drawable/ic_filter_list_black_24dp"/>
+
+    <item android:id="@+id/action_edit"
+        app:showAsAction="never"
+        android:title="@string/action_edit"
+        android:icon="@drawable/ic_mode_edit_black_24dp"/>
+
     <item
         android:id="@+id/action_toggle"
         android:orderInCategory="100"
         app:showAsAction="never"
         android:title="@string/action_hide"/>
-
-    <item
-        android:id="@+id/action_anchor"
-        android:orderInCategory="200"
-        app:showAsAction="never"
-        android:title="@string/action_anchor_enable"/>
-
-    <item
-        android:id="@+id/action_add"
-        android:orderInCategory="300"
-        app:showAsAction="never"
-        android:title="Adicionar Coordenadas" />
-
 
 </menu>

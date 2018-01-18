@@ -10,7 +10,6 @@
         android:id="@+id/txtNumberID"
         android:layout_width="65dp"
         android:layout_height="match_parent"
-        android:layout_marginStart="8dp"
         android:background="@drawable/dashed_top"
         android:gravity="center"
         android:layerType="software"
@@ -22,14 +21,15 @@
 
     <TextView
         android:id="@+id/txtDatetime"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:textColor="#000"
         android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/imgInfo"
         app:layout_constraintStart_toEndOf="@+id/txtNumberID"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="01/12/2018 - 11:20" />
+        tools:text="01/12/2018 - 11:20 até quinta - 08:13" />
 
     <TextView
         android:id="@+id/txtAddress"
@@ -38,6 +38,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginTop="2dp"
         android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/imgInfo"
         app:layout_constraintStart_toEndOf="@+id/txtNumberID"
         app:layout_constraintTop_toBottomOf="@+id/txtDatetime"

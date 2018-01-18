@@ -1,13 +1,13 @@
 package br.gov.dpf.tracker.Firestore;
 
-import android.content.res.Resources;
-import android.graphics.BitmapFactory;
+import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -17,13 +17,14 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.maps.android.ui.IconGenerator;
 
-import java.io.File;
-
+import br.gov.dpf.tracker.Components.ImageDownloader;
 import br.gov.dpf.tracker.Entities.Tracker;
 import br.gov.dpf.tracker.MainActivity;
 import br.gov.dpf.tracker.R;
@@ -38,20 +39,22 @@ public class TrackerAdapter
         //Fired when user click on a recycler view item
         void OnTrackerSelected(String tracker_id, Tracker tracker, View viewRoot);
 
+        //Fired when user click on edit button
+        void OnTrackerEdit(String tracker_id, Tracker tracker, View viewRoot);
     }
-
-    //Display size info
-    private DisplayMetrics mMetrics;
 
     //Linked activity
     private MainActivity mActivity;
+
+    //Get shared preferences
+    private SharedPreferences sharedPreferences;
 
     //Constructor
     public TrackerAdapter(MainActivity activity, Query query) {
         super(activity, query);
 
         mActivity = activity;
-        mMetrics = Resources.getSystem().getDisplayMetrics();
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
     }
 
     // Create new views (invoked by the layout manager)
@@ -86,72 +89,126 @@ public class TrackerAdapter
         final Tracker tracker = getSnapshot(position).toObject(Tracker.class);
         final String trackerID = getSnapshot(position).getId();
 
+        //Check notification options for this tracker
+        checkNotificationSubscriptions(trackerID);
+
         // - replace the contents of the view with that element
-        holder.txtTrackerName.setText(mActivity.getString(R.string.TrackerLabel, tracker.getName()));
+        holder.txtTrackerName.setText(tracker.getTitleName());
         holder.txtTrackerModel.setText(tracker.getModel());
-        holder.txtBatteryLevel.setText(tracker.getBatteryLevel());
-        holder.txtSignalLevel.setText(tracker.getSignalLevel());
-        holder.txtLastUpdateValue.setText(formatDateTime(tracker.getLastUpdate()));
+        holder.txtBatteryLevel.setText(tracker.getStringBatteryLevel());
+        holder.txtSignalLevel.setText(tracker.getStringSignalLevel());
+
+        //Check if tracker has an coordinate available
+        if(tracker.getLastCoordinate() != null)
+            holder.txtLastUpdateValue.setText(formatDateTime(tracker.getLastUpdate(), false));
+        else
+            holder.txtLastUpdateValue.setText(mActivity.getResources().getString(R.string.txtWaitingTitle));
 
         //Set user defined color
         holder.imageView.setCircleBackgroundColor(Color.parseColor(tracker.getBackgroundColor()));
 
-        //File path to model image
-        File imgFile = new File(mActivity.getFilesDir(), tracker.getModel());
+        //Set model item image
+        ImageDownloader modelIcon = new ImageDownloader(holder.imageView, tracker.getModel());
 
-        //Check If image was already downloaded
-        if(imgFile.exists())
-        {
-            //Return image disk path
-            holder.imageView.setImageBitmap(BitmapFactory.decodeFile(imgFile.getAbsolutePath()));
-        }
+        //Execute image search from disk or URL
+        modelIcon.execute();
 
+        //Change color to loading animation
         holder.progressBar.getIndeterminateDrawable().setColorFilter(holder.imageView.getCircleBackgroundColor(), android.graphics.PorterDuff.Mode.SRC_IN);
 
+        //Set item click listener
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mActivity != null) {
+                if (mActivity != null)
+                {
+                    //Disable click to avoid double clicking
                     holder.itemView.setClickable(false);
+
+                    //Cal interface method on main activity
                     mActivity.OnTrackerSelected(trackerID, tracker, holder.itemView);
                 }
             }
         });
 
+        //Set edit click listener
+        holder.imgEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mActivity != null)
+                {
+                    //Disable click to avoid double clicking
+                    holder.itemView.setClickable(false);
+
+                    //Cal interface method on main activity
+                    mActivity.OnTrackerEdit(trackerID, tracker, holder.itemView);
+                }
+            }
+        });
+
+        //Disable click on map area (opens google map app)
         holder.mapView.setClickable(false);
 
+        //If tracker has coordinates available
         if (tracker.getLastCoordinate() != null && tracker.getLastUpdate() != null)
         {
 
+            //Load map
             holder.mapView.onCreate(null);
             holder.mapView.onResume();
             holder.mapView.getMapAsync(new OnMapReadyCallback() {
                 @Override
                 public void onMapReady(final GoogleMap googleMap) {
 
-
+                    //Initialize map
                     MapsInitializer.initialize(mActivity);
                     holder.googleMap = googleMap;
                     holder.googleMap.getUiSettings().setMapToolbarEnabled(false);
+
+                    //Define icon settings
                     IconGenerator iconFactory = new IconGenerator(mActivity);
                     iconFactory.setColor(Color.parseColor(tracker.getBackgroundColor()));
                     iconFactory.setTextAppearance(R.style.Marker);
 
+                    //Get central coordinates
                     LatLng coordinates = new LatLng(tracker.getLastCoordinate().getLatitude(), tracker.getLastCoordinate().getLongitude());
+
+                    //Set camera position
                     googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinates, 14));
 
+                    //If coordinates come from a GSM tower cell
+                    if(tracker.getLastCoordinateType() != null && tracker.getLastCoordinateType().equals("GSM") && sharedPreferences.getBoolean("ShowCircle", true))
+                    {
+                        //Add circle representing cell tower signal coverage
+                        googleMap.addCircle(new CircleOptions()
+                                .center(coordinates)
+                                .radius(500)
+                                .strokeWidth(mActivity.getResources().getDimensionPixelSize(R.dimen.map_circle_width))
+                                .strokeColor(Color.parseColor("#88" + tracker.getBackgroundColor().substring(3)))
+                                .fillColor(Color.parseColor("#55" + tracker.getBackgroundColor().substring(3))));
+
+                        //Change marker color to be not transparent
+                        iconFactory.setColor(Color.parseColor("#" + tracker.getBackgroundColor().substring(3)));
+                    }
+
+                    //Define map marker settings
                     MarkerOptions markerOptions = new MarkerOptions().
                             icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(formatTime(tracker.getLastUpdate())))).
                             position(coordinates).
                             anchor(iconFactory.getAnchorU(), iconFactory.getAnchorV());
 
+                    //Add marker on map
                     googleMap.addMarker(markerOptions);
 
+                    //Set map style
                     holder.googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
+                    //Define method to call after map is loaded
                     holder.googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
                         @Override
                         public void onMapLoaded() {
+
+                            //If coordinates is available
                             if (googleMap.getMapType() != GoogleMap.MAP_TYPE_NONE && tracker.getLastCoordinate() != null)
                             {
                                 //Hide loading animation
@@ -159,9 +216,35 @@ public class TrackerAdapter
                             }
                         }
                     });
-
                 }
             });
+        }
+    }
+
+    public void checkNotificationSubscriptions(String trackerID)
+    {
+        if(!sharedPreferences.contains(trackerID + "_NotifyLowBattery"))
+        {
+            //Get firebase messaging instance
+            FirebaseMessaging notifications = FirebaseMessaging.getInstance();
+
+            //Get shared preferences editor
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+
+            //Subscribe to default topic Low Battery Alert
+            editor.putBoolean(trackerID + "_NotifyLowBattery", true);
+            notifications.subscribeToTopic(trackerID + "_NotifyLowBattery");
+
+            //Subscribe to default topic Movement Alert
+            editor.putBoolean(trackerID + "_NotifyMovement", true);
+            notifications.subscribeToTopic(trackerID + "_NotifyMovement");
+
+            //Subscribe to default topic Tracker Stopped Alert
+            editor.putBoolean(trackerID + "_NotifyStopped", true);
+            notifications.subscribeToTopic(trackerID + "_NotifyStopped");
+
+            //Apply changes
+            editor.apply();
         }
     }
 
@@ -190,6 +273,7 @@ public class TrackerAdapter
 
         // each data item is just a string in this case
         TextView txtTrackerName, txtTrackerModel, txtLastUpdateValue, txtBatteryLevel, txtSignalLevel;
+        ImageView imgEdit;
         CircleImageView imageView;
         ProgressBar progressBar;
         MapView mapView;
@@ -203,7 +287,7 @@ public class TrackerAdapter
             super(itemView);
 
             //Text fields
-            txtTrackerName = itemView.findViewById(R.id.lblTrackerName);
+            txtTrackerName = itemView.findViewById(R.id.lblItemCount);
             txtTrackerModel = itemView.findViewById(R.id.txtTrackerModel);
             txtLastUpdateValue = itemView.findViewById(R.id.txtLastUpdate);
             txtBatteryLevel = itemView.findViewById(R.id.txtBatteryLevel);
@@ -212,8 +296,11 @@ public class TrackerAdapter
             //Progress bar
             progressBar = itemView.findViewById(R.id.progressBar);
 
-            //CardView view
+            //Circle image view
             imageView = itemView.findViewById(R.id.imgTracker);
+
+            //Edit image view
+            imgEdit = itemView.findViewById(R.id.imgEdit);
 
             //Google maps view
             mapView = itemView.findViewById(R.id.googleMap);

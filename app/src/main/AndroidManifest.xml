@@ -29,6 +29,27 @@
              sign the APK for publishing.
              You can define the keys for the debug and release targets in src/debug/ and src/release/. 
         -->
+
+        <!-- Firebase ID service -->
+        <service android:name="br.gov.dpf.tracker.Firebase.FirebaseInstanceID">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+            </intent-filter>
+        </service>
+
+        <!-- Firebase Messaging service -->
+        <service android:name="br.gov.dpf.tracker.Firebase.MessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
+
+        <!-- Broadcast receiver class -->
+        <receiver
+            android:name=".Components.TrackerBroadcastReceiver"
+            android:exported="false" >
+        </receiver>
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
@@ -49,12 +70,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".RegisterActivity"
             android:label="@string/title_activity_register"
             android:parentActivityName=".MainActivity"
             android:configChanges="orientation"
             android:theme="@style/AppTheme.NoActionBar"/>
+
+        <activity
+            android:name=".FilterActivity"
+            android:label="@string/action_filter"
+            android:parentActivityName=".DetailActivity"
+            android:theme="@style/AppTheme.NoActionBar"/>
+
         <activity
             android:name=".DetailActivity"
             android:label="@string/title_activity_detail"
