@@ -436,8 +436,6 @@ public class DetailActivity
         //Get next (+1) or previous (-1) marker (markers are added on reversed order, since data are ordered by date descending)
         Marker marker = markers.get(markers.size() - markerPosition + nextPosition * -1);
 
-        mRecyclerView.getLayoutManager().scrollToPosition(5);
-
         //Call method to show marker info window
         onMarkerClick(marker);
     }
