@@ -153,11 +153,11 @@
             android:contentDescription="@string/imgBatteryLevel"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_battery_90_black_24dp"
-            app:layout_constraintEnd_toStartOf="@+id/txtBatteryLevel"
+            app:layout_constraintEnd_toStartOf="@+id/lblBatteryLevel"
             app:layout_constraintTop_toTopOf="@+id/txtLastUpdate" />
 
         <TextView
-            android:id="@+id/txtBatteryLevel"
+            android:id="@+id/lblBatteryLevel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toStartOf="@+id/imgSignalLevel"
@@ -170,11 +170,11 @@
             android:layout_height="20dp"
             android:contentDescription="@string/imgSignalLevel"
             android:src="@drawable/ic_signal_cellular_3_bar_black_24dp"
-            app:layout_constraintEnd_toStartOf="@+id/txtSignalLevel"
-            app:layout_constraintTop_toTopOf="@+id/txtBatteryLevel" />
+            app:layout_constraintEnd_toStartOf="@+id/lblSignalLevel"
+            app:layout_constraintTop_toTopOf="@+id/lblBatteryLevel" />
 
         <TextView
-            android:id="@+id/txtSignalLevel"
+            android:id="@+id/lblSignalLevel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"

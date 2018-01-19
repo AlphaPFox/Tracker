@@ -33,9 +33,10 @@ dependencies {
     implementation 'com.android.support:cardview-v7:26.1.0'
     implementation 'com.android.support:recyclerview-v7:26.1.0'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
-    implementation 'com.xw.repo:bubbleseekbar:3.13-lite'
 
     //External Libraries
+    implementation 'com.xw.repo:bubbleseekbar:3.13-lite'
+    implementation 'com.appolica:interactive-info-window:v1.0.6'
     implementation 'de.hdodenhof:circleimageview:2.2.0'
     implementation 'com.sothree.slidinguppanel:library:3.4.0'
 }

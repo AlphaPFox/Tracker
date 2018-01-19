@@ -29,12 +29,12 @@
         app:layout_constraintEnd_toStartOf="@+id/imgInfo"
         app:layout_constraintStart_toEndOf="@+id/txtNumberID"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="01/12/2018 - 11:20 até quinta - 08:13" />
+        tools:text="01/12/2018 - 11:20" />
 
     <TextView
         android:id="@+id/txtAddress"
         android:layout_width="0dp"
-        android:layout_height="40dp"
+        android:layout_height="45dp"
         android:layout_marginEnd="16dp"
         android:layout_marginTop="2dp"
         android:textSize="12sp"

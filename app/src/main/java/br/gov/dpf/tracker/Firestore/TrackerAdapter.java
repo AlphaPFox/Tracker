@@ -290,8 +290,8 @@ public class TrackerAdapter
             txtTrackerName = itemView.findViewById(R.id.lblItemCount);
             txtTrackerModel = itemView.findViewById(R.id.txtTrackerModel);
             txtLastUpdateValue = itemView.findViewById(R.id.txtLastUpdate);
-            txtBatteryLevel = itemView.findViewById(R.id.txtBatteryLevel);
-            txtSignalLevel = itemView.findViewById(R.id.txtSignalLevel);
+            txtBatteryLevel = itemView.findViewById(R.id.lblBatteryLevel);
+            txtSignalLevel = itemView.findViewById(R.id.lblSignalLevel);
 
             //Progress bar
             progressBar = itemView.findViewById(R.id.progressBar);

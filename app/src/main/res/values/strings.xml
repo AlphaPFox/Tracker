@@ -73,6 +73,8 @@
     <string name="txtTrackerID">Identificação do aparelho</string>
     <string name="txtInterval">Intervalo de atualização</string>
     <string name="txtIntervalSubtitle"> <b>Alerta:</b> Quanto menor o intervalo de atualização, mais preciso será o rastreamento. Porém, a duração da bateria é afetada diretamente por esta opção.</string>
+    <string name="txtInfoBattery">Bateria:</string>
+    <string name="txtInfoSignal">Sinal GSM:</string>
 
     <!-- Filter activity -->
     <string name="txtFilterTitle">Opções de exibição</string>
@@ -86,6 +88,11 @@
     <string name="txtDatetimeTitle">Intervalo de datas</string>
     <string name="lblInitialDate">Data inicial</string>
     <string name="lblEndingDate">Data final</string>
+    <string name="btnNext">Próxima</string>
+    <string name="btnPrevious">Anterior</string>
+    <string name="imgAddress">Endereço</string>
+    <string name="imgDatetime">Data/hora</string>
+    <string name="btnClose">Fechar</string>
 
     <string-array name="weekdays">
         <item>Domingo</item>

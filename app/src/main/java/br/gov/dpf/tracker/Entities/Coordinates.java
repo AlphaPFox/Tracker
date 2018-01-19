@@ -98,4 +98,19 @@ public class Coordinates
     public void setCellID(String mCellID) {
         this.mCellID = mCellID;
     }
+
+    public String getStringBatteryLevel()
+    {
+        if(mBatteryLevel > 0)
+            return String.valueOf(mBatteryLevel) + "%";
+        else
+            return "Não disponível";
+    }
+    public String getStringSignalLevel()
+    {
+        if(mSignalLevel > 0)
+            return String.valueOf(mSignalLevel) + "%";
+        else
+            return "Não disponível";
+    }
 }
