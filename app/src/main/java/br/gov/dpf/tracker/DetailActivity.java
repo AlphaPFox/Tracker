@@ -240,7 +240,7 @@ public class DetailActivity
                     findViewById(R.id.vwEmptyRecycler).setVisibility(View.GONE);
 
                     //Check if only one item or if screen is small
-                    if(getItemCount() == 1 || mMetrics.heightPixels / mMetrics.density < 600)
+                    if(getItemCount() == 1 || mMetrics.heightPixels / mMetrics.density < 530)
                     {
                         //If only one item, set panel height to show it
                         mLayout.setPanelHeight(getResources().getDimensionPixelSize(R.dimen.panel_single_row_height));
@@ -388,6 +388,16 @@ public class DetailActivity
                 //Add polyline to map
                 mMap.addPolyline(polylineSettings);
             }
+
+            //Define map loaded callback
+            mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+                @Override
+                public void onMapLoaded()
+                {
+                    //Hide loading animation
+                    mLoadingBackground.animate().setDuration(500).alpha(0f);
+                }
+            });
         }
     }
 
@@ -481,16 +491,6 @@ public class DetailActivity
 
         //Set map click event listener
         mMap.setOnMarkerClickListener(this);
-
-        //Define map loaded callback
-        mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
-            @Override
-            public void onMapLoaded()
-            {
-                //Hide loading animation
-                mLoadingBackground.animate().setDuration(500).alpha(0f);
-            }
-        });
     }
 
     @Override
