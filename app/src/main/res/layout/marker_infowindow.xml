@@ -65,7 +65,6 @@
             android:layout_marginEnd="8dp"
             android:layout_marginTop="8dp"
             android:scaleType="centerCrop"
-            android:src="@mipmap/tk102"
             app:civ_fill_color="#105f97"
             app:layout_constraintBottom_toTopOf="@+id/btnNext"
             app:layout_constraintEnd_toEndOf="parent"
@@ -120,8 +119,7 @@
             android:textSize="13sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/imgAddress"
-            app:layout_constraintTop_toTopOf="@+id/imgAddress"
-            tools:text="testandotestando testando testando testando testando testando testando testando testando testando testando testando testando testando testando testando testando testando testando testando testando testando testando testando testando testando testando testando testando testando  " />
+            app:layout_constraintTop_toTopOf="@+id/imgAddress" />
 
         <Button
             android:id="@+id/btnPrevious"
