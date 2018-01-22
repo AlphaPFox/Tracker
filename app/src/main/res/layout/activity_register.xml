@@ -23,6 +23,7 @@
     </android.support.design.widget.AppBarLayout>
 
     <ScrollView
+        android:id="@+id/vwMainScroll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="?attr/actionBarSize">
@@ -288,6 +289,7 @@
             </android.support.v7.widget.CardView>
 
             <android.support.v7.widget.CardView
+                android:id="@+id/vwUpdateInterval"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp">
@@ -337,6 +339,8 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
                             android:layout_marginBottom="8dp"
+                            android:focusable="true"
+                            android:focusableInTouchMode="true"
                             app:bsb_bubble_color="@color/colorAccent"
                             app:bsb_bubble_text_color="@color/colorPrimaryDark"
                             app:bsb_max="6"

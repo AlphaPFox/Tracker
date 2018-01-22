@@ -25,6 +25,7 @@ import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -242,6 +243,22 @@ public class RegisterActivity extends AppCompatActivity
             //Change activity title
             getSupportActionBar().setTitle(intent.getStringExtra("RegisterActivity_TrackerName"));
         }
+
+        //Get main scroll view
+        final ScrollView vwScrollMain = findViewById(R.id.vwMainScroll);
+
+        //Perform action after layout ends
+        vwScrollMain.post(new Runnable() {
+            @Override
+            public void run() {
+
+                //Scroll to show update interval
+                vwScrollMain.smoothScrollTo(0, findViewById(R.id.vwUpdateInterval).getTop());
+
+                //Request focus on seek bar
+                findViewById(R.id.seekBar).requestFocus();
+            }
+        });
     }
 
     //Called when editing or inserting a new tracker
