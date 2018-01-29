@@ -65,6 +65,7 @@
     <string name="action_show">Exibir Painel</string>
     <string name="action_filter">Filtar resultados</string>
     <string name="action_edit">Editar rastreador</string>
+    <string name="action_request_position">Solicitar posição atual</string>
     <string name="imgInfo">Informações sobre a localização.</string>
     <string name="txtWaitingTitle">Aguardando dados&#8230;</string>
     <string name="txtWaitingSubtitle">Nenhuma resposta do rastreador foi recebida até o momento. Certifique-se que o mesmo esteja ligado e com sinal da rede de celular.</string>

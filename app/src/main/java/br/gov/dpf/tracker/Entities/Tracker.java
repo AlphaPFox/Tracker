@@ -1,10 +1,16 @@
 package br.gov.dpf.tracker.Entities;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.firebase.firestore.GeoPoint;
 
 import java.util.Date;
 
-public class Tracker {
+@SuppressWarnings("unused")
+public class Tracker implements Parcelable {
+
+    private String mID;
 
     private String mName;
 
@@ -31,28 +37,24 @@ public class Tracker {
     private String mBackgroundColor;
 
     //Required by FireStore DB
-    public Tracker()
-    {
+    public Tracker() {
 
     }
 
-    public Tracker(String mName, String mDescription, String mModel, String mIdentification, int mUpdateInterval, String mBackgroundColor) {
-        this.mName = mName;
-        this.mModel = mModel;
-        this.mDescription = mDescription;
-        this.mIdentification = mIdentification;
-        this.mBackgroundColor = mBackgroundColor;
-        this.mLastUpdate = new Date();
-        this.mUpdateInterval = mUpdateInterval;
+    public String getID() {
+        return mID;
+    }
+
+    public void setID(String mID) {
+        this.mID = mID;
     }
 
     public String getName() {
         return mName;
     }
 
-    public String getTitleName()
-    {
-        if(mName.length() > 10)
+    public String getTitleName() {
+        if (mName.length() > 10)
             return mName;
         else
             return "Rastreador: " + mName;
@@ -79,13 +81,11 @@ public class Tracker {
         this.mIdentification = mIdentification;
     }
 
-    public int getUpdateInterval()
-    {
+    public int getUpdateInterval() {
         return mUpdateInterval;
     }
 
-    public void setUpdateInterval(int mUpdateInterval)
-    {
+    public void setUpdateInterval(int mUpdateInterval) {
         this.mUpdateInterval = mUpdateInterval;
     }
 
@@ -167,4 +167,54 @@ public class Tracker {
     public void setLastCoordinate(GeoPoint mLastCoordinate) {
         this.mLastCoordinate = mLastCoordinate;
     }
+
+    protected Tracker(Parcel in) {
+        mID = in.readString();
+        mName = in.readString();
+        mDescription = in.readString();
+        mIdentification = in.readString();
+        mModel = in.readString();
+        mBatteryLevel = in.readInt();
+        mSignalLevel = in.readInt();
+        mUpdateInterval = in.readInt();
+        long tmpMLastUpdate = in.readLong();
+        mLastUpdate = tmpMLastUpdate != -1 ? new Date(tmpMLastUpdate) : null;
+        long tmpMLastCheck = in.readLong();
+        mLastCheck = tmpMLastCheck != -1 ? new Date(tmpMLastCheck) : null;
+        mLastCoordinateType = in.readString();
+        mBackgroundColor = in.readString();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mID);
+        dest.writeString(mName);
+        dest.writeString(mDescription);
+        dest.writeString(mIdentification);
+        dest.writeString(mModel);
+        dest.writeInt(mBatteryLevel);
+        dest.writeInt(mSignalLevel);
+        dest.writeInt(mUpdateInterval);
+        dest.writeLong(mLastUpdate != null ? mLastUpdate.getTime() : -1L);
+        dest.writeLong(mLastCheck != null ? mLastCheck.getTime() : -1L);
+        dest.writeString(mLastCoordinateType);
+        dest.writeString(mBackgroundColor);
+    }
+
+    public static final Parcelable.Creator<Tracker> CREATOR = new Parcelable.Creator<Tracker>() {
+        @Override
+        public Tracker createFromParcel(Parcel in) {
+            return new Tracker(in);
+        }
+
+        @Override
+        public Tracker[] newArray(int size) {
+            return new Tracker[size];
+        }
+    };
 }

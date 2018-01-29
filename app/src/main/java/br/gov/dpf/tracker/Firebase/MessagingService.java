@@ -1,5 +1,7 @@
 package br.gov.dpf.tracker.Firebase;
 
+import android.util.Log;
+
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -35,5 +37,26 @@ public class MessagingService extends FirebaseMessagingService {
             //Show notification to user
             notificationController.showNotification(remoteMessage.getData());
         }
+    }
+
+
+    @Override
+    public void onDeletedMessages() {
+        Log.d("wouter", "onDeletedMessages: ");
+        super.onDeletedMessages();
+    }
+
+    @Override
+    public void onMessageSent(String msgID)
+    {
+        Log.e("wouter", "##########onMessageSent: " + msgID );
+        super.onMessageSent(msgID);
+    }
+
+    @Override
+    public void onSendError(String msgID, Exception exception)
+    {
+        Log.e("wouter", "onSendError ", exception );
+        super.onSendError(msgID, exception);
     }
 }

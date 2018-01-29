@@ -32,7 +32,7 @@ public abstract class BaseAdapter<VH extends RecyclerView.ViewHolder>
 
     public ArrayList<DocumentSnapshot> mSnapshots = new ArrayList<>();
 
-    public BaseAdapter(Activity activity, Query query) {
+    BaseAdapter(Activity activity, Query query) {
 
         mQuery = query;
         mActivity = activity;
@@ -105,7 +105,7 @@ public abstract class BaseAdapter<VH extends RecyclerView.ViewHolder>
 
     protected void onDocumentAdded(DocumentChange change) {
         mSnapshots.add(change.getNewIndex(), change.getDocument());
-        notifyDataSetChanged();
+            notifyDataSetChanged();
     }
 
     protected void onDocumentModified(DocumentChange change) {

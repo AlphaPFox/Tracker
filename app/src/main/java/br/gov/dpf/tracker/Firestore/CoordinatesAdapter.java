@@ -11,7 +11,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Query;
 
 import br.gov.dpf.tracker.DetailActivity;
@@ -19,19 +18,11 @@ import br.gov.dpf.tracker.Entities.Coordinates;
 import br.gov.dpf.tracker.R;
 
 public class CoordinatesAdapter extends BaseAdapter<CoordinatesAdapter.ViewHolder> {
-    
-    //Define interface to event listener
-    public interface OnCoordinatesSelectedListener {
-
-        //Fired when user click on a recycler view item
-        void OnCoordinatesSelected(DocumentSnapshot Coordinates, View viewRoot);
-    }
-
-    //Linked activity
-    public DetailActivity mActivity;
+        //Linked activity
+    private DetailActivity mActivity;
 
     //Constructor
-    public CoordinatesAdapter(DetailActivity activity, Query query) {
+    protected CoordinatesAdapter(DetailActivity activity, Query query) {
         super(activity, query);
 
         mActivity = activity;
@@ -98,7 +89,7 @@ public class CoordinatesAdapter extends BaseAdapter<CoordinatesAdapter.ViewHolde
         }
 
         //Change color based on user selection
-        numberBackground.setColorFilter(Color.parseColor(mActivity.getIntent().getStringExtra("DetailActivity_TrackerColor")), PorterDuff.Mode.SRC_ATOP);
+        numberBackground.setColorFilter(Color.parseColor(mActivity.tracker.getBackgroundColor()), PorterDuff.Mode.SRC_ATOP);
 
         //Set background
         holder.txtNumberID.setBackground(numberBackground);
@@ -117,7 +108,7 @@ public class CoordinatesAdapter extends BaseAdapter<CoordinatesAdapter.ViewHolde
             public void onClick(View view) {
             if (mActivity != null)
             {
-                mActivity.OnCoordinatesSelected(getSnapshot(holder.getAdapterPosition()), holder.itemView);
+                mActivity.OnCoordinatesSelected(getSnapshot(holder.getAdapterPosition()));
             }
             }
         });
@@ -126,7 +117,7 @@ public class CoordinatesAdapter extends BaseAdapter<CoordinatesAdapter.ViewHolde
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    public static class ViewHolder
+    static class ViewHolder
             extends RecyclerView.ViewHolder {
 
         // each data item is just a string in this case

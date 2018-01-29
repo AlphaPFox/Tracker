@@ -17,7 +17,7 @@ public class TrackerBroadcastReceiver extends BroadcastReceiver
             //Instantiate singleton notification builder
             NotificationController notificationController = NotificationController.getInstance(context);
 
-            if(intent.hasExtra("DismissGroup"))
+             if(intent.hasExtra("DismissGroup"))
             {
                 //Dismiss notification group (summary)
                 notificationController.dismissNotificationGroup(intent.getAction());
@@ -27,7 +27,7 @@ public class TrackerBroadcastReceiver extends BroadcastReceiver
                 //Dismiss single notification
                 notificationController.dismissNotification(intent.getStringExtra("GroupKey"), intent.getIntExtra("DismissSingle", 0));
             }
-            else if(intent.hasExtra("DetailActivity_TrackerID"))
+            else if(intent.hasExtra("Tracker"))
             {
                 //Dismiss notification group (summary)
                 notificationController.dismissNotificationGroup(intent.getStringExtra("GroupKey"));

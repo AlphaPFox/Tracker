@@ -12,6 +12,11 @@
         android:title="@string/action_edit"
         android:icon="@drawable/ic_mode_edit_black_24dp"/>
 
+    <item android:id="@+id/action_request_position"
+        app:showAsAction="never"
+        android:title="@string/action_request_position"
+        android:icon="@drawable/ic_mode_edit_black_24dp"/>
+
     <item
         android:id="@+id/action_toggle"
         android:orderInCategory="100"

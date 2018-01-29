@@ -9,7 +9,6 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatCheckBox;
@@ -37,6 +36,7 @@ import com.xw.repo.BubbleSeekBar;
 
 import br.gov.dpf.tracker.Components.ImageDownloader;
 import br.gov.dpf.tracker.Entities.Model;
+import br.gov.dpf.tracker.Entities.Tracker;
 
 public class RegisterActivity extends AppCompatActivity
 {
@@ -44,7 +44,10 @@ public class RegisterActivity extends AppCompatActivity
     private String mModel = "TK 102B";
 
     //Default color option
-    private String mColor = "#90FF0000";
+    private String mColor = "#99ff0000";
+
+    //Object representing the tracker to be inserted/updated
+    private Tracker tracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +60,9 @@ public class RegisterActivity extends AppCompatActivity
 
         FloatingActionButton fab = findViewById(R.id.fab);
 
+        //Set back button on toolbar
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -64,11 +70,11 @@ public class RegisterActivity extends AppCompatActivity
             }
         });
 
-        //Handle click events for color options
-        onColorSelect((GridLayout) findViewById(R.id.vwColors));
+        //Try to load tracker from intent (if edit mode)
+        tracker = getIntent().getParcelableExtra("Tracker");
 
-        //Set back button on toolbar
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //Handle click events for color options
+        loadColors((GridLayout) findViewById(R.id.vwColors));
 
         //Set support text
         ((TextView) findViewById(R.id.txtIntervalAlert)).setText(getResources().getText(R.string.txtIntervalSubtitle));
@@ -104,9 +110,6 @@ public class RegisterActivity extends AppCompatActivity
                             //Layout parent
                             final LinearLayout vwModels = findViewById(R.id.vwModels);
 
-                            //Value exists if activity is in edit mode
-                            String trackerModel = getIntent().getStringExtra("RegisterActivity_TrackerModel");
-
                             //For each model retrieved
                             for (DocumentSnapshot document : task.getResult())
                             {
@@ -129,7 +132,7 @@ public class RegisterActivity extends AppCompatActivity
                                 vwModels.addView(vwModel);
 
                                 //If activity is in edit mode and this is the corresponding tracker model
-                                if(trackerModel != null && trackerModel.equals(model.getName()))
+                                if(tracker != null && tracker.getModel().equals(model.getName()))
                                 {
                                     //Set background color only for the selected device model
                                     vwModel.setBackgroundColor(getResources().getColor(R.color.colorSelected));
@@ -145,7 +148,7 @@ public class RegisterActivity extends AppCompatActivity
                                     });
 
                                     //Get current selected model
-                                    mModel = trackerModel;
+                                    mModel = tracker.getModel();
 
                                     //Change layout labels according to selected model
                                     changeLabels(mModel);
@@ -176,7 +179,7 @@ public class RegisterActivity extends AppCompatActivity
                             }
 
                             //If there is any model available and activity is not in edit mode
-                            if(vwModels.getChildCount() > 0 && trackerModel == null)
+                            if(vwModels.getChildCount() > 0 && tracker == null)
                             {
                                 //Set first item as selected by default
                                 vwModels.getChildAt(0).setBackgroundColor(getResources().getColor(R.color.colorSelected));
@@ -197,51 +200,44 @@ public class RegisterActivity extends AppCompatActivity
                     }
                 });
 
-        //Get activity intent
-        Intent intent = getIntent();
-
         //Check if activity was called to edit existing tracker
-        if(intent.hasExtra("RegisterActivity_TrackerID"))
+        if(tracker != null)
         {
             //Load tracker data
-            loadData(intent);
+            loadData();
 
             //Hide add floating action button
             fab.setVisibility(View.GONE);
         }
-
     }
 
     //Called when editing an existing tracker
-    public void loadData(Intent intent)
+    public void loadData()
     {
-        //Get trackerID from intent
-        String trackerID = intent.getStringExtra("RegisterActivity_TrackerID");
-
         //Get shared preferences
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         //Load tracker data on text views
-        ((EditText) findViewById(R.id.txtTrackerName)).setText(intent.getStringExtra("RegisterActivity_TrackerName"));
-        ((EditText) findViewById(R.id.txtTrackerDescription)).setText(intent.getStringExtra("RegisterActivity_TrackerDescription"));
-        ((EditText) findViewById(R.id.txtTrackerID)).setText(intent.getStringExtra("RegisterActivity_TrackerIdentification"));
+        ((EditText) findViewById(R.id.txtTrackerName)).setText(tracker.getName());
+        ((EditText) findViewById(R.id.txtTrackerDescription)).setText(tracker.getDescription());
+        ((EditText) findViewById(R.id.txtTrackerID)).setText(tracker.getIdentification());
 
         //Set update interval options
-        ((BubbleSeekBar) findViewById(R.id.seekBar)).setProgress(getSectionByUpdateInterval(intent.getIntExtra("RegisterActivity_TrackerUpdateInterval", 60)));
+        ((BubbleSeekBar) findViewById(R.id.seekBar)).setProgress(getSectionByUpdateInterval(tracker.getUpdateInterval()));
 
         //Set notification options using shared preferences
-        ((SwitchCompat)findViewById(R.id.swLowBattery)).setChecked(sharedPreferences.getBoolean(trackerID + "_NotifyLowBattery", false));
-        ((SwitchCompat)findViewById(R.id.swMovement)).setChecked(sharedPreferences.getBoolean(trackerID + "_NotifyMovement", false));
-        ((SwitchCompat)findViewById(R.id.swStopped)).setChecked(sharedPreferences.getBoolean(trackerID + "_NotifyStopped", false));
-        ((SwitchCompat)findViewById(R.id.swTrackerStatus)).setChecked(sharedPreferences.getBoolean(trackerID + "_NotifyStatus", false));
-        ((SwitchCompat)findViewById(R.id.swAvailable)).setChecked(sharedPreferences.getBoolean(trackerID + "_NotifyAvailable", false));
-        ((SwitchCompat)findViewById(R.id.swSMSResponse)).setChecked(sharedPreferences.getBoolean(trackerID + "_NotifySMSResponse", false));
+        ((SwitchCompat)findViewById(R.id.swLowBattery)).setChecked(sharedPreferences.getBoolean(tracker.getID() + "_NotifyLowBattery", false));
+        ((SwitchCompat)findViewById(R.id.swMovement)).setChecked(sharedPreferences.getBoolean(tracker.getID() + "_NotifyMovement", false));
+        ((SwitchCompat)findViewById(R.id.swStopped)).setChecked(sharedPreferences.getBoolean(tracker.getID() + "_NotifyStopped", false));
+        ((SwitchCompat)findViewById(R.id.swTrackerStatus)).setChecked(sharedPreferences.getBoolean(tracker.getID() + "_NotifyStatus", false));
+        ((SwitchCompat)findViewById(R.id.swAvailable)).setChecked(sharedPreferences.getBoolean(tracker.getID() + "_NotifyAvailable", false));
+        ((SwitchCompat)findViewById(R.id.swSMSResponse)).setChecked(sharedPreferences.getBoolean(tracker.getID() + "_NotifySMSResponse", false));
 
         //Check support action bar
         if(getSupportActionBar() != null)
         {
             //Change activity title
-            getSupportActionBar().setTitle(intent.getStringExtra("RegisterActivity_TrackerName"));
+            getSupportActionBar().setTitle(tracker.getName());
         }
 
         //Get main scroll view
@@ -280,33 +276,41 @@ public class RegisterActivity extends AppCompatActivity
             //Create intent to send to MainActivity
             Intent intent = new Intent();
 
+            //Tracker object containing data to be inserted or updated
+            Tracker tracker;
+
             //Check if activity is in edit mode
-            if(getIntent().hasExtra("RegisterActivity_TrackerID"))
+            if(getIntent().hasExtra("Tracker"))
             {
-                //Add tracker ID on main activity intent
-                intent.putExtra("RegisterActivity_TrackerID", getIntent().getStringExtra("RegisterActivity_TrackerID"));
-
                 //Inform activity intention: update existing tracker
-                intent.putExtra("RegisterActivity_UpdateTracker", true);
+                intent.putExtra("UpdateTracker", true);
 
-                //Inform tracker position on main activity
-                intent.putExtra("TrackerPosition", getIntent().getIntExtra("TrackerPosition",0));
+                //Get tracker data from intent
+                tracker = getIntent().getParcelableExtra("Tracker");
             }
             else
             {
-                //Inform activity intention: update existing tracker
-                intent.putExtra("RegisterActivity_InsertTracker", true);
+                //Inform activity intention: insert new tracker
+                intent.putExtra("InsertTracker", true);
+
+                //Create new tracker
+                tracker = new Tracker();
             }
 
+            //Inform tracker position on main activity
+            intent.putExtra("TrackerPosition", getIntent().getIntExtra("TrackerPosition",0));
+
             //Save tracker data on intent
-            intent.putExtra("TrackerName", trackerName);
-            intent.putExtra("TrackerDescription", ((EditText) findViewById(R.id.txtTrackerDescription)).getText().toString());
-            intent.putExtra("TrackerIdentification", trackerIdentification);
-            intent.putExtra("TrackerModel", mModel);
+            tracker.setName(trackerName);
+            tracker.setDescription(((EditText) findViewById(R.id.txtTrackerDescription)).getText().toString());
+            tracker.setIdentification(trackerIdentification);
+            tracker.setModel(mModel);
 
             //Get update interval
-            intent.putExtra("TrackerUpdateInterval", getUpdateIntervalBySection(((BubbleSeekBar) findViewById(R.id.seekBar)).getProgress()));
-            intent.putExtra("TrackerColor", mColor);
+            tracker.setUpdateInterval(getUpdateIntervalBySection(((BubbleSeekBar) findViewById(R.id.seekBar)).getProgress()));
+
+            //Get tracker color
+            tracker.setBackgroundColor(mColor);
 
             //Save notifications preferences
             intent.putExtra("NotifyLowBattery", ((SwitchCompat)findViewById(R.id.swLowBattery)).isChecked());
@@ -316,10 +320,13 @@ public class RegisterActivity extends AppCompatActivity
             intent.putExtra("NotifyAvailable", ((SwitchCompat)findViewById(R.id.swAvailable)).isChecked());
             intent.putExtra("NotifySMSResponse", ((SwitchCompat)findViewById(R.id.swSMSResponse)).isChecked());
 
+            //Put tracker data on intent
+            intent.putExtra("Tracker", tracker);
+
             //Set result
             setResult(RESULT_OK, intent);
 
-            //End activity (returns to MainActivity.OnActivityResult)
+            //End activity (returns to parent activity -> OnActivityResult)
             finish();
         }
     }
@@ -427,7 +434,7 @@ public class RegisterActivity extends AppCompatActivity
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setTitle("Deletar rastreador")
-                .setMessage("Confirma a exclusão do rastreador " + getIntent().getStringExtra("RegisterActivity_TrackerName") + "?")
+                .setMessage("Confirma a exclusão do rastreador " + tracker.getName() + "?")
                 .setPositiveButton("Sim", new DialogInterface.OnClickListener()
                 {
                     @Override
@@ -436,16 +443,16 @@ public class RegisterActivity extends AppCompatActivity
                         //Create intent to return on main activity
                         Intent intent = new Intent();
 
-                        //Add tracker ID on intent
-                        intent.putExtra("RegisterActivity_TrackerID", getIntent().getStringExtra("RegisterActivity_TrackerID"));
+                        //Add tracker on intent
+                        intent.putExtra("Tracker", tracker);
 
                         //Inform activity intention: delete existing tracker
-                        intent.putExtra("RegisterActivity_DeleteTracker", true);
+                        intent.putExtra("DeleteTracker", true);
 
                         //Set result
                         setResult(RESULT_OK, intent);
 
-                        //End activity (returns to MainActivity.OnActivityResult)
+                        //End activity (returns to parent activity -> OnActivityResult)
                         finish();
                     }
 
@@ -463,7 +470,7 @@ public class RegisterActivity extends AppCompatActivity
         MenuItem delete = menu.findItem(R.id.action_delete);
 
         //Set delete option visible if activity is in activity mode
-        delete.setVisible(getIntent().hasExtra("RegisterActivity_TrackerID"));
+        delete.setVisible(getIntent().hasExtra("Tracker"));
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -473,7 +480,14 @@ public class RegisterActivity extends AppCompatActivity
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
-                NavUtils.navigateUpFromSameTask(this);
+
+                //Set result
+                setResult(RESULT_CANCELED, getIntent());
+
+                //End activity (returns to parent activity -> OnActivityResult)
+                finish();
+
+                //End method
                 return true;
 
             case R.id.action_add:
@@ -487,10 +501,7 @@ public class RegisterActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    public void onColorSelect(final GridLayout vwColors){
-
-        //Check if activity is in edit mode
-        String trackerColor = getIntent().getStringExtra("RegisterActivity_TrackerColor");
+    public void loadColors(final GridLayout vwColors){
 
         //For each device model
         for (int i = 0; i < vwColors.getChildCount(); i++)
@@ -523,18 +534,18 @@ public class RegisterActivity extends AppCompatActivity
             });
 
             //If activity is in edit mode and this is the corresponding tracker color
-            if(trackerColor != null && vwColor.getTag().equals(trackerColor))
+            if(tracker != null && vwColor.getTag().equals(tracker.getBackgroundColor()))
             {
                 //Set checked status
                 vwColor.setChecked(true);
 
                 //Get current selected color
-                mColor = trackerColor;
+                mColor = tracker.getBackgroundColor();
             }
         }
 
         //If activity is not in edit mode
-        if(trackerColor == null)
+        if(tracker == null)
         {
             //Select first item as default
             ((AppCompatCheckBox) vwColors.getChildAt(0)).setChecked(true);

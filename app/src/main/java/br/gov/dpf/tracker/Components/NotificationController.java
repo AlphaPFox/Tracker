@@ -57,7 +57,7 @@ public class NotificationController
     }
 
     //Show notification to user (groups notification from the same tracker)
-    public void showNotification(Map<String, String> notificationData)
+    public NotificationMessage showNotification(Map<String, String> notificationData)
     {
         //Notification group object
         NotificationGroup notificationGroup;
@@ -106,6 +106,18 @@ public class NotificationController
                 notificationManager.notify(notificationGroup.getGroupID(), buildSummary(notificationGroup));
             }
         }
+
+        //Return created notification
+        return notification;
+    }
+
+    void updateNotification(NotificationMessage notification)
+    {
+        //Get notification group corresponding to this tracker
+        NotificationGroup notificationGroup = notificationGroups.get(notification.getGroupKey());
+
+        //Build single notification
+        notificationManager.notify(notification.getNotificationID(), buildNotification(notification, notificationGroup));
     }
 
     private Notification buildNotification(NotificationMessage notification, NotificationGroup notificationGroup) {
@@ -145,7 +157,7 @@ public class NotificationController
         if(notification.getCoordinates() != null)
         {
             //Change notification priority
-            single_notification.setPriority(Notification.PRIORITY_MAX);
+            single_notification.setPriority(Notification.PRIORITY_HIGH);
 
             try
             {
@@ -180,6 +192,15 @@ public class NotificationController
             single_notification.setStyle(new NotificationCompat.BigTextStyle().bigText(notification.getExpandedContent()));
         }
 
+        //If notification has progress indicator
+        if(notification.getProgress() > 0)
+        {
+            //Set progress to notification
+            single_notification.setPriority(Notification.PRIORITY_MAX);
+            single_notification.setProgress(100, notification.getProgress(), false);
+            single_notification.setAutoCancel(false);
+        }
+
         //Set tracker color on notification
         single_notification.setColor(Color.parseColor(notificationGroup.tracker.getBackgroundColor()));
 
@@ -212,11 +233,7 @@ public class NotificationController
 
         // Put tracker data on intent
         clickIntent.putExtra("GroupKey", notificationGroup.getGroupKey());
-        clickIntent.putExtra("DetailActivity_TrackerID", notificationGroup.getGroupKey());
-        clickIntent.putExtra("DetailActivity_TrackerName", "Rastreador: " + notificationGroup.tracker.getName());
-        clickIntent.putExtra("DetailActivity_TrackerModel", notificationGroup.tracker.getModel());
-        clickIntent.putExtra("DetailActivity_TrackerColor", notificationGroup.tracker.getBackgroundColor());
-        clickIntent.putExtra("DetailActivity_TrackerLastUpdate", (notificationGroup.tracker.getLastUpdate() == null ? "" : String.valueOf(notificationGroup.tracker.getLastUpdate().getTime())));
+        clickIntent.putExtra("Tracker", notificationGroup.tracker);
 
         //Apply it to notification builder
         single_notification.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
@@ -309,11 +326,7 @@ public class NotificationController
 
         // Put tracker data on intent
         clickIntent.putExtra("GroupKey", notificationGroup.getGroupKey());
-        clickIntent.putExtra("DetailActivity_TrackerID", notificationGroup.getGroupKey());
-        clickIntent.putExtra("DetailActivity_TrackerName", "Rastreador: " + notificationGroup.tracker.getName());
-        clickIntent.putExtra("DetailActivity_TrackerModel", notificationGroup.tracker.getModel());
-        clickIntent.putExtra("DetailActivity_TrackerColor", notificationGroup.tracker.getBackgroundColor());
-        clickIntent.putExtra("DetailActivity_TrackerLastUpdate", (notificationGroup.tracker.getLastUpdate() == null ? "" : String.valueOf(notificationGroup.tracker.getLastUpdate().getTime())));
+        clickIntent.putExtra("Tracker", notificationGroup.tracker);
 
         //Apply it to notification builder
         summaryBuilder.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
@@ -321,8 +334,12 @@ public class NotificationController
         //Add notification title
         for (NotificationMessage notificationMessage : notificationGroup.notifications)
         {
-            //Add to notification
-            inboxStyle.addLine(notificationMessage.getStyledMessage());
+            //Check if it is a progress notification
+            if(notificationMessage.updater == null)
+            {
+                //Add to summary
+                inboxStyle.addLine(notificationMessage.getStyledMessage());
+            }
         }
 
         //Set notification style
@@ -355,10 +372,18 @@ public class NotificationController
         if(notificationGroup != null)
         {
             //For each existing notification
-            for(NotificationMessage notification : notificationGroup.notifications)
+            for(NotificationMessage notification : notificationGroup.notifications) {
 
                 //Dismiss notification
                 notificationManager.cancel(notification.getNotificationID());
+
+                //Check if there is an update related to this notification
+                if (notification.updater != null)
+                {
+                    //Cancel update
+                    notification.updater.dismissUpdate();
+                }
+            }
 
             //Dismiss summary
             notificationManager.cancel(notificationGroup.getGroupID());
@@ -368,7 +393,7 @@ public class NotificationController
         }
     }
 
-    void dismissNotification(String groupKey, int notificationID)
+    public void dismissNotification(String groupKey, int notificationID)
     {
         //Get notification group
         NotificationGroup notificationGroup = notificationGroups.get(groupKey);
@@ -378,6 +403,13 @@ public class NotificationController
         {
             //Find notification by id
             NotificationMessage notification = notificationGroup.findNotification(notificationID);
+
+            //Check if there is an update related to this notification
+            if(notification != null && notification.updater != null)
+            {
+                //Cancel update
+                notification.updater.dismissUpdate();
+            }
 
             //Remove notification from group
             notificationGroup.notifications.remove(notification);

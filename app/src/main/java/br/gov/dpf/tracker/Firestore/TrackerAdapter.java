@@ -1,9 +1,15 @@
 package br.gov.dpf.tracker.Firestore;
 
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,11 +26,30 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.maps.android.ui.IconGenerator;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 import br.gov.dpf.tracker.Components.ImageDownloader;
+import br.gov.dpf.tracker.Components.NotificationController;
+import br.gov.dpf.tracker.Entities.NotificationMessage;
 import br.gov.dpf.tracker.Entities.Tracker;
 import br.gov.dpf.tracker.MainActivity;
 import br.gov.dpf.tracker.R;
@@ -32,16 +57,6 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class TrackerAdapter
         extends BaseAdapter<TrackerAdapter.ViewHolder>  {
-
-    //Define interface to event listener
-    public interface OnTrackerSelectedListener {
-
-        //Fired when user click on a recycler view item
-        void OnTrackerSelected(String tracker_id, Tracker tracker, View viewRoot);
-
-        //Fired when user click on edit button
-        void OnTrackerEdit(String tracker_id, Tracker tracker, View viewRoot);
-    }
 
     //Linked activity
     private MainActivity mActivity;
@@ -87,10 +102,12 @@ public class TrackerAdapter
 
         //Get tracker using index position
         final Tracker tracker = getSnapshot(position).toObject(Tracker.class);
-        final String trackerID = getSnapshot(position).getId();
+
+        //Save auto-generated tracker ID
+        tracker.setID(getSnapshot(position).getId());
 
         //Check notification options for this tracker
-        checkNotificationSubscriptions(trackerID);
+        checkNotificationSubscriptions(tracker.getID());
 
         // - replace the contents of the view with that element
         holder.txtTrackerName.setText(tracker.getTitleName());
@@ -126,7 +143,7 @@ public class TrackerAdapter
                     holder.itemView.setClickable(false);
 
                     //Cal interface method on main activity
-                    mActivity.OnTrackerSelected(trackerID, tracker, holder.itemView);
+                    mActivity.OnTrackerSelected(tracker, holder.itemView);
                 }
             }
         });
@@ -141,7 +158,7 @@ public class TrackerAdapter
                     holder.itemView.setClickable(false);
 
                     //Cal interface method on main activity
-                    mActivity.OnTrackerEdit(trackerID, tracker, holder.itemView);
+                    mActivity.OnTrackerEdit(tracker, holder.itemView);
                 }
             }
         });
@@ -221,7 +238,7 @@ public class TrackerAdapter
         }
     }
 
-    public void checkNotificationSubscriptions(String trackerID)
+    private void checkNotificationSubscriptions(String trackerID)
     {
         if(!sharedPreferences.contains(trackerID + "_NotifyLowBattery"))
         {
@@ -248,6 +265,192 @@ public class TrackerAdapter
         }
     }
 
+    public static void manageTracker(final Intent intent, final View rootView)
+    {
+        //Get Firestore DB instance
+        FirebaseFirestore mFireStoreDB = FirebaseFirestore.getInstance();
+
+        //Load tracker data from previous activity
+        final Tracker tracker = intent.getParcelableExtra("Tracker");
+
+        //Check previous activity intent
+        if (intent.hasExtra("InsertTracker"))
+        {
+            // Add a new document with a generated ID
+            mFireStoreDB.collection("Tracker")
+                    .add(tracker)
+                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                        @Override
+                        public void onSuccess(final DocumentReference documentReference) {
+
+                            //Update notification options
+                            TrackerAdapter.updateTrackerNotifications(intent, documentReference.getId(), rootView.getContext());
+
+                            //Create snack bar to show feed back to user
+                            Snackbar.make(rootView, "Rastreador cadastrado!", Snackbar.LENGTH_LONG)
+                                    .setAction("CANCELAR", new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View view)
+                                        {
+                                            //Undo tracker insert
+                                            documentReference.delete();
+
+                                            //Show message to user
+                                            Snackbar.make(rootView, "Inclusão cancelada com sucesso.", Snackbar.LENGTH_LONG).show();
+                                        }
+                                    }).show();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Snackbar.make(rootView, "Erro durante o cadastramento: " + e.toString(), Snackbar.LENGTH_LONG).show();
+                        }
+                    });
+        }
+        else if (intent.hasExtra("UpdateTracker"))
+        {
+            //Create hash to store updates
+            Map<String,Object> updates = new HashMap<>();
+
+            //Save updates on hash map
+            updates.put("name", tracker.getName());
+            updates.put("description", tracker.getDescription());
+            updates.put("model", tracker.getModel());
+            updates.put("identification", tracker.getIdentification());
+            updates.put("updateInterval", tracker.getUpdateInterval());
+            updates.put("backgroundColor", tracker.getBackgroundColor());
+
+            //Update tracker on fire store DB
+            mFireStoreDB.collection("Tracker").document(tracker.getID())
+                    .update(updates)
+                    .addOnSuccessListener(new OnSuccessListener<Void>()
+                    {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+
+                            //Update notification options
+                            TrackerAdapter.updateTrackerNotifications(intent, tracker.getID(), rootView.getContext());
+
+                            //Show confirmation to user
+                            Snackbar.make(rootView, "Rastreador atualizado com sucesso.", Snackbar.LENGTH_LONG).show();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener()
+                    {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Snackbar.make(rootView, "Erro durante a atualização: " + e.getMessage(), Snackbar.LENGTH_LONG).show();
+                        }
+                    });
+
+        }
+        else if (intent.hasExtra("DeleteTracker"))
+        {
+            //Transaction batch
+            final WriteBatch batch = mFireStoreDB.batch();
+
+            //Delete operation to be performed if user don't cancel
+            batch.delete(mFireStoreDB.collection("Tracker").document(tracker.getID()));
+
+            //Inform user that an delete operation is going to happen
+            final Snackbar message = Snackbar.make(rootView, "", Snackbar.LENGTH_LONG);
+
+            //Set message text
+            message.setText("Exclusão em andamento...");
+
+            //Set available action
+            message.setAction("CANCELAR", new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View view) {
+
+                    //Undo tracker delete
+                    message.dismiss();
+                }
+            });
+
+            //Set dismiss event callback
+            message.addCallback(new Snackbar.Callback() {
+
+                @Override
+                public void onDismissed(Snackbar snackbar, int event) {
+
+                    //If user did not canceled delete operation
+                    if(event == DISMISS_EVENT_TIMEOUT)
+                    {
+                        // Commit the delete operation
+                        batch.commit()
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+
+                                        //Update notifications with empty intent to remove subscription to topics
+                                        TrackerAdapter.updateTrackerNotifications(new Intent(), tracker.getID(), rootView.getContext());
+
+                                        //Show success message
+                                        Snackbar.make(rootView, "Exclusão finalizada com sucesso!", Snackbar.LENGTH_LONG).show();
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener()
+                                {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+
+                                        //Show error message
+                                        Snackbar.make(rootView, "Erro durante a exclusão: " + e.getMessage(), Snackbar.LENGTH_LONG).show();
+                                    }
+                                });
+                    }
+                }
+            });
+
+            //Show snack bar
+            message.show();
+        }
+    }
+
+    private static void updateTrackerNotifications(Intent i, String TrackerID, Context context)
+    {
+        //Get shared preferences
+        SharedPreferences.Editor sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context).edit();
+
+        //Get firebase messaging instance
+        FirebaseMessaging notifications = FirebaseMessaging.getInstance();
+
+        //Save options
+        updateNotificationOption(sharedPreferences, notifications, i, TrackerID, "NotifyLowBattery");
+        updateNotificationOption(sharedPreferences, notifications, i, TrackerID, "NotifyMovement");
+        updateNotificationOption(sharedPreferences, notifications, i, TrackerID, "NotifyStopped");
+        updateNotificationOption(sharedPreferences, notifications, i, TrackerID, "NotifyStatus");
+        updateNotificationOption(sharedPreferences, notifications, i, TrackerID, "NotifyAvailable");
+        updateNotificationOption(sharedPreferences, notifications, i, TrackerID, "NotifySMSResponse");
+
+        //Commit changes on shared preferences
+        sharedPreferences.apply();
+    }
+
+    private static void updateNotificationOption(SharedPreferences.Editor sharedPreferences, FirebaseMessaging notifications, Intent i, String TrackerID, String topic)
+    {
+        //If user wants to receive this notification
+        if(i.getBooleanExtra(topic, false))
+        {
+            //Subscribe to notification topic
+            notifications.subscribeToTopic(TrackerID + "_" + topic);
+
+            //Save option on shared preferences
+            sharedPreferences.putBoolean(TrackerID + "_" + topic, true);
+        }
+        else
+        {
+            //Unsubscribe to notification topic
+            notifications.unsubscribeFromTopic(TrackerID + "_" + topic);
+
+            //Remove option from shared preferences
+            sharedPreferences.putBoolean(TrackerID + "_" + topic, false);
+        }
+    }
+
     //Recycling GoogleMap for list item
     @Override
     public void onViewRecycled(ViewHolder holder)
@@ -268,7 +471,7 @@ public class TrackerAdapter
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    public static class ViewHolder
+    protected static class ViewHolder
             extends RecyclerView.ViewHolder {
 
         // each data item is just a string in this case

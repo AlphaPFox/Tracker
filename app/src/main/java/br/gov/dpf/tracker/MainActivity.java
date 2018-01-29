@@ -3,12 +3,10 @@ package br.gov.dpf.tracker;
 import android.app.ActivityOptions;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -28,19 +26,9 @@ import android.view.View;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.WriteBatch;
-import com.google.firebase.messaging.FirebaseMessaging;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import br.gov.dpf.tracker.Components.GridAutoLayoutManager;
 import br.gov.dpf.tracker.Entities.Tracker;
@@ -48,14 +36,12 @@ import br.gov.dpf.tracker.Firestore.TrackerAdapter;
 
 public class MainActivity
         extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, TrackerAdapter.OnTrackerSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener {
 
     private RecyclerView mRecyclerView;
     public GridAutoLayoutManager mRecyclerLayoutManager;
     private View mEmptyView, mLoadingView;
     private SwipeRefreshLayout mSwipeRefresh;
-
-    private FirebaseFirestore mFireStoreDB;
     private TrackerAdapter mAdapter;
     private Query mQuery;
 
@@ -97,7 +83,7 @@ public class MainActivity
         mSwipeRefresh.setColorSchemeResources(R.color.colorAccent);
 
         //Initialize db instance
-        mFireStoreDB = FirebaseFirestore.getInstance();
+        FirebaseFirestore mFireStoreDB = FirebaseFirestore.getInstance();
 
         //Define db search query
         mQuery = mFireStoreDB.collection("Tracker").orderBy("lastUpdate", Query.Direction.DESCENDING);
@@ -192,217 +178,26 @@ public class MainActivity
         // Collect data from the intent and use it
         if(resultCode == RESULT_OK)
         {
-            if (intent.hasExtra("RegisterActivity_InsertTracker"))
-            {
-                //Load new tracker
-                final Tracker tracker = new Tracker(
-                        intent.getStringExtra("TrackerName"),
-                        intent.getStringExtra("TrackerDescription"),
-                        intent.getStringExtra("TrackerModel"),
-                        intent.getStringExtra("TrackerIdentification"),
-                        intent.getIntExtra("TrackerUpdateInterval", 60),
-                        intent.getStringExtra("TrackerColor"));
-
-                // Add a new document with a generated ID
-                mFireStoreDB.collection("Tracker")
-                        .add(tracker)
-                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                            @Override
-                            public void onSuccess(final DocumentReference documentReference) {
-
-                                //Update notification options
-                                updateTrackerNotifications(intent, documentReference.getId());
-
-                                //Create snack bar to show feed back to user
-                                Snackbar.make(findViewById(R.id.coordinator_layout), "Rastreador cadastrado!", Snackbar.LENGTH_LONG)
-                                        .setAction("CANCELAR", new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View view) {
-                                                //Undo tracker insert
-                                                documentReference.delete();
-
-                                                //Show message to user
-                                                Snackbar.make(findViewById(R.id.coordinator_layout), "Inclusão cancelada com sucesso.", Snackbar.LENGTH_LONG).show();
-                                            }
-                                        }).show();
-
-                                //Scroll to show newly inserted item
-                                mRecyclerView.scrollToPosition(0);
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Snackbar.make(findViewById(R.id.coordinator_layout), "Erro durante o cadastramento: " + e.toString(), Snackbar.LENGTH_LONG).show();
-                            }
-                        });
-            }
-            else if (intent.hasExtra("RegisterActivity_UpdateTracker"))
-            {
-
-                //Create hash to store updates
-                Map<String,Object> updates = new HashMap<>();
-
-                //Save updates on hash map
-                updates.put("name", intent.getStringExtra("TrackerName"));
-                updates.put("description", intent.getStringExtra("TrackerDescription"));
-                updates.put("model", intent.getStringExtra("TrackerModel"));
-                updates.put("identification", intent.getStringExtra("TrackerIdentification"));
-                updates.put("updateInterval", intent.getIntExtra("TrackerUpdateInterval", 60));
-                updates.put("backgroundColor", intent.getStringExtra("TrackerColor"));
-
-                //Update tracker on fire store DB
-                mFireStoreDB.collection("Tracker").document(intent.getStringExtra("RegisterActivity_TrackerID"))
-                        .update(updates)
-                        .addOnSuccessListener(new OnSuccessListener<Void>()
-                        {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-
-                                //Update notification options
-                                updateTrackerNotifications(intent, intent.getStringExtra("RegisterActivity_TrackerID"));
-
-                                //Show confirmation to user
-                                Snackbar.make(findViewById(R.id.coordinator_layout), "Rastreador atualizado com sucesso.", Snackbar.LENGTH_LONG).show();
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener()
-                        {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Snackbar.make(findViewById(R.id.coordinator_layout), "Erro durante a atualização: " + e.getMessage(), Snackbar.LENGTH_LONG).show();
-                            }
-                        });
-
-            }
-            else if (intent.hasExtra("RegisterActivity_DeleteTracker"))
-            {
-                //Transaction batch
-                final WriteBatch batch = mFireStoreDB.batch();
-
-                //Delete operation to be performed if user don't cancel
-                batch.delete(mFireStoreDB.collection("Tracker").document(intent.getStringExtra("RegisterActivity_TrackerID")));
-
-                //Inform user that an delete operation is going to happen
-                final Snackbar message = Snackbar.make(findViewById(R.id.coordinator_layout), "", Snackbar.LENGTH_LONG);
-
-                //Set message text
-                message.setText("Exclusão em andamento...");
-
-                //Set available action
-                message.setAction("CANCELAR", new View.OnClickListener()
-                    {
-                        @Override
-                        public void onClick(View view) {
-
-                            //Undo tracker delete
-                            message.dismiss();
-                        }
-                    });
-
-                //Set dismiss event callback
-                message.addCallback(new Snackbar.Callback() {
-
-                    @Override
-                    public void onDismissed(Snackbar snackbar, int event) {
-
-                        //If user did not canceled delete operation
-                        if(event == DISMISS_EVENT_TIMEOUT)
-                        {
-                            // Commit the delete operation
-                            batch.commit()
-                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-
-                                            //Update notifications with empty intent to remove subscription to topics
-                                            updateTrackerNotifications(new Intent(), intent.getStringExtra("RegisterActivity_TrackerID"));
-
-                                            Snackbar.make(findViewById(R.id.coordinator_layout), "Exclusão finalizada com sucesso!", Snackbar.LENGTH_LONG).show();
-                                        }
-                                    })
-                                    .addOnFailureListener(new OnFailureListener()
-                                    {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            Snackbar.make(findViewById(R.id.coordinator_layout), "Erro durante a exclusão: " + e.getMessage(), Snackbar.LENGTH_LONG).show();
-                                        }
-                                    });
-                        }
-                    }
-                });
-
-                //Show snack bar
-                message.show();
-            }
-
-            //If returning from Detail Activity
-            if(intent.hasExtra("TrackerPosition"))
-            {
-                //Wait for recycler to load and scroll to selected item position
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mRecyclerView.scrollToPosition(intent.getIntExtra("TrackerPosition", 0));
-                    }
-                }, 200);
-            }
+            //Respond to previous activity intention (INSERT/EDIT/DELETE tracker)
+            TrackerAdapter.manageTracker(intent, findViewById(R.id.coordinator_layout));
         }
+
+        //Wait for recycler to load and scroll to selected item position
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mRecyclerView.scrollToPosition(intent.getIntExtra("TrackerPosition", 0));
+            }
+        }, 200);
     }
 
-    public void updateTrackerNotifications(Intent i, String TrackerID)
-    {
-        //Get shared preferences
-        SharedPreferences.Editor sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this).edit();
-
-        //Get firebase messaging instance
-        FirebaseMessaging notifications = FirebaseMessaging.getInstance();
-
-        //Save options
-        updateNotificationOption(sharedPreferences, notifications, i, TrackerID, "NotifyLowBattery");
-        updateNotificationOption(sharedPreferences, notifications, i, TrackerID, "NotifyMovement");
-        updateNotificationOption(sharedPreferences, notifications, i, TrackerID, "NotifyStopped");
-        updateNotificationOption(sharedPreferences, notifications, i, TrackerID, "NotifyStatus");
-        updateNotificationOption(sharedPreferences, notifications, i, TrackerID, "NotifyAvailable");
-        updateNotificationOption(sharedPreferences, notifications, i, TrackerID, "NotifySMSResponse");
-
-        //Commit changes on shared preferences
-        sharedPreferences.apply();
-    }
-
-    public void updateNotificationOption(SharedPreferences.Editor sharedPreferences, FirebaseMessaging notifications, Intent i, String TrackerID, String topic)
-    {
-        //If user wants to receive this notification
-        if(i.getBooleanExtra(topic, false))
-        {
-            //Subscribe to notification topic
-            notifications.subscribeToTopic(TrackerID + "_" + topic);
-
-            //Save option on shared preferences
-            sharedPreferences.putBoolean(TrackerID + "_" + topic, true);
-        }
-        else
-        {
-            //Unsubscribe to notification topic
-            notifications.unsubscribeFromTopic(TrackerID + "_" + topic);
-
-            //Remove option from shared preferences
-            sharedPreferences.putBoolean(TrackerID + "_" + topic, false);
-        }
-    }
-
-    @Override
-    public void OnTrackerSelected(String tracker_id, Tracker tracker, View viewRoot) {
+    public void OnTrackerSelected(Tracker tracker, View viewRoot) {
 
         // Go to the details page for the selected restaurant
         final Intent i = new Intent(this, DetailActivity.class);
 
         // Put tracker data on intent
-        i.putExtra("DetailActivity_TrackerID", tracker_id);
-        i.putExtra("DetailActivity_TrackerName", tracker.getTitleName());
-        i.putExtra("DetailActivity_TrackerModel", tracker.getModel());
-        i.putExtra("DetailActivity_TrackerColor", tracker.getBackgroundColor());
-        i.putExtra("DetailActivity_TrackerLastUpdate", (tracker.getLastUpdate() == null ? "" : String.valueOf(tracker.getLastUpdate().getTime())));
+        i.putExtra("Tracker", tracker);
 
         //Save tracker position on array
         i.putExtra("TrackerPosition", mRecyclerView.getChildAdapterPosition(viewRoot));
@@ -448,21 +243,15 @@ public class MainActivity
         }
     }
 
-
-    @Override
-    public void OnTrackerEdit(String tracker_id, Tracker tracker, View viewRoot)
+    public void OnTrackerEdit(Tracker tracker, View viewRoot)
     {
         // Go to the details page for the selected restaurant
         final Intent i = new Intent(this, RegisterActivity.class);
 
         // Put tracker data on intent
-        i.putExtra("RegisterActivity_TrackerID", tracker_id);
-        i.putExtra("RegisterActivity_TrackerName", tracker.getName());
-        i.putExtra("RegisterActivity_TrackerDescription", tracker.getDescription());
-        i.putExtra("RegisterActivity_TrackerIdentification", tracker.getIdentification());
-        i.putExtra("RegisterActivity_TrackerModel", tracker.getModel());
-        i.putExtra("RegisterActivity_TrackerColor", tracker.getBackgroundColor());
-        i.putExtra("RegisterActivity_TrackerUpdateInterval", tracker.getUpdateInterval());
+        i.putExtra("Tracker", tracker);
+
+        // Save position to scroll when activity return
         i.putExtra("TrackerPosition", mRecyclerView.getChildAdapterPosition(viewRoot));
 
         //Start edit activity
@@ -489,7 +278,14 @@ public class MainActivity
             case R.id.action_add:
                 //On click, load register activity
                 Intent intent = new Intent(getApplicationContext(), RegisterActivity.class);
+
+                //Save tracker position on array
+                intent.putExtra("TrackerPosition", mAdapter.getItemCount());
+
+                //Start register activity and wait for result
                 startActivityForResult(intent, 0);
+
+                //End method
                 return true;
 
             case R.id.action_refresh:

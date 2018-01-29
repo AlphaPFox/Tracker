@@ -1,21 +1,23 @@
 package br.gov.dpf.tracker;
 
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
-import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,7 +28,6 @@ import android.widget.TextView;
 import com.appolica.interactiveinfowindow.InfoWindow;
 import com.appolica.interactiveinfowindow.InfoWindowManager;
 import com.appolica.interactiveinfowindow.fragment.MapInfoWindowFragment;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -39,10 +40,14 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.RemoteMessage;
 import com.google.maps.android.ui.IconGenerator;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout.PanelState;
@@ -56,32 +61,43 @@ import java.util.Locale;
 
 import br.gov.dpf.tracker.Components.ImageDownloader;
 import br.gov.dpf.tracker.Components.InfoFragment;
+import br.gov.dpf.tracker.Components.TrackerUpdater;
 import br.gov.dpf.tracker.Entities.Coordinates;
+import br.gov.dpf.tracker.Entities.Tracker;
 import br.gov.dpf.tracker.Firestore.CoordinatesAdapter;
+import br.gov.dpf.tracker.Firestore.TrackerAdapter;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class DetailActivity
         extends AppCompatActivity
-        implements OnMapReadyCallback, CoordinatesAdapter.OnCoordinatesSelectedListener, GoogleMap.OnMarkerClickListener {
+        implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
+    //Activities request types (RegisterActivity or FilterActivity)
+    static int REQUEST_EDIT = 0;
+    static int REQUEST_FILTER = 1;
 
+    //Object containing user preferences
     private SharedPreferences sharedPreferences;
+
+    //Layout components
     private SlidingUpPanelLayout mLayout;
-
-    private GoogleMap mMap;
-
     private InfoWindowManager infoWindowManager;
-
     private LinearLayout mLoadingBackground;
     private RecyclerView mRecyclerView;
+    private CircleImageView imgToolbarIcon;
+    private DisplayMetrics mMetrics;
 
+    //Database components
     private FirebaseFirestore mFireStoreDB;
     private CoordinatesAdapter mAdapter;
-    private DisplayMetrics mMetrics;
     private Query mQuery;
 
+    //Object containing tracker data
+    public Tracker tracker;
+
+    //Google maps components
+    private GoogleMap mMap;
     private List<Marker> markers;
-    private List<Circle> gsmTowers;
 
     @Override
     protected void onStart() {
@@ -102,6 +118,45 @@ public class DetailActivity
         //Set activity layout
         setContentView(R.layout.activity_detail);
 
+        //Get intent from previous activity
+        Intent intent = getIntent();
+
+        //Get shared preferences
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        //Initialize db instance
+        mFireStoreDB = FirebaseFirestore.getInstance();
+
+        //Get display metrics
+        mMetrics = Resources.getSystem().getDisplayMetrics();
+
+        //if intent contains tracker data
+        if (intent.hasExtra("Tracker"))
+        {
+            loadLayout(intent);
+        }
+
+        // Load coordinates data
+        loadDataset();
+
+        // Initialize google map
+        MapInfoWindowFragment mapFragment = (MapInfoWindowFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+        // Initialize info window manager
+        infoWindowManager = mapFragment.infoWindowManager();
+        infoWindowManager.setHideOnFling(true);
+    }
+
+
+    public void loadLayout(Intent intent)
+    {
+        //Get tracker data from intent
+        tracker = intent.getParcelableExtra("Tracker");
+
+        //Get sliding layout
+        mLayout = findViewById(R.id.sliding_layout);
+
         //Set toolbar element
         final Toolbar mToolbar = findViewById(R.id.main_toolbar);
         setSupportActionBar(mToolbar);
@@ -113,102 +168,56 @@ public class DetailActivity
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
-        //Get intent from previous activity
-        Intent intent = getIntent();
-
-        //Get shared preferences
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-        //Get sliding layout
-        mLayout = findViewById(R.id.sliding_layout);
-
-        //Initialize db instance
-        mFireStoreDB = FirebaseFirestore.getInstance();
-
-        //Get display metrics
-        mMetrics = Resources.getSystem().getDisplayMetrics();
-
         //Define db search query
         buildQuery(intent);
 
-        //if intent contains tracker data
-        if (intent.hasExtra("DetailActivity_TrackerID"))
+        //Get layout elements
+        imgToolbarIcon = mToolbar.findViewById(R.id.imgModel);
+        TextView txtToolbarTitle = mToolbar.findViewById(R.id.txtToolbarTitle);
+        TextView txtToolbarSubtitle = mToolbar.findViewById(R.id.txtToolbarSubtitle);
+        ProgressBar progressBar = findViewById(R.id.progressBar);
+        mLoadingBackground = findViewById(R.id.loadingBackground);
+
+        //Set circle image background color
+        imgToolbarIcon.setCircleBackgroundColor(Color.parseColor(tracker.getBackgroundColor()));
+
+        //Set model item image
+        ImageDownloader modelIcon = new ImageDownloader(imgToolbarIcon, tracker.getModel());
+
+        //Execute image search from disk or URL
+        modelIcon.execute();
+
+        //Change loading color
+        progressBar.getIndeterminateDrawable().setColorFilter(imgToolbarIcon.getCircleBackgroundColor(), android.graphics.PorterDuff.Mode.SRC_IN);
+
+        //Set toolbar texts
+        txtToolbarTitle.setText(tracker.getName());
+        txtToolbarSubtitle.setText(tracker.getModel());
+
+        //Check if device supports shared element transition
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
         {
-            //Get layout elements
-            CircleImageView imgToolbarIcon = mToolbar.findViewById(R.id.imgModel);
-            TextView txtToolbarTitle = mToolbar.findViewById(R.id.txtToolbarTitle);
-            TextView txtToolbarSubtitle = mToolbar.findViewById(R.id.txtToolbarSubtitle);
-            ProgressBar progressBar = findViewById(R.id.progressBar);
-            mLoadingBackground = findViewById(R.id.loadingBackground);
-
-            //Set circle image background color
-            imgToolbarIcon.setCircleBackgroundColor(Color.parseColor(intent.getStringExtra("DetailActivity_TrackerColor")));
-
-            //Set model item image
-            ImageDownloader modelIcon = new ImageDownloader(imgToolbarIcon, intent.getStringExtra("DetailActivity_TrackerModel"));
-
-            //Execute image search from disk or URL
-            modelIcon.execute();
-
-            //Change loading color
-            progressBar.getIndeterminateDrawable().setColorFilter(imgToolbarIcon.getCircleBackgroundColor(), android.graphics.PorterDuff.Mode.SRC_IN);
-
-            //Set toolbar texts
-            txtToolbarTitle.setText(intent.getStringExtra("DetailActivity_TrackerName"));
-            txtToolbarSubtitle.setText(intent.getStringExtra("DetailActivity_TrackerModel"));
-
-            //Check if device supports shared element transition
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            //Check if loading animation was visible on previous activity (MainActivity)
+            if(intent.getIntExtra("DetailActivity_BackgroundTransition", R.id.loadingBackground) == R.id.loadingBackground)
             {
-                //Check if loading animation was visible on previous activity (MainActivity)
-                if(intent.getIntExtra("DetailActivity_BackgroundTransition", R.id.loadingBackground) == R.id.loadingBackground)
-                {
-                    //Perform transition with loading animation on this activity
-                    mLoadingBackground.setTransitionName(getString(R.string.transition_drawable));
-                }
-                else
-                {
-                    //Else, hide loading animation
-                    mLoadingBackground.setVisibility(View.GONE);
-
-                    //Perform transition with map component
-                    findViewById(R.id.map).setTransitionName(getString(R.string.transition_drawable));
-                }
-
-                //Components in toolbar for transition
-                imgToolbarIcon.setTransitionName(getString(R.string.transition_icon));
-                txtToolbarTitle.setTransitionName(getString(R.string.transition_title));
-                txtToolbarSubtitle.setTransitionName(getString(R.string.transition_subtitle));
+                //Perform transition with loading animation on this activity
+                mLoadingBackground.setTransitionName(getString(R.string.transition_drawable));
             }
+            else
+            {
+                //Else, hide loading animation
+                mLoadingBackground.setVisibility(View.GONE);
+
+                //Perform transition with map component
+                findViewById(R.id.map).setTransitionName(getString(R.string.transition_drawable));
+            }
+
+            //Components in toolbar for transition
+            imgToolbarIcon.setTransitionName(getString(R.string.transition_icon));
+            txtToolbarTitle.setTransitionName(getString(R.string.transition_title));
+            txtToolbarSubtitle.setTransitionName(getString(R.string.transition_subtitle));
         }
-
-        // Load coordinates data
-        loadDataset();
-
-        // Lookup the recycler view in activity layout
-        mRecyclerView = findViewById(R.id.DetailRecycler);
-
-        // Attach the adapter to the recycler view to populate items
-        mRecyclerView.setAdapter(mAdapter);
-
-        // Set linear layout for orientation
-        LinearLayoutManager layoutManager = new LinearLayoutManager(mRecyclerView.getContext());
-
-        // Set layout manager to position the items
-        mRecyclerView.setLayoutManager(layoutManager);
-
-        // Set item divider settings
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(mRecyclerView.getContext(), layoutManager.getOrientation()));
-
-        // Initialize google map
-        MapInfoWindowFragment mapFragment = (MapInfoWindowFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
-        // Initialize info window manager
-        infoWindowManager = mapFragment.infoWindowManager();
-        infoWindowManager.setHideOnFling(true);
     }
-
 
     //Initialize FireStore data adapter
     public void loadDataset()
@@ -264,6 +273,21 @@ public class DetailActivity
                         "Error: check logs for info.", Snackbar.LENGTH_LONG).show();
             }
         };
+
+        // Lookup the recycler view in activity layout
+        mRecyclerView = findViewById(R.id.DetailRecycler);
+
+        // Attach the adapter to the recycler view to populate items
+        mRecyclerView.setAdapter(mAdapter);
+
+        // Set linear layout for orientation
+        LinearLayoutManager layoutManager = new LinearLayoutManager(mRecyclerView.getContext());
+
+        // Set layout manager to position the items
+        mRecyclerView.setLayoutManager(layoutManager);
+
+        // Set item divider settings
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(mRecyclerView.getContext(), layoutManager.getOrientation()));
     }
 
     //Load map markers, lines and other components based on coordinates available
@@ -279,7 +303,7 @@ public class DetailActivity
             markers = new ArrayList<>();
 
             //Initialize markers array list
-            gsmTowers = new ArrayList<>();
+            List<Circle> gsmTowers = new ArrayList<>();
 
             //Define marker factory settings
             IconGenerator iconFactory = new IconGenerator(getApplicationContext());
@@ -300,7 +324,7 @@ public class DetailActivity
                 LatLng position = new LatLng(coordinates.getPosition().getLatitude(), coordinates.getPosition().getLongitude());
 
                 //Set default color
-                iconFactory.setColor(Color.parseColor(getIntent().getStringExtra("DetailActivity_TrackerColor")));
+                iconFactory.setColor(Color.parseColor(tracker.getBackgroundColor()));
 
                 //If coordinates contains tower cell data (GSM location) and user selected display option
                 if (coordinates.getCellID() != null && sharedPreferences.getBoolean("ShowCircle", true))
@@ -322,15 +346,18 @@ public class DetailActivity
                     if(!is_added)
                     {
                         //Add circle representing cell tower coverage area
-                        mMap.addCircle(new CircleOptions()
+                        Circle gsmTower = mMap.addCircle(new CircleOptions()
                                 .center(position)
                                 .radius(500)
                                 .strokeWidth(getResources().getDimensionPixelSize(R.dimen.map_circle_width))
-                                .strokeColor(Color.parseColor("#88" + getIntent().getStringExtra("DetailActivity_TrackerColor").substring(3)))
-                                .fillColor(Color.parseColor("#55" + getIntent().getStringExtra("DetailActivity_TrackerColor").substring(3))));
+                                .strokeColor(Color.parseColor("#88" + tracker.getBackgroundColor().substring(3)))
+                                .fillColor(Color.parseColor("#55" + tracker.getBackgroundColor().substring(3))));
+
+                        //Save gsm tower on list (avoid duplicate circles on same position)
+                        gsmTowers.add(gsmTower);
 
                         //Change marker color (remove transparency)
-                        iconFactory.setColor(Color.parseColor("#" + getIntent().getStringExtra("DetailActivity_TrackerColor").substring(3)));
+                        iconFactory.setColor(Color.parseColor("#" + tracker.getBackgroundColor().substring(3)));
                     }
                 }
 
@@ -346,14 +373,15 @@ public class DetailActivity
 
                 //Define arguments to fragment
                 Bundle args = new Bundle();
+
                 args.putInt("ID", mCoordinateSnapshots.size() - markers.size());
                 args.putInt("ItemCount", mCoordinateSnapshots.size());
                 args.putString("Address", coordinates.getAddress());
                 args.putString("BatteryLevel", coordinates.getStringBatteryLevel());
                 args.putString("SignalLevel", coordinates.getStringSignalLevel());
-                args.putString("TrackerName", getIntent().getStringExtra("DetailActivity_TrackerName"));
-                args.putString("TrackerModel", getIntent().getStringExtra("DetailActivity_TrackerModel"));
-                args.putString("TrackerColor", getIntent().getStringExtra("DetailActivity_TrackerColor"));
+                args.putString("TrackerName", tracker.getName());
+                args.putString("TrackerModel", tracker.getModel());
+                args.putString("TrackerColor", tracker.getBackgroundColor());
                 args.putString("Datetime", new SimpleDateFormat("dd/MM/yyyy hh:mm", Locale.getDefault()).format(coordinates.getDatetime()));
 
                 //Add to fragment
@@ -375,7 +403,7 @@ public class DetailActivity
                 // Add a polyline to the map.
                 PolylineOptions polylineSettings = new PolylineOptions()
                         .width(getResources().getDimensionPixelSize(R.dimen.map_polyline_width))
-                        .color(Color.parseColor(getIntent().getStringExtra("DetailActivity_TrackerColor")))
+                        .color(Color.parseColor(tracker.getBackgroundColor()))
                         .pattern(Arrays.asList(new Dash(getResources().getDimensionPixelSize(R.dimen.map_polyline_dash)), new Gap(getResources().getDimensionPixelSize(R.dimen.map_polyline_gap))))
                         .geodesic(true);
 
@@ -450,8 +478,7 @@ public class DetailActivity
         onMarkerClick(marker);
     }
 
-    @Override
-    public void OnCoordinatesSelected(final DocumentSnapshot coordinates, final View viewRoot)
+    public void OnCoordinatesSelected(final DocumentSnapshot coordinates)
     {
         // Return panel to collapsed state
         mLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
@@ -467,19 +494,36 @@ public class DetailActivity
         // Collect data from the intent and use it
         if (resultCode == RESULT_OK)
         {
-            //Rebuild query using filter settings
-            buildQuery(intent);
-
-            //Check if map is already loaded
-            if(mMap != null)
+            //Check if returning from filter activity
+            if(requestCode == REQUEST_FILTER)
             {
-                //Clear any existing data from map
-                mMap.clear();
-            }
+                //Rebuild query using filter settings
+                buildQuery(intent);
 
-            //Inform new query to adapter
-            mAdapter.setQuery(mQuery);
-            mAdapter.notifyDataSetChanged();
+                //Check if map is already loaded
+                if (mMap != null) {
+                    //Clear any existing data from map
+                    mMap.clear();
+                }
+
+                //Inform new query to adapter
+                mAdapter.setQuery(mQuery);
+                mAdapter.notifyDataSetChanged();
+
+                // Attach the adapter to the recycler view to populate items
+                mRecyclerView.setAdapter(mAdapter);
+            }
+            else if(requestCode == REQUEST_EDIT)
+            {
+                //Respond to previous activity intention (INSERT/EDIT/DELETE tracker)
+                TrackerAdapter.manageTracker(intent, mLayout);
+
+                //Load changes on layout
+                loadLayout(intent);
+
+                //Load changes on map
+                loadDataset();
+            }
         }
     }
 
@@ -509,11 +553,6 @@ public class DetailActivity
     }
 
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.action_toggle:
@@ -535,13 +574,68 @@ public class DetailActivity
             }
             case R.id.action_edit:
             {
+                // Create intent to go to edit page
+                Intent registerActivity = new Intent(this, RegisterActivity.class);
 
+                //Put tracker data on intent
+                registerActivity.putExtra("Tracker", tracker);
+
+                //Start edit activity
+                startActivityForResult(registerActivity, REQUEST_EDIT);
+
+                //End method
+                return true;
             }
             case R.id.action_filter:
             {
+                //Get current activity intent
                 Intent intent = getIntent();
+
+                //Set class to FilterActivity
                 intent.setClass(this, FilterActivity.class);
-                startActivityForResult(intent, 0);
+
+                //Call FilterActivity and wait for result
+                startActivityForResult(intent, REQUEST_FILTER);
+
+                //End method
+                return true;
+
+            }
+            case R.id.action_request_position:
+            {
+                //Create confirmation dialog
+                new AlertDialog.Builder(this, R.style.Theme_AppCompat_DayNight_Dialog_Alert)
+                        .setIcon(R.drawable.ic_place_black_24dp)
+                        .setTitle("Solicitar posição atual")
+                        .setMessage("O processo pode durar até 5 (cinco) minutos, deseja continuar?")
+                        .setPositiveButton("Sim", new DialogInterface.OnClickListener()
+                        {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which)
+                            {
+                                //Create updater object
+                                TrackerUpdater updater = new TrackerUpdater();
+
+                                //Request update
+                                updater.requestUpdate(mLayout, tracker);
+                            }
+                        })
+                        .setNegativeButton("Não (FCM)", new DialogInterface.OnClickListener()
+                        {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which)
+                            {
+                                FirebaseMessaging fm = FirebaseMessaging.getInstance();
+
+                                fm.send(new RemoteMessage.Builder("550578036766@gcm.googleapis.com")
+                                        .setMessageId(String.valueOf(new Date().getTime()))
+                                        .setTtl(60)
+                                        .addData("key1", "a value")
+                                        .addData("key2", "another value")
+                                        .build());
+                            }
+                        })
+                        .show();
 
                 return true;
             }
@@ -579,7 +673,7 @@ public class DetailActivity
             setIntent(intent);
 
             //Define date relative search query
-            mQuery = mFireStoreDB.collection("Tracker/" + intent.getStringExtra("DetailActivity_TrackerID") + "/Coordinates")
+            mQuery = mFireStoreDB.collection("Tracker/" + tracker.getID() + "/Coordinates")
                     .whereGreaterThan("datetime", startDate)
                     .whereLessThan("datetime", endDate)
                     .orderBy("datetime", Query.Direction.DESCENDING)
@@ -592,7 +686,7 @@ public class DetailActivity
         else
         {
             //Define search query
-            mQuery = mFireStoreDB.collection("Tracker/" + intent.getStringExtra("DetailActivity_TrackerID") + "/Coordinates")
+            mQuery = mFireStoreDB.collection("Tracker/" + tracker.getID() + "/Coordinates")
                     .orderBy("datetime", Query.Direction.DESCENDING)
                     .limit(limit);
         }
