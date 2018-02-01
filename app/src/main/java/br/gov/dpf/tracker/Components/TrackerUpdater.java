@@ -40,7 +40,7 @@ public class TrackerUpdater
                         Map<String, String> notificationData = new HashMap<>();
 
                         //Save notification settings
-                        notificationData.put("id", tracker.getID());
+                        notificationData.put("id", tracker.getIdentification());
                         notificationData.put("title", "Realizando solicitação...");
                         notificationData.put("progress", "5");
                         notificationData.put("datetime", String.valueOf(new Date().getTime()));
@@ -64,7 +64,7 @@ public class TrackerUpdater
                         updateStep = 0;
 
                         //Update lastCheck to force server update on tracker
-                        mFireStoreDB.document("Tracker/" + tracker.getID())
+                        mFireStoreDB.document("Tracker/" + tracker.getIdentification())
                                 .update("lastCheck", null)
                                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
@@ -80,7 +80,7 @@ public class TrackerUpdater
                                 });
 
                         //Listen for changes on SMS sent
-                        ListenerRegistration smsSentListener = mFireStoreDB.collection("Tracker/" + tracker.getID() + "/SMS_Sent")
+                        ListenerRegistration smsSentListener = mFireStoreDB.collection("Tracker/" + tracker.getIdentification() + "/SMS_Sent")
                                 .whereGreaterThan("sentTime", currentDate)
                                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                                     @Override
@@ -111,7 +111,7 @@ public class TrackerUpdater
                                 });
 
                         //Listen for changes on SMS received
-                        ListenerRegistration smsReceivedListener = mFireStoreDB.collection("Tracker/" + tracker.getID() + "/SMS_Received")
+                        ListenerRegistration smsReceivedListener = mFireStoreDB.collection("Tracker/" + tracker.getIdentification() + "/SMS_Received")
                                 .whereGreaterThan("receivedTime", currentDate)
                                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                                     @Override
@@ -140,7 +140,7 @@ public class TrackerUpdater
                                 });
 
                         //Listen for changes on Coordinates
-                        ListenerRegistration coordinatesUpdateListener = mFireStoreDB.collection("Tracker/" + tracker.getID() + "/Coordinates")
+                        ListenerRegistration coordinatesUpdateListener = mFireStoreDB.collection("Tracker/" + tracker.getIdentification() + "/Coordinates")
                                 .whereGreaterThan("lastDatetime", currentDate)
                                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                                     @Override
@@ -162,7 +162,7 @@ public class TrackerUpdater
                                 });
 
                         //Listen for changes on Coordinates
-                        ListenerRegistration coordinatesInsertListener = mFireStoreDB.collection("Tracker/" + tracker.getID() + "/Coordinates")
+                        ListenerRegistration coordinatesInsertListener = mFireStoreDB.collection("Tracker/" + tracker.getIdentification() + "/Coordinates")
                                 .whereGreaterThan("datetime", currentDate)
                                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                                     @Override

@@ -673,7 +673,7 @@ public class DetailActivity
             setIntent(intent);
 
             //Define date relative search query
-            mQuery = mFireStoreDB.collection("Tracker/" + tracker.getID() + "/Coordinates")
+            mQuery = mFireStoreDB.collection("Tracker/" + tracker.getIdentification() + "/Coordinates")
                     .whereGreaterThan("datetime", startDate)
                     .whereLessThan("datetime", endDate)
                     .orderBy("datetime", Query.Direction.DESCENDING)
@@ -686,7 +686,7 @@ public class DetailActivity
         else
         {
             //Define search query
-            mQuery = mFireStoreDB.collection("Tracker/" + tracker.getID() + "/Coordinates")
+            mQuery = mFireStoreDB.collection("Tracker/" + tracker.getIdentification() + "/Coordinates")
                     .orderBy("datetime", Query.Direction.DESCENDING)
                     .limit(limit);
         }

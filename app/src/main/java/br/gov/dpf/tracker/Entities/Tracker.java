@@ -7,10 +7,10 @@ import com.google.firebase.firestore.GeoPoint;
 
 import java.util.Date;
 
+import br.gov.dpf.tracker.Components.GeoPointParcelable;
+
 @SuppressWarnings("unused")
 public class Tracker implements Parcelable {
-
-    private String mID;
 
     private String mName;
 
@@ -28,9 +28,7 @@ public class Tracker implements Parcelable {
 
     private Date mLastUpdate;
 
-    private Date mLastCheck;
-
-    private GeoPoint mLastCoordinate;
+    private GeoPointParcelable mLastCoordinate;
 
     private String mLastCoordinateType;
 
@@ -41,29 +39,13 @@ public class Tracker implements Parcelable {
 
     }
 
-    public String getID() {
-        return mID;
-    }
-
-    public void setID(String mID) {
-        this.mID = mID;
-    }
-
     public String getName() {
         return mName;
-    }
-
-    public String getTitleName() {
-        if (mName.length() > 10)
-            return mName;
-        else
-            return "Rastreador: " + mName;
     }
 
     public void setName(String mName) {
         this.mName = mName;
     }
-
 
     public String getDescription() {
         return mDescription;
@@ -77,9 +59,7 @@ public class Tracker implements Parcelable {
         return mIdentification;
     }
 
-    public void setIdentification(String mIdentification) {
-        this.mIdentification = mIdentification;
-    }
+    public void setIdentification(String mIdentification) { this.mIdentification = mIdentification;  }
 
     public int getUpdateInterval() {
         return mUpdateInterval;
@@ -101,21 +81,11 @@ public class Tracker implements Parcelable {
         return mBackgroundColor;
     }
 
-    public void setBackgroundColor(String mBackgroundColor) {
-        this.mBackgroundColor = mBackgroundColor;
-    }
+    public void setBackgroundColor(String mBackgroundColor) { this.mBackgroundColor = mBackgroundColor;  }
 
     public int getBatteryLevel() {
         return mBatteryLevel;
     }
-
-    public String getStringBatteryLevel() {
-        if (mBatteryLevel != 0)
-            return String.valueOf(mBatteryLevel) + "%";
-        else
-            return "N/D";
-    }
-
 
     public void setBatteryLevel(int mBatteryLevel) {
         this.mBatteryLevel = mBatteryLevel;
@@ -125,20 +95,11 @@ public class Tracker implements Parcelable {
         return mSignalLevel;
     }
 
-    public String getStringSignalLevel() {
-        if (mSignalLevel != 0)
-            return String.valueOf(mSignalLevel) + "%";
-        else
-            return "N/D";
-    }
-
     public String getLastCoordinateType() {
         return mLastCoordinateType;
     }
 
-    public void setLastCoordinateType(String mLastCoordinateType) {
-        this.mLastCoordinateType = mLastCoordinateType;
-    }
+    public void setLastCoordinateType(String mLastCoordinateType) { this.mLastCoordinateType = mLastCoordinateType;  }
 
     public void setSignalLevel(int mSignalLevel) {
         this.mSignalLevel = mSignalLevel;
@@ -152,24 +113,17 @@ public class Tracker implements Parcelable {
         this.mLastUpdate = mLastUpdate;
     }
 
-    public Date getLastCheck() {
-        return mLastCheck;
-    }
-
-    public void setLastCheck(Date mLastCheck) {
-        this.mLastCheck = mLastCheck;
-    }
-
     public GeoPoint getLastCoordinate() {
         return mLastCoordinate;
     }
 
-    public void setLastCoordinate(GeoPoint mLastCoordinate) {
-        this.mLastCoordinate = mLastCoordinate;
+    public void setLastCoordinate(GeoPoint mLastCoordinate)
+    {
+        if(mLastCoordinate != null)
+            this.mLastCoordinate = new GeoPointParcelable(mLastCoordinate.getLatitude(), mLastCoordinate.getLongitude());
     }
 
     protected Tracker(Parcel in) {
-        mID = in.readString();
         mName = in.readString();
         mDescription = in.readString();
         mIdentification = in.readString();
@@ -179,8 +133,7 @@ public class Tracker implements Parcelable {
         mUpdateInterval = in.readInt();
         long tmpMLastUpdate = in.readLong();
         mLastUpdate = tmpMLastUpdate != -1 ? new Date(tmpMLastUpdate) : null;
-        long tmpMLastCheck = in.readLong();
-        mLastCheck = tmpMLastCheck != -1 ? new Date(tmpMLastCheck) : null;
+        mLastCoordinate = in.readParcelable(GeoPointParcelable.class.getClassLoader());
         mLastCoordinateType = in.readString();
         mBackgroundColor = in.readString();
     }
@@ -192,7 +145,6 @@ public class Tracker implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mID);
         dest.writeString(mName);
         dest.writeString(mDescription);
         dest.writeString(mIdentification);
@@ -201,7 +153,7 @@ public class Tracker implements Parcelable {
         dest.writeInt(mSignalLevel);
         dest.writeInt(mUpdateInterval);
         dest.writeLong(mLastUpdate != null ? mLastUpdate.getTime() : -1L);
-        dest.writeLong(mLastCheck != null ? mLastCheck.getTime() : -1L);
+        dest.writeParcelable(mLastCoordinate, PARCELABLE_WRITE_RETURN_VALUE);
         dest.writeString(mLastCoordinateType);
         dest.writeString(mBackgroundColor);
     }
@@ -217,4 +169,25 @@ public class Tracker implements Parcelable {
             return new Tracker[size];
         }
     };
+
+    public String formatName() {
+        if (mName.length() > 10)
+            return mName;
+        else
+            return "Rastreador: " + mName;
+    }
+
+    public String formatSignalLevel() {
+        if (mSignalLevel != 0)
+            return String.valueOf(mSignalLevel) + "%";
+        else
+            return "N/D";
+    }
+
+    public String formatBatteryLevel() {
+        if (mBatteryLevel != 0)
+            return String.valueOf(mBatteryLevel) + "%";
+        else
+            return "N/D";
+    }
 }

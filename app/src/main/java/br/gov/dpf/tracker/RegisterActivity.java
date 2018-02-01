@@ -222,16 +222,19 @@ public class RegisterActivity extends AppCompatActivity
         ((EditText) findViewById(R.id.txtTrackerDescription)).setText(tracker.getDescription());
         ((EditText) findViewById(R.id.txtTrackerID)).setText(tracker.getIdentification());
 
+        //Disable update of tracker unique ID
+        findViewById(R.id.txtTrackerID).setEnabled(false);
+
         //Set update interval options
         ((BubbleSeekBar) findViewById(R.id.seekBar)).setProgress(getSectionByUpdateInterval(tracker.getUpdateInterval()));
 
         //Set notification options using shared preferences
-        ((SwitchCompat)findViewById(R.id.swLowBattery)).setChecked(sharedPreferences.getBoolean(tracker.getID() + "_NotifyLowBattery", false));
-        ((SwitchCompat)findViewById(R.id.swMovement)).setChecked(sharedPreferences.getBoolean(tracker.getID() + "_NotifyMovement", false));
-        ((SwitchCompat)findViewById(R.id.swStopped)).setChecked(sharedPreferences.getBoolean(tracker.getID() + "_NotifyStopped", false));
-        ((SwitchCompat)findViewById(R.id.swTrackerStatus)).setChecked(sharedPreferences.getBoolean(tracker.getID() + "_NotifyStatus", false));
-        ((SwitchCompat)findViewById(R.id.swAvailable)).setChecked(sharedPreferences.getBoolean(tracker.getID() + "_NotifyAvailable", false));
-        ((SwitchCompat)findViewById(R.id.swSMSResponse)).setChecked(sharedPreferences.getBoolean(tracker.getID() + "_NotifySMSResponse", false));
+        ((SwitchCompat)findViewById(R.id.swLowBattery)).setChecked(sharedPreferences.getBoolean(tracker.getIdentification() + "_NotifyLowBattery", false));
+        ((SwitchCompat)findViewById(R.id.swMovement)).setChecked(sharedPreferences.getBoolean(tracker.getIdentification() + "_NotifyMovement", false));
+        ((SwitchCompat)findViewById(R.id.swStopped)).setChecked(sharedPreferences.getBoolean(tracker.getIdentification() + "_NotifyStopped", false));
+        ((SwitchCompat)findViewById(R.id.swTrackerStatus)).setChecked(sharedPreferences.getBoolean(tracker.getIdentification() + "_NotifyStatus", false));
+        ((SwitchCompat)findViewById(R.id.swAvailable)).setChecked(sharedPreferences.getBoolean(tracker.getIdentification() + "_NotifyAvailable", false));
+        ((SwitchCompat)findViewById(R.id.swSMSResponse)).setChecked(sharedPreferences.getBoolean(tracker.getIdentification() + "_NotifySMSResponse", false));
 
         //Check support action bar
         if(getSupportActionBar() != null)

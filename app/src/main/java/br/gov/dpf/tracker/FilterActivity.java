@@ -34,7 +34,8 @@ public class FilterActivity extends AppCompatActivity implements View.OnClickLis
     private BubbleSeekBar seekBar;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_filter);

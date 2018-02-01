@@ -58,9 +58,6 @@ public class NotificationGroup {
 
             //Parse result to a tracker object
             tracker = result.toObject(Tracker.class);
-
-            //Save tracker ID
-            tracker.setID(result.getId());
         }
         catch (Exception ex)
         {
