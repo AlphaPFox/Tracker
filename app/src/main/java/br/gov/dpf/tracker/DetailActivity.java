@@ -1,6 +1,5 @@
 package br.gov.dpf.tracker;
 
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,7 +8,6 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -40,8 +38,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -59,7 +55,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import br.gov.dpf.tracker.Components.ImageDownloader;
 import br.gov.dpf.tracker.Components.InfoFragment;
 import br.gov.dpf.tracker.Components.TrackerUpdater;
 import br.gov.dpf.tracker.Entities.Coordinates;
@@ -182,10 +177,7 @@ public class DetailActivity
         imgToolbarIcon.setCircleBackgroundColor(Color.parseColor(tracker.getBackgroundColor()));
 
         //Set model item image
-        ImageDownloader modelIcon = new ImageDownloader(imgToolbarIcon, tracker.getModel());
-
-        //Execute image search from disk or URL
-        modelIcon.execute();
+        imgToolbarIcon.setBackgroundResource(getResources().getIdentifier(tracker.getModel(), "mipmap", getPackageName()));
 
         //Change loading color
         progressBar.getIndeterminateDrawable().setColorFilter(imgToolbarIcon.getCircleBackgroundColor(), android.graphics.PorterDuff.Mode.SRC_IN);

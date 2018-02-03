@@ -35,7 +35,6 @@ import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.maps.android.ui.IconGenerator;
 
-import br.gov.dpf.tracker.Components.ImageDownloader;
 import br.gov.dpf.tracker.Entities.Tracker;
 import br.gov.dpf.tracker.MainActivity;
 import br.gov.dpf.tracker.R;
@@ -108,10 +107,7 @@ public class TrackerAdapter
         holder.imageView.setCircleBackgroundColor(Color.parseColor(tracker.getBackgroundColor()));
 
         //Set model item image
-        ImageDownloader modelIcon = new ImageDownloader(holder.imageView, tracker.getModel());
-
-        //Execute image search from disk or URL
-        modelIcon.execute();
+        holder.imageView.setBackgroundResource(mActivity.getResources().getIdentifier(tracker.getModel(), "mipmap", mActivity.getPackageName()));
 
         //Change color to loading animation
         holder.progressBar.getIndeterminateDrawable().setColorFilter(holder.imageView.getCircleBackgroundColor(), android.graphics.PorterDuff.Mode.SRC_IN);

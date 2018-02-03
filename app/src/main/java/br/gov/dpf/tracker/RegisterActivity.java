@@ -34,7 +34,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.xw.repo.BubbleSeekBar;
 
-import br.gov.dpf.tracker.Components.ImageDownloader;
 import br.gov.dpf.tracker.Entities.Model;
 import br.gov.dpf.tracker.Entities.Tracker;
 
@@ -98,107 +97,6 @@ public class RegisterActivity extends AppCompatActivity
                 return array;
             }
         });
-
-        //Get model collection
-        FirebaseFirestore.getInstance().collection("Model")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful())
-                        {
-                            //Layout parent
-                            final LinearLayout vwModels = findViewById(R.id.vwModels);
-
-                            //For each model retrieved
-                            for (DocumentSnapshot document : task.getResult())
-                            {
-                                //Get model data
-                                Model model = document.toObject(Model.class);
-
-                                //Create item layout
-                                final View vwModel = getLayoutInflater().inflate(R.layout.model_layout_item, vwModels, false);
-
-                                //Set item text
-                                ((TextView)vwModel.findViewById(R.id.txtModel)).setText(model.getName());
-
-                                //Set item image
-                                ImageDownloader modelIcon = new ImageDownloader((ImageView) vwModel.findViewById(R.id.imgModel), model.getName(), model.getImagePath());
-
-                                //Execute image search from disk or URL
-                                modelIcon.execute();
-
-                                //Add item to parent
-                                vwModels.addView(vwModel);
-
-                                //If activity is in edit mode and this is the corresponding tracker model
-                                if(tracker != null && tracker.getModel().equals(model.getName()))
-                                {
-                                    //Set background color only for the selected device model
-                                    vwModel.setBackgroundColor(getResources().getColor(R.color.colorSelected));
-
-                                    //Scroll to position
-                                    vwModel.post(new Runnable() {
-                                        @Override
-                                        public void run()
-                                        {
-                                            //Scroll to selected model position
-                                            findViewById(R.id.vwModelScroll).scrollTo(vwModel.getLeft(), 0);
-                                        }
-                                    });
-
-                                    //Get current selected model
-                                    mModel = tracker.getModel();
-
-                                    //Change layout labels according to selected model
-                                    changeLabels(mModel);
-                                }
-
-                                vwModel.setOnClickListener(new View.OnClickListener() {
-
-                                    @Override
-                                    public void onClick(View view) {
-
-                                        //When clicked, for each device model
-                                        for (int i = 0; i < vwModels.getChildCount(); i++)
-                                        {
-                                            //Set background transparent = not selected
-                                            vwModels.getChildAt(i).setBackgroundColor(getResources().getColor(R.color.Transparent));
-                                        }
-
-                                        //Set background color only for the selected device model
-                                        view.setBackgroundColor(getResources().getColor(R.color.colorSelected));
-
-                                        //Get current selected model
-                                        mModel = ((TextView) view.findViewById(R.id.txtModel)).getText().toString();
-
-                                        //Change layout labels according to selected model
-                                        changeLabels(mModel);
-                                    }
-                                });
-                            }
-
-                            //If there is any model available and activity is not in edit mode
-                            if(vwModels.getChildCount() > 0 && tracker == null)
-                            {
-                                //Set first item as selected by default
-                                vwModels.getChildAt(0).setBackgroundColor(getResources().getColor(R.color.colorSelected));
-
-                                //Get current selected model
-                                mModel = ((TextView) vwModels.getChildAt(0).findViewById(R.id.txtModel)).getText().toString();
-                            }
-                        }
-                        else
-                        {
-                            // Show a snack bar on errors
-                            Snackbar.make(findViewById(android.R.id.content),
-                                    "Database error: check logs for info.", Snackbar.LENGTH_LONG).show();
-
-                            //Log error
-                            Log.e("Firestore DB", "Error", task.getException());
-                        }
-                    }
-                });
 
         //Check if activity was called to edit existing tracker
         if(tracker != null)

@@ -61,10 +61,7 @@ public class InfoFragment extends Fragment {
         imgModel.setCircleBackgroundColor(Color.parseColor(arguments.getString("TrackerColor")));
 
         //Set model item image
-        ImageDownloader modelIcon = new ImageDownloader(imgModel, arguments.getString("TrackerModel"));
-
-        //Execute image search from disk or URL
-        modelIcon.execute();
+        imgModel.setBackgroundResource(getResources().getIdentifier(arguments.getString("TrackerModel"), "mipmap", getActivity().getPackageName()));
 
         //Set title bar background color
         vwTitleBar.setBackgroundColor(imgModel.getCircleBackgroundColor());
