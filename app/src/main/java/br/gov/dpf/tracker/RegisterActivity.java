@@ -74,7 +74,7 @@ public class RegisterActivity extends AppCompatActivity
         ((TextView) findViewById(R.id.txtIntervalAlert)).setText(getResources().getText(R.string.lblUpdateInterval));
 
         //Set seek bar sections
-        ((BubbleSeekBar) findViewById(R.id.seekBar)).setCustomSectionTextArray(new BubbleSeekBar.CustomSectionTextArray() {
+        ((BubbleSeekBar) findViewById(R.id.sbUpdateInterval)).setCustomSectionTextArray(new BubbleSeekBar.CustomSectionTextArray() {
             @NonNull
             @Override
             public SparseArray<String> onCustomize(int sectionCount, @NonNull SparseArray<String> array) {
@@ -119,7 +119,6 @@ public class RegisterActivity extends AppCompatActivity
         findViewById(R.id.txtTrackerIdentification).setEnabled(false);
 
         //Set update interval options
-        ((BubbleSeekBar) findViewById(R.id.seekBar)).setProgress(getSectionByUpdateInterval(tracker.getUpdateInterval()));
 
         //Set notification options using shared preferences
         ((SwitchCompat)findViewById(R.id.swLowBattery)).setChecked(sharedPreferences.getBoolean(tracker.getIdentification() + "_NotifyLowBattery", false));
@@ -148,7 +147,7 @@ public class RegisterActivity extends AppCompatActivity
                 vwScrollMain.smoothScrollTo(0, findViewById(R.id.vwUpdateInterval).getTop());
 
                 //Request focus on seek bar
-                findViewById(R.id.seekBar).requestFocus();
+                findViewById(R.id.sbUpdateInterval).requestFocus();
             }
         });
     }
@@ -203,7 +202,6 @@ public class RegisterActivity extends AppCompatActivity
             tracker.setModel(mModel);
 
             //Get update interval
-            tracker.setUpdateInterval(getUpdateIntervalBySection(((BubbleSeekBar) findViewById(R.id.seekBar)).getProgress()));
 
             //Get tracker color
             tracker.setBackgroundColor(mColor);

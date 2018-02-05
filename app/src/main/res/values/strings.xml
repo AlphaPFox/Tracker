@@ -67,6 +67,7 @@
     <string name="lblSuntechID">Identificador (6 dígitos):</string>
     <string name="txtSuntechHint">696478</string>
     <string name="lblSuntechSubtitle">Informe o número de identificação do aparelho. Por padrão, o número é composto pelos 6 últimos dígitos do IMEI.</string>
+    <string name="lblEditIDSubtitle"><b>Alerta:</b> O campo de identificação do aparelho não deve ser alterado. Caso necessário, cadastre um novo rastreador com o número de identificação desejado.</string>
     <string name="lblColorIdentification">Cor de identificação</string>
     <string name="lblColorDescription">Selecione uma cor para facilitar a identificação a visualização do rastreador no mapa.</string>
 
@@ -76,6 +77,8 @@
     <string name="title_tracker_tk102b_settings">Configurações - TK 102B</string>
     <string name="lblLowBattery">Ao atingir um nível crítico de bateria, o rastreador começará a enviar alertas periódicos.</string>
     <string name="swLowBattery">Enviar alerta de bateria fraca</string>
+    <string name="lblShockAlert">Caso ativado, o rastreador enviará um alerta ao detectar qualquer vibração do dispositivo.</string>
+    <string name="swShockAlert">Ativar alerta de vibração</string>
     <string name="swMoveoutAlert">Ativar alerta de evasão</string>
     <string name="lblMoveOutDistance">Limite de distancia:</string>
     <string name="txtMoveOutHint">200</string>
@@ -96,6 +99,7 @@
     <string name="cbCoordinates">Notificação de localização</string>
     <string name="cbLowBattery">Notificação de bateria fraca</string>
     <string name="cbMoveout">Notificação de evasão </string>
+    <string name="cbShockAlert">Notificação de vibração </string>
     <string name="cbSpeedLimit">Notificação de limite de velocidade</string>
     <string name="cbStatusCheck">Notificação de status</string>
     <string name="cbAvailable">Notificação de disponibilidade</string>

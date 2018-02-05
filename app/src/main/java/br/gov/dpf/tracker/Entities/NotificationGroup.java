@@ -1,5 +1,7 @@
 package br.gov.dpf.tracker.Entities;
 
+import android.app.NotificationManager;
+import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
 import com.google.android.gms.tasks.Tasks;
@@ -34,7 +36,7 @@ public class NotificationGroup {
         getTrackerData(key);
     }
 
-    //Add notification and update notification count list
+    //Get notification with that specific ID
     public NotificationMessage findNotification(int notificationID)
     {
         for(NotificationMessage notification : notifications)
@@ -46,6 +48,27 @@ public class NotificationGroup {
         }
 
         return null;
+    }
+
+    //Add notification to topic
+    public void addNotification(NotificationMessage newNotification, NotificationManagerCompat notificationManager)
+    {
+        //For each existing notification on this group
+        for(NotificationMessage notification : notifications)
+        {
+            //If it is from the same topic
+            if(notification.getTopic().equals((newNotification.getTopic())))
+            {
+                //Remove old notification (will be replaced)
+                notifications.remove(notification);
+
+                //Cancel old notification
+                notificationManager.cancel(notification.getNotificationID());
+            }
+        }
+
+        //Add new notification
+        notifications.add(newNotification);
     }
 
     //Get tracker from FireStore DB

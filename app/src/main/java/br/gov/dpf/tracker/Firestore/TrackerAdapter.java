@@ -29,11 +29,14 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.maps.android.ui.IconGenerator;
+
+import java.util.Date;
 
 import br.gov.dpf.tracker.Entities.Tracker;
 import br.gov.dpf.tracker.MainActivity;
@@ -90,13 +93,13 @@ public class TrackerAdapter
 
         // - replace the contents of the view with that element
         holder.txtTrackerName.setText(tracker.formatName());
-        holder.txtTrackerModel.setText(tracker.getModel());
-        holder.txtBatteryLevel.setText(tracker.formatBatteryLevel());
-        holder.txtSignalLevel.setText(tracker.formatSignalLevel());
+        holder.txtTrackerModel.setText(tracker.formatTrackerModel());
+        holder.txtBatteryLevel.setText(tracker.getSignalLevel());
+        holder.txtSignalLevel.setText(tracker.getBatteryLevel());
 
         //Check if tracker has an coordinate available
-        if(tracker.getLastCoordinate() != null)
-            holder.txtLastUpdateValue.setText(formatDateTime(tracker.getLastUpdate(), false));
+        if(tracker.getLastUpdate() != null)
+            holder.txtLastUpdateValue.setText(formatDateTime((Date) tracker.getLastUpdate().get("datetime"), false));
         else
             holder.txtLastUpdateValue.setText(mActivity.getResources().getString(R.string.txtWaitingTitle));
 
@@ -143,15 +146,17 @@ public class TrackerAdapter
         holder.mapView.setClickable(false);
 
         //If tracker has coordinates available
-        if (tracker.getLastCoordinate() != null && tracker.getLastUpdate() != null)
+        if (tracker.getLastUpdate() != null)
         {
-
             //Load map
             holder.mapView.onCreate(null);
             holder.mapView.onResume();
             holder.mapView.getMapAsync(new OnMapReadyCallback() {
                 @Override
                 public void onMapReady(final GoogleMap googleMap) {
+
+                    //Get coordinates
+                    GeoPoint dbCoordinates = (GeoPoint) tracker.getLastUpdate().get("coordinates");
 
                     //Initialize map
                     MapsInitializer.initialize(mActivity);
@@ -164,13 +169,13 @@ public class TrackerAdapter
                     iconFactory.setTextAppearance(R.style.Marker);
 
                     //Get central coordinates
-                    LatLng coordinates = new LatLng(tracker.getLastCoordinate().getLatitude(), tracker.getLastCoordinate().getLongitude());
+                    LatLng coordinates = new LatLng(dbCoordinates.getLatitude(), dbCoordinates.getLongitude());
 
                     //Set camera position
                     googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinates, 14));
 
                     //If coordinates come from a GSM tower cell
-                    if(tracker.getLastCoordinateType() != null && tracker.getLastCoordinateType().equals("GSM") && sharedPreferences.getBoolean("ShowCircle", true))
+                    if(tracker.getLastUpdate().get("type") == "GSM" && sharedPreferences.getBoolean("ShowCircle", true))
                     {
                         //Add circle representing cell tower signal coverage
                         googleMap.addCircle(new CircleOptions()
@@ -186,7 +191,7 @@ public class TrackerAdapter
 
                     //Define map marker settings
                     MarkerOptions markerOptions = new MarkerOptions().
-                            icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(formatTime(tracker.getLastUpdate())))).
+                            icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(formatTime((Date) tracker.getLastUpdate().get("datetime"))))).
                             position(coordinates).
                             anchor(iconFactory.getAnchorU(), iconFactory.getAnchorV());
 
@@ -202,7 +207,7 @@ public class TrackerAdapter
                         public void onMapLoaded() {
 
                             //If coordinates is available
-                            if (googleMap.getMapType() != GoogleMap.MAP_TYPE_NONE && tracker.getLastCoordinate() != null)
+                            if (googleMap.getMapType() != GoogleMap.MAP_TYPE_NONE && tracker.getLastUpdate() != null)
                             {
                                 //Hide loading animation
                                 ((View) holder.progressBar.getParent()).animate().setDuration(500).alpha(0f);

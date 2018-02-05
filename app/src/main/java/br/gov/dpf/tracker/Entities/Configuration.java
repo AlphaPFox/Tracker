@@ -4,41 +4,64 @@ import java.util.Date;
 
 public class Configuration
 {
-    private String mCommand;
+    private String mName;
 
-    private String mCommandType;
+    private String mValue;
 
     private String mStatus;
 
-    private Date mDatetime;
+    private boolean mEnabled;
 
-    public static String COMMAND_TYPE_SMS = "SMS";
-    public static String TCP_COMMAND = "TCP";
+    private Date mDatetime;
 
     public Configuration()
     {
     }
 
-    public Configuration(String command, String commandType) {
-        this.mCommand = command;
-        this.mCommandType = commandType;
-        this.mStatus = "REQUESTED";
-        this.mDatetime = new Date();
+    public Configuration(String name, String value, boolean enabled)
+    {
+        mName = name;
+        mValue = value;
+        mEnabled = enabled;
     }
 
-    public String getCommand() {
-        return mCommand;
+    public String getName() {
+        return mName;
     }
 
-    public String getCommandType() {
-        return mCommandType;
+    public void setName(String mName) {
+        this.mName = mName;
+    }
+
+    public String getValue() {
+        return mValue;
+    }
+
+    public void setValue(String mValue) {
+        this.mValue = mValue;
     }
 
     public String getStatus() {
         return mStatus;
     }
 
+    public void setStatus(String mStatus) {
+        this.mStatus = mStatus;
+    }
+
+    public boolean isEnabled() {
+        return mEnabled;
+    }
+
+    public void setEnabled(boolean mEnabled) {
+        this.mEnabled = mEnabled;
+    }
+
     public Date getDatetime() {
         return mDatetime;
+    }
+
+    public void setDatetime(Date mDatetime) {
+        this.mDatetime = mDatetime;
     }
 }

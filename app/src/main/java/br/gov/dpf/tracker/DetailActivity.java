@@ -183,8 +183,8 @@ public class DetailActivity
         progressBar.getIndeterminateDrawable().setColorFilter(imgToolbarIcon.getCircleBackgroundColor(), android.graphics.PorterDuff.Mode.SRC_IN);
 
         //Set toolbar texts
-        txtToolbarTitle.setText(tracker.getName());
-        txtToolbarSubtitle.setText(tracker.getModel());
+        txtToolbarTitle.setText(tracker.formatName());
+        txtToolbarSubtitle.setText(tracker.formatTrackerModel());
 
         //Check if device supports shared element transition
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)

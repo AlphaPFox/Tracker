@@ -49,7 +49,7 @@ public class TrackerUpdater
                         final NotificationController notificationController = NotificationController.getInstance(rootView.getContext());
 
                         //Build notification
-                        final NotificationMessage notification = notificationController.showNotification(notificationData);
+                        final NotificationMessage notification = notificationController.showNotification(notificationData, "/topics/" + tracker.getIdentification() +"_NotifyUpdate");
 
                         //Save updater (to allow dismiss)
                         notification.updater = TrackerUpdater.this;

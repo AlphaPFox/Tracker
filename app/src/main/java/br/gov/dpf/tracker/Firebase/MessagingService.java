@@ -35,7 +35,7 @@ public class MessagingService extends FirebaseMessagingService {
         if (remoteMessage.getData().size() > 0)
         {
             //Show notification to user
-            notificationController.showNotification(remoteMessage.getData());
+            notificationController.showNotification(remoteMessage.getData(), remoteMessage.getFrom());
         }
     }
 

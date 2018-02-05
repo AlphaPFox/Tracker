@@ -57,13 +57,13 @@ public class NotificationController
     }
 
     //Show notification to user (groups notification from the same tracker)
-    public NotificationMessage showNotification(Map<String, String> notificationData)
+    public NotificationMessage showNotification(Map<String, String> notificationData, String topic)
     {
         //Notification group object
         NotificationGroup notificationGroup;
 
         //Create notification object
-        NotificationMessage notification = new NotificationMessage(getNotificationId(), notificationData);
+        NotificationMessage notification = new NotificationMessage(getNotificationId(), notificationData, topic);
 
         //If this group already exists (created on a previous notification)
         if(notificationGroups.containsKey(notification.getGroupKey()))
@@ -81,7 +81,7 @@ public class NotificationController
         }
 
         //Add notification to group
-        notificationGroup.notifications.add(notification);
+        notificationGroup.addNotification(notification, notificationManager);
 
         //Check if tracker was successfully retrieved from FireStore DB
         if(notificationGroup.tracker != null)
@@ -393,7 +393,7 @@ public class NotificationController
         }
     }
 
-    public void dismissNotification(String groupKey, int notificationID)
+    void dismissNotification(String groupKey, int notificationID)
     {
         //Get notification group
         NotificationGroup notificationGroup = notificationGroups.get(groupKey);

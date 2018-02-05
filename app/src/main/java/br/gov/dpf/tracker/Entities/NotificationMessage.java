@@ -11,16 +11,18 @@ import br.gov.dpf.tracker.Components.TrackerUpdater;
 public class NotificationMessage
 {
     private int id, progress;
+    private String topic;
     private String groupKey;
     private String title, content, expanded, coordinates;
     private Long datetime;
 
     public TrackerUpdater updater;
 
-    public NotificationMessage(int notificationID, Map<String, String> data)
+    public NotificationMessage(int notificationID, Map<String, String> data, String topic)
     {
         //Get data from FCM message payload
         this.id = notificationID;
+        this.topic = topic;
         this.groupKey = data.get("id");
         this.title = data.get("title");
         this.content = data.get("content");
@@ -35,6 +37,8 @@ public class NotificationMessage
     public String getGroupKey() { return groupKey; }
 
     public String getTitle() { return title; }
+
+    public String getTopic() { return topic; }
 
     public void setTitle(String value) { title = value; }
 

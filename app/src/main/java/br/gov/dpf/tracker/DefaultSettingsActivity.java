@@ -21,12 +21,13 @@ import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
 import br.gov.dpf.tracker.Entities.Tracker;
 
-public class SettingsActivity extends AppCompatActivity {
+public class DefaultSettingsActivity extends AppCompatActivity {
 
     //Default device model
     private String mModel = "tk102b";
@@ -34,25 +35,39 @@ public class SettingsActivity extends AppCompatActivity {
     //Default color option
     private String mColor = "#99ff0000";
 
+    //Menu item used to confirm settings
+    private MenuItem confirmMenu;
+
     //Object representing the tracker to be inserted/updated
     private Tracker tracker;
 
-    //Define possible result operations
-    public static int RESULT_CANCELED = 0;
-    public static int RESULT_SUCCESS = 1;
-    public static int RESULT_ERROR = -1;
+    //Flag indicating whether this activity is in edit mode
+    private boolean editMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
+        //Set activity layout
         setContentView(R.layout.activity_settings);
 
+        //Load toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //Load Floating Action Button
         FloatingActionButton fab = findViewById(R.id.fab);
+
+        //Set click event
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                //Method called to save data
+                onSettingsConfirmed();
+            }
+        });
 
         //Check action bar
         if(getSupportActionBar() != null)
@@ -61,32 +76,27 @@ public class SettingsActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        //Set floating action button event
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onSettingsConfirmed(null);
-            }
-        });
-
-        //Try to load tracker from intent (if edit mode)
-        tracker = getIntent().getParcelableExtra("Tracker");
-
-        //Handle click events for color options
-        loadColors((GridLayout) findViewById(R.id.vwColors));
-
-        //Handle click events for model options
-        loadModels((LinearLayout) findViewById(R.id.vwModels));
-
         //Check if activity was called to edit existing tracker
-        if(getIntent().getBooleanExtra("UpdateTracker", false))
+        if(getIntent().getIntExtra("Request", MainActivity.REQUEST_INSERT) == MainActivity.REQUEST_UPDATE)
         {
+            //Load tracker from intent
+            tracker = getIntent().getParcelableExtra("Tracker");
+
+            //Set activity in edit mode
+            editMode = true;
+
             //Load tracker data
             loadData();
 
             //Hide add floating action button
             fab.setVisibility(View.GONE);
         }
+
+        //Handle click events for color options
+        loadColors((GridLayout) findViewById(R.id.vwColors));
+
+        //Handle click events for model options
+        loadModels((LinearLayout) findViewById(R.id.vwModels));
     }
 
 
@@ -98,8 +108,14 @@ public class SettingsActivity extends AppCompatActivity {
         ((EditText) findViewById(R.id.txtTrackerDescription)).setText(tracker.getDescription());
         ((EditText) findViewById(R.id.txtTrackerIdentification)).setText(tracker.getIdentification());
 
+        //Change subtitle to alert that tracker identification cannot change
+        ((TextView) findViewById(R.id.lblTrackerIdentificationSubtitle)).setText(getResources().getText(R.string.lblEditIDSubtitle));
+
         //Disable update of tracker unique ID
         findViewById(R.id.txtTrackerIdentification).setEnabled(false);
+
+        //Hide model selected
+        findViewById(R.id.vwModelCardView).setVisibility(View.GONE);
 
         //Check support action bar
         if(getSupportActionBar() != null)
@@ -110,7 +126,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     //Called when editing or inserting a new tracker
-    public void onSettingsConfirmed(final MenuItem item)
+    public void onSettingsConfirmed()
     {
         //Get tracker name and identification
         String trackerName = ((EditText) findViewById(R.id.txtTrackerName)).getText().toString();
@@ -120,55 +136,128 @@ public class SettingsActivity extends AppCompatActivity {
         if(trackerName.isEmpty() || trackerIdentification.isEmpty())
         {
             //Alert user, not optional fields
-            Snackbar.make(findViewById(R.id.fab), "Preencha os campos nome e identificação do aparelho", Snackbar.LENGTH_LONG).show();
+            Snackbar.make(findViewById(android.R.id.content), "Preencha os campos nome e identificação do aparelho", Snackbar.LENGTH_LONG).show();
+        }
+        else if(mModel.equals("pt39") || mModel.equals("gt02"))
+        {
+            //Alert user, unsupported models
+            Snackbar.make(findViewById(android.R.id.content), "Modelo atualmente não suportado pela plataforma", Snackbar.LENGTH_LONG).show();
         }
         else
         {
-            //Check if activity is in edit mode
-            boolean editMode = getIntent().getBooleanExtra("UpdateTracker", false);
-
-            //Create intent to send to MainActivity
-            final Intent intent = new Intent();
-
-            //Tracker object containing data to be inserted or updated
-            Tracker tracker = new Tracker();
-
-            //Save tracker data
-            tracker.setName(trackerName);
-            tracker.setDescription(((EditText) findViewById(R.id.txtTrackerDescription)).getText().toString());
-            tracker.setIdentification(trackerIdentification);
-            tracker.setModel(mModel);
-
-            //Save tracker color
-            tracker.setBackgroundColor(mColor);
-
-            //Put tracker data on intent
-            intent.putExtra("Tracker", tracker);
+            // Input is validated, set loading indicator on menu
+            confirmMenu.setActionView(new ProgressBar(this));
 
             //Check if activity is in edit mode
             if(editMode)
             {
-                //Inform tracker position on main activity
-                intent.putExtra("TrackerPosition", getIntent().getIntExtra("TrackerPosition",0));
+                //Update tracker data
+                tracker.setName(trackerName);
+                tracker.setDescription(((EditText) findViewById(R.id.txtTrackerDescription)).getText().toString());
+                tracker.setIdentification(trackerIdentification);
 
-                // Set loading indicator on menu
-                item.setActionView(new ProgressBar(this));
+                //Update tracker color
+                tracker.setBackgroundColor(mColor);
 
-                // If editing an existing tracker
+                //Check if user is changing tracker model
+                if(!tracker.getModel().equals(mModel))
+                {
+                    //Save new tracker model
+                    tracker.setModel(mModel);
+
+                    //Create intent to call next activity (Tracker Configurations)
+                    Intent intent = new Intent(DefaultSettingsActivity.this, TrackerSettingsActivity.class);
+
+                    //Put tracker data on intent
+                    intent.putExtra("Tracker", tracker);
+
+                    //Inform activity intention: change tracker model
+                    intent.putExtra("UpdateModel", true);
+
+                    //Inform activity intention: insert new tracker
+                    intent.putExtra("Request", MainActivity.REQUEST_UPDATE);
+
+                    //Start next activity
+                    startActivityForResult(intent, MainActivity.REQUEST_UPDATE);
+                }
+                else
+                {
+                    // If editing an existing tracker
+                    FirebaseFirestore.getInstance()
+                            .collection("Tracker")
+                            .document(tracker.getIdentification())
+                            .set(tracker, SetOptions.merge())
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+
+                                    //Set result editing result - OK
+                                    setResult(MainActivity.RESULT_SUCCESS);
+
+                                    //End activity (returns to parent activity -> OnActivityResult)
+                                    finish();
+
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+
+                                    //Set result editing result - OK
+                                    setResult(MainActivity.RESULT_ERROR);
+
+                                    //End activity (returns to parent activity -> OnActivityResult)
+                                    finish();
+                                }
+                            });
+                }
+            }
+            else
+            {
+                //Then this is an INSERT operation, create a new tracker
+                tracker = new Tracker();
+
+                //Save tracker data
+                tracker.setName(trackerName);
+                tracker.setDescription(((EditText) findViewById(R.id.txtTrackerDescription)).getText().toString());
+                tracker.setIdentification(trackerIdentification);
+                tracker.setModel(mModel);
+
+                //Save tracker color
+                tracker.setBackgroundColor(mColor);
+
+                //Run query to check if there is already a tracker with this identification
                 FirebaseFirestore.getInstance()
                         .collection("Tracker")
                         .document(tracker.getIdentification())
-                        .set(tracker, SetOptions.merge())
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        .get()
+                        .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                             @Override
-                            public void onSuccess(Void aVoid) {
+                            public void onSuccess(DocumentSnapshot documentSnapshot) {
 
-                                //Set result editing result - OK
-                                setResult(RESULT_SUCCESS, intent);
+                                //If there is a tracker with the same ID
+                                if(documentSnapshot.exists())
+                                {
+                                    // Show a snack bar on errors
+                                    Snackbar.make(findViewById(android.R.id.content), "Erro: Já existe um rastreador com o mesmo identificador.", Snackbar.LENGTH_LONG).show();
 
-                                //End activity (returns to parent activity -> OnActivityResult)
-                                finish();
+                                    // Cancel loading indicator
+                                    confirmMenu.setActionView(null);
+                                }
+                                else
+                                {
+                                    //Create intent to call next activity (Tracker Configurations)
+                                    Intent intent = new Intent(DefaultSettingsActivity.this, TrackerSettingsActivity.class);
 
+                                    //Put tracker data on intent
+                                    intent.putExtra("Tracker", tracker);
+
+                                    //Inform activity intention: insert new tracker
+                                    intent.putExtra("Request", MainActivity.REQUEST_INSERT);
+
+                                    //Start next activity
+                                    startActivityForResult(intent, MainActivity.REQUEST_INSERT);
+                                }
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
@@ -176,24 +265,32 @@ public class SettingsActivity extends AppCompatActivity {
                             public void onFailure(@NonNull Exception e) {
 
                                 //Set result editing result - OK
-                                setResult(RESULT_ERROR, intent);
+                                setResult(MainActivity.RESULT_ERROR);
 
                                 //End activity (returns to parent activity -> OnActivityResult)
                                 finish();
                             }
                         });
             }
-            else
-            {
-                //Inform activity intention: insert new tracker
-                intent.putExtra("InsertTracker", true);
+        }
+    }
 
-                //Define intent to open a new activity
-                intent.setClass(this, TrackerActivity.class);
+    @Override
+    protected void onActivityResult (int requestCode, int resultCode, final Intent intent)
+    {
+        // Check TrackerSettingsActivity result
+        if(resultCode == MainActivity.RESULT_CANCELED)
+        {
+            // User canceled (back pressed), hide loading
+            confirmMenu.setActionView(null);
+        }
+        else
+        {
+            // User completed operation, send result to MainActivity
+            setResult(resultCode);
 
-                //Start next activity
-                startActivityForResult(intent, 0);
-            }
+            // End activity (returns to parent activity -> OnActivityResult)
+            finish();
         }
     }
 
@@ -201,6 +298,16 @@ public class SettingsActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.settings, menu);
+
+        //Save action menu item
+        confirmMenu = menu.findItem(R.id.action_add);
+
+        //If in edit mode
+        if(editMode)
+        {
+            //Add a new option
+            menu.add(Menu.NONE, R.id.action_settings, Menu.NONE, "Alterar modelo do rastreador");
+        }
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -212,7 +319,7 @@ public class SettingsActivity extends AppCompatActivity {
             case android.R.id.home:
 
                 //Set result
-                setResult(RESULT_CANCELED, getIntent());
+                setResult(MainActivity.RESULT_CANCELED, getIntent());
 
                 //End activity (returns to parent activity -> OnActivityResult)
                 finish();
@@ -221,7 +328,19 @@ public class SettingsActivity extends AppCompatActivity {
                 return true;
 
             case R.id.action_add:
-                onSettingsConfirmed(item);
+
+                //Method called to save data
+                onSettingsConfirmed();
+
+                //End method
+                return true;
+
+            case R.id.action_settings:
+
+                //Method called to save data
+                findViewById(R.id.vwModelCardView).setVisibility(View.VISIBLE);
+
+                //End method
                 return true;
 
         }
@@ -270,6 +389,13 @@ public class SettingsActivity extends AppCompatActivity {
 
                 break;
         }
+
+        //If activity is not in edit mode
+        if(!editMode)
+        {
+            //Clear any previous text on identification
+            txtTrackerID.setText("");
+        }
     }
 
     public void loadModels(final LinearLayout vwModels)
@@ -277,7 +403,6 @@ public class SettingsActivity extends AppCompatActivity {
         //For each device model
         for (int i = 0; i < vwModels.getChildCount(); i++)
         {
-
             //Get checkbox representing a color
             LinearLayout vwModel = (LinearLayout) vwModels.getChildAt(i);
 
@@ -305,23 +430,22 @@ public class SettingsActivity extends AppCompatActivity {
             });
 
             //If activity is in edit mode and this is the corresponding tracker color
-            if(tracker != null && vwModel.getTag().equals(tracker.getModel()))
+            if(editMode && vwModel.getTag().equals(tracker.getModel()))
             {
-                //Set background color only for the selected device model
+                //Set checked status
                 vwModel.setBackgroundColor(getResources().getColor(R.color.colorSelected));
 
-                //Get current selected model
-                mModel = tracker.getModel();
+                //Get current selected color
+                mColor = tracker.getBackgroundColor();
             }
         }
 
         //If activity is not in edit mode
-        if(tracker == null)
+        if(!editMode)
         {
             //Select first item as default
             vwModels.getChildAt(0).setBackgroundColor(getResources().getColor(R.color.colorSelected));
         }
-
     }
 
     public void loadColors(final GridLayout vwColors){
@@ -357,7 +481,7 @@ public class SettingsActivity extends AppCompatActivity {
             });
 
             //If activity is in edit mode and this is the corresponding tracker color
-            if(tracker != null && vwColor.getTag().equals(tracker.getBackgroundColor()))
+            if(editMode && vwColor.getTag().equals(tracker.getBackgroundColor()))
             {
                 //Set checked status
                 vwColor.setChecked(true);
@@ -368,7 +492,7 @@ public class SettingsActivity extends AppCompatActivity {
         }
 
         //If activity is not in edit mode
-        if(tracker == null)
+        if(!editMode)
         {
             //Select first item as default
             ((AppCompatCheckBox) vwColors.getChildAt(0)).setChecked(true);

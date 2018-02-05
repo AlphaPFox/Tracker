@@ -71,12 +71,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SettingsActivity"
+            android:name=".DefaultSettingsActivity"
             android:label="@string/title_activity_settings"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".TrackerActivity"
+            android:name=".TrackerSettingsActivity"
             android:label="@string/title_tracker_tk102b_settings"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

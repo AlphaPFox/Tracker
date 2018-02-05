@@ -1,5 +1,6 @@
 package br.gov.dpf.tracker;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -15,27 +16,39 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.xw.repo.BubbleSeekBar;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
 import br.gov.dpf.tracker.Entities.Configuration;
 import br.gov.dpf.tracker.Entities.Tracker;
 
-import static br.gov.dpf.tracker.SettingsActivity.RESULT_ERROR;
-import static br.gov.dpf.tracker.SettingsActivity.RESULT_SUCCESS;
-
-public class TrackerActivity extends AppCompatActivity {
-
+public class TrackerSettingsActivity extends AppCompatActivity
+{
     //Object representing the tracker to be inserted/updated
     private Tracker tracker;
+
+    //Flag indicating whether this activity is in edit mode
+    private boolean editMode;
+
+    //Flag indicating if a DB operation is running
+    private boolean loading;
 
     //Menu item used to confirm settings
     private MenuItem confirmMenu;
@@ -48,6 +61,9 @@ public class TrackerActivity extends AppCompatActivity {
 
     //Firebase Firestore DB
     private FirebaseFirestore firestoreDB;
+
+    //Create an array list to save existing configurations
+    private List<Configuration> configurations;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,29 +78,103 @@ public class TrackerActivity extends AppCompatActivity {
         //Get DB instance
         firestoreDB = FirebaseFirestore.getInstance();
 
-        //Get tracker from intent
-        tracker = getIntent().getParcelableExtra("Tracker");
-
-        //Check model value
-        switch (tracker.getModel())
+        //Check if activity intent has the required data
+        if(getIntent().hasExtra("Tracker"))
         {
-            case "tk102b":
-                //Define TK 102B tracker model layout
-                loadTK102B();
-                break;
-            case "spot":
-                //Define SPOT Trace layout
-                loadSPOT();
-                break;
-            case "st940":
-                //Define SPOT Trace layout
-                loadST940();
-                break;
-            default:
-                //Unsupported model, just finish activity
-                finish();
-                break;
+            //Load tracker from intent
+            tracker = getIntent().getParcelableExtra("Tracker");
+
+            //Check if activity is in edit mode
+            editMode = getIntent().getIntExtra("Request", MainActivity.REQUEST_INSERT) == MainActivity.REQUEST_UPDATE;
+
+            //Check model value
+            switch (tracker.getModel())
+            {
+                case "tk102b":
+                    //Define TK 102B tracker model layout
+                    loadTK102B();
+                    break;
+
+                case "spot":
+                    //Define SPOT Trace layout
+                    loadSPOT();
+                    break;
+
+                case "st940":
+                    //Define SPOT Trace layout
+                    loadST940();
+                    break;
+
+                default:
+                    //Unsupported model
+                    setResult(MainActivity.RESULT_ERROR);
+
+                    //Finish with error code
+                    finish();
+                    break;
+            }
+
+            //If activity is in edit mode
+            if(editMode)
+            {
+                //Load tracker data
+                loadData();
+            }
         }
+        else
+        {
+            //This activity can't start without tracker data
+            setResult(MainActivity.RESULT_ERROR);
+
+            //Finish with error code
+            finish();
+        }
+    }
+
+    private void loadData()
+    {
+        // Flag indicating DB operation in progress
+        loading = true;
+
+        // If editing an existing tracker
+        FirebaseFirestore.getInstance()
+                .collection("Tracker/" + tracker.getIdentification() + "/Configurations")
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot documentSnapshots)
+                    {
+                        // Save current configurations
+                        configurations = documentSnapshots.toObjects(Configuration.class);
+
+                        // if loading indicator is available
+                        if(confirmMenu != null)
+
+                            //Cancel loading indicator
+                            confirmMenu.setActionView(null);
+
+                        // Set loading flag to false
+                        loading = false;
+
+                        // If activity intent is to edit notifications
+                        if(getIntent().getBooleanExtra("UpdateNotifications", false))
+                        {
+                            //Scroll to notification panel
+                            findViewById(R.id.vwMainScroll).scrollTo(0, findViewById(R.id.vwNotificationsCardView).getTop());
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                        //Set result editing result - OK
+                        setResult(MainActivity.RESULT_ERROR);
+
+                        //End activity (returns to parent activity -> OnActivityResult)
+                        finish();
+                    }
+                });
     }
 
     private void loadToolbar(String trackerTitle)
@@ -103,13 +193,22 @@ public class TrackerActivity extends AppCompatActivity {
         //Find floating action button
         FloatingActionButton fab = findViewById(R.id.fab);
 
-        //Set floating action button event
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //onSettingsConfirmed(null);
-            }
-        });
+        //If in edit mode
+        if(editMode)
+        {
+            //Hide floating action button
+            fab.setVisibility(View.GONE);
+        }
+        else
+        {
+            //Set click event
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onSettingsConfirmed();
+                }
+            });
+        }
 
         //Check support action bar
         if(getIntent().getBooleanExtra("InsertTracker", true) && getSupportActionBar() != null)
@@ -181,9 +280,9 @@ public class TrackerActivity extends AppCompatActivity {
 
                 //Update interval options
                 array.put(0, "1 hora");
-                array.put(1, "3 horas");
-                array.put(2, "6 horas");
-                array.put(3, "12 horas");
+                array.put(1, "6 horas");
+                array.put(2, "12 horas");
+                array.put(3, "18 horas");
                 array.put(4, "1 dia");
 
                 return array;
@@ -209,7 +308,7 @@ public class TrackerActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.lblUpdateInterval)).setText(getResources().getText(R.string.lblUpdateInterval));
 
         //Set seek bar sections
-        ((BubbleSeekBar) findViewById(R.id.seekBar)).setCustomSectionTextArray(new BubbleSeekBar.CustomSectionTextArray() {
+        ((BubbleSeekBar) findViewById(R.id.sbUpdateInterval)).setCustomSectionTextArray(new BubbleSeekBar.CustomSectionTextArray() {
             @NonNull
             @Override
             public SparseArray<String> onCustomize(int sectionCount, @NonNull SparseArray<String> array) {
@@ -229,11 +328,11 @@ public class TrackerActivity extends AppCompatActivity {
         });
 
         //Set visibility events for specific switches
-        changeLayoutVisibility(R.id.swLowBattery, -1, R.id.cbLowBattery);
+        changeLayoutVisibility(R.id.swShockAlert, -1, R.id.cbShockAlert);
         changeLayoutVisibility(R.id.swMoveoutAlert, R.id.vwMoveoutAlert, R.id.cbMoveout);
         changeLayoutVisibility(R.id.swSpeedAlert, R.id.vwSpeedLimit, R.id.cbSpeedLimit);
         changeLayoutVisibility(R.id.swStatusCheck, -1, R.id.cbStatusCheck);
-        changeLayoutVisibility(R.id.swUpdateInterval, R.id.seekBar, -1);
+        changeLayoutVisibility(R.id.swUpdateInterval, R.id.sbUpdateInterval, -1);
         changeLayoutVisibility(R.id.swNotifications, R.id.vwNotificationOptions, -1);
     }
 
@@ -343,6 +442,13 @@ public class TrackerActivity extends AppCompatActivity {
         //Save action menu item
         confirmMenu = menu.findItem(R.id.action_add);
 
+        //If is loading data
+        if(loading)
+        {
+            //Show loading indicator
+            confirmMenu.setActionView(new ProgressBar(this));
+        }
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -353,7 +459,7 @@ public class TrackerActivity extends AppCompatActivity {
             case android.R.id.home:
 
                 //Set result
-                setResult(RESULT_CANCELED, getIntent());
+                setResult(MainActivity.RESULT_CANCELED, getIntent());
 
                 //End activity (returns to parent activity -> OnActivityResult)
                 finish();
@@ -375,24 +481,37 @@ public class TrackerActivity extends AppCompatActivity {
         // Get shared preferences editor
         final SharedPreferences.Editor editor = sharedPreferences.edit();
 
-        // Initialize a new DB transaction
-        WriteBatch transaction = firestoreDB.batch();
-
         // Set loading indicator on menu
         confirmMenu.setActionView(new ProgressBar(this));
 
-        //Check activity intent
-        if (getIntent().getBooleanExtra("InsertTracker", true))
+        // Initialize a new DB transaction
+        WriteBatch transaction = firestoreDB.batch();
+
+        //Get configuration collection
+        CollectionReference configCollection = firestoreDB.collection("Tracker/" + tracker.getIdentification() + "/Configurations");
+
+        //If activity is not in edit mode
+        if (!editMode)
         {
-            //If inserting a new tracker, add operation on DB transaction
+            //Add to transaction the insert tracker
             transaction.set(firestoreDB.collection("Tracker").document(tracker.getIdentification()), tracker);
+        }
+
+        //If activity is updating an existing tracker model
+        if (getIntent().getBooleanExtra("UpdateModel", false))
+        {
+            //Add to transaction the update tracker
+            transaction.set(firestoreDB.collection("Tracker").document(tracker.getIdentification()), tracker);
+
+            //For each previous model configuration
+            for(Configuration config : configurations)
+
+                //Add to transaction delete old configuration
+                transaction.delete(configCollection.document(config.getName()));
         }
 
         //Get notification options switch
         boolean showNotifications = ((SwitchCompat) findViewById(R.id.swNotifications)).isChecked();
-
-        //Get configuration collection
-        CollectionReference configs = firestoreDB.collection("Tracker/Configurations");
 
         //Check model value
         switch (tracker.getModel())
@@ -400,18 +519,22 @@ public class TrackerActivity extends AppCompatActivity {
             case "tk102b":
 
                 //Get tracker configuration options
-                SwitchCompat swLowBatery = findViewById(R.id.swLowBattery);
                 SwitchCompat swStatusCheck = findViewById(R.id.swStatusCheck);
+                SwitchCompat swShockAlert = findViewById(R.id.swShockAlert);
                 SwitchCompat swMoveOutAlert = findViewById(R.id.swMoveoutAlert);
+                EditText txtMoveOutAlert = findViewById(R.id.txtMoveoutDistance);
                 SwitchCompat swSpeedAlert = findViewById((R.id.swSpeedAlert));
+                EditText txtSpeedAlert = findViewById(R.id.txtSpeedLimit);
                 SwitchCompat swUpdateInterval = findViewById(R.id.swUpdateInterval);
+                BubbleSeekBar sbUpdateInterval = findViewById(R.id.sbUpdateInterval);
 
-
-                if(swStatusCheck.isChecked())
-                {
-                    Configuration lowBattery = new Configuration("low123456", Configuration.COMMAND_TYPE_SMS);
-                }
-                    transaction.set(configs.document("LowBattery"), )
+                //Add configurations to DB transaction
+                transaction.set(configCollection.document("Admin"), new Configuration("Admin", null, true));
+                transaction.set(configCollection.document("Shock"), new Configuration("Shock", null, swShockAlert.isChecked()));
+                transaction.set(configCollection.document("StatusCheck"), new Configuration("StatusCheck", null, swStatusCheck.isChecked()));
+                transaction.set(configCollection.document("Speed"), new Configuration("Speed", txtSpeedAlert.getText().toString(), swSpeedAlert.isChecked()));
+                transaction.set(configCollection.document("MoveOut"), new Configuration("MoveOut", txtMoveOutAlert.getText().toString(), swMoveOutAlert.isChecked()));
+                transaction.set(configCollection.document("UpdateInterval"), new Configuration("UpdateInterval", String.valueOf(getUpdateIntervalBySection(sbUpdateInterval.getProgress())), swUpdateInterval.isChecked()));
 
                 //Update user notification preferences
                 updateNotificationOption(R.id.cbCoordinates, "Coordinates", showNotifications, editor);
@@ -424,6 +547,24 @@ public class TrackerActivity extends AppCompatActivity {
                 break;
             case "st940":
 
+                //Get tracker configuration options
+                SwitchCompat swDeepSleep = findViewById(R.id.swDeepsleep);
+                SwitchCompat swEmergency = findViewById(R.id.swEmergency);
+                EditText txtEmergency = findViewById(R.id.txtEmergency);
+                SwitchCompat swTurnOff = findViewById(R.id.swTurnOff);
+                SwitchCompat swMagnetAlert = findViewById(R.id.swMagnetAlert);
+                SwitchCompat swInterval = findViewById(R.id.swUpdateInterval);
+                BubbleSeekBar sbActive = findViewById(R.id.seekBarActive);
+                BubbleSeekBar sbIdle = findViewById(R.id.seekBarIdle);
+
+                //Add configurations to DB transaction
+                transaction.set(configCollection.document("DeepSleep"), new Configuration("DeepSleep", null, swDeepSleep.isChecked()));
+                transaction.set(configCollection.document("Emergency"), new Configuration("Emergency", txtEmergency.getText().toString(), swEmergency.isChecked()));
+                transaction.set(configCollection.document("TurnOff"), new Configuration("TurnOff", null, swTurnOff.isChecked()));
+                transaction.set(configCollection.document("MagnetAlert"), new Configuration("MagnetAlert", null, swMagnetAlert.isChecked()));
+                transaction.set(configCollection.document("IntervalIdle"), new Configuration("IntervalIdle", String.valueOf(sbIdle.getProgress()), swInterval.isChecked()));
+                transaction.set(configCollection.document("IntervalActive"), new Configuration("IntervalActive", String.valueOf(sbActive.getProgress()), swInterval.isChecked()));
+
                 //Update user notification preferences
                 updateNotificationOption(R.id.cbCoordinates, "Coordinates", showNotifications, editor);
                 updateNotificationOption(R.id.cbEmergency, "Emergency", showNotifications, editor);
@@ -433,10 +574,10 @@ public class TrackerActivity extends AppCompatActivity {
                 break;
             case "spot":
 
-                //Update user notification preferences
+                //Update only user notification preferences (SPOT MODEL do not support remote configurations)
                 updateNotificationOption(R.id.cbCoordinates, "Coordinates", showNotifications, editor);
                 updateNotificationOption(R.id.cbLowBattery, "LowBattery", showNotifications, editor);
-                updateNotificationOption(R.id.cbStatusCheck, "TurnOff", showNotifications, editor);
+                updateNotificationOption(R.id.cbTurnOff, "TurnOff", showNotifications, editor);
                 updateNotificationOption(R.id.cbFunctioning, "Functioning", showNotifications, editor);
 
                 break;
@@ -456,7 +597,7 @@ public class TrackerActivity extends AppCompatActivity {
                         editor.apply();
 
                         //Set activity result
-                        setResult(RESULT_SUCCESS);
+                        setResult(MainActivity.RESULT_SUCCESS);
 
                         //Finish activity
                         finish();
@@ -467,7 +608,7 @@ public class TrackerActivity extends AppCompatActivity {
                     public void onFailure(@NonNull Exception e) {
 
                         //Set result editing result - OK
-                        setResult(RESULT_ERROR);
+                        setResult(MainActivity.RESULT_ERROR);
 
                         //End activity (returns to parent activity -> OnActivityResult)
                         finish();

@@ -16,11 +16,13 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.transition.Fade;
 import android.util.Pair;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -45,17 +47,15 @@ public class MainActivity
     private TrackerAdapter mAdapter;
     private Query mQuery;
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mAdapter.startListening();
-    }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        mAdapter.stopListening();
-    }
+    //Define possible result operations
+    public static int RESULT_ERROR = -1;
+    public static int RESULT_SUCCESS = 0;
+    public static int RESULT_CANCELED = 1;
+
+    //Define possible request operations
+    public static int REQUEST_INSERT = 2;
+    public static int REQUEST_UPDATE = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,9 +135,15 @@ public class MainActivity
             @Override
             public void onClick(View view) {
 
-            //On click, load register activity
-            Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
-            startActivityForResult(intent, 0);
+            //Create intent to open settings activity
+            Intent intent = new Intent(getApplicationContext(), DefaultSettingsActivity.class);
+
+            //Define intent to insert a new tracker
+            intent.putExtra("Request", REQUEST_INSERT);
+
+            //Start settings activity and wait for the return
+            startActivityForResult(intent, REQUEST_INSERT);
+
             }
         });
 
@@ -149,6 +155,19 @@ public class MainActivity
                 mAdapter.setQuery(mQuery);
             }
         });
+    }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mAdapter.startListening();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mAdapter.stopListening();
     }
 
     @Override
@@ -176,31 +195,25 @@ public class MainActivity
     protected void onActivityResult (int requestCode, int resultCode, final Intent intent) {
 
         // Collect data from the intent and use it
-        if(resultCode == RESULT_OK)
+        if(resultCode == RESULT_SUCCESS)
         {
-            //Respond to previous activity intention (INSERT/EDIT/DELETE tracker)
-            TrackerAdapter.manageTracker(intent, findViewById(R.id.coordinator_layout));
+            // Show success message
+            Snackbar.make(findViewById(android.R.id.content), "Rastreador " + (requestCode == REQUEST_INSERT ? "cadastrado" : "atualizado") + " com sucesso.", Snackbar.LENGTH_LONG).show();
         }
-
-        //Wait for recycler to load and scroll to selected item position
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mRecyclerView.scrollToPosition(intent.getIntExtra("TrackerPosition", 0));
-            }
-        }, 200);
+        else if (resultCode == RESULT_ERROR)
+        {
+            // Show error message
+            Snackbar.make(findViewById(android.R.id.content), "Erro ao executar operação de " + (requestCode == REQUEST_INSERT ? "cadastro." : "atualização."), Snackbar.LENGTH_LONG).show();
+        }
     }
 
     public void OnTrackerSelected(Tracker tracker, View viewRoot) {
 
         // Go to the details page for the selected restaurant
-        final Intent i = new Intent(this, DetailActivity.class);
+        final Intent intent = new Intent(this, DetailActivity.class);
 
         // Put tracker data on intent
-        i.putExtra("Tracker", tracker);
-
-        //Save tracker position on array
-        i.putExtra("TrackerPosition", mRecyclerView.getChildAdapterPosition(viewRoot));
+        intent.putExtra("Tracker", tracker);
 
         //If device supports shared element transition
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -211,7 +224,7 @@ public class MainActivity
             int transitionID = (viewRoot.findViewById(R.id.loadingBackground).getAlpha() == 0 ? R.id.googleMap : R.id.loadingBackground);
 
             //Save transition ID on intent
-            i.putExtra("DetailActivity_BackgroundTransition", transitionID);
+            intent.putExtra("DetailActivity_BackgroundTransition", transitionID);
 
             //Define shared elements to perform transition
             final ActivityOptions options = ActivityOptions
@@ -230,8 +243,9 @@ public class MainActivity
                 @Override
                 public void run()
                 {
+
                     //Start activity after 500ms
-                    startActivityForResult(i, 0, options.toBundle());
+                    startActivity(intent, options.toBundle());
                 }
             }, 500);
 
@@ -239,23 +253,78 @@ public class MainActivity
         else
         {
             //No support to shared transition, start activity without animation
-            startActivityForResult(i, 0);
+            startActivity(intent);
         }
     }
 
-    public void OnTrackerEdit(Tracker tracker, View viewRoot)
+    public void OnTrackerEdit(final Tracker tracker, View viewRoot)
     {
-        // Go to the details page for the selected restaurant
-        final Intent i = new Intent(this, RegisterActivity.class);
+        //Create a new popup menu
+        PopupMenu popup = new PopupMenu(this, viewRoot.findViewById(R.id.imgEdit));
 
-        // Put tracker data on intent
-        i.putExtra("Tracker", tracker);
+        //Get layout inflater
+        popup.getMenuInflater().inflate(R.menu.tracker, popup.getMenu());
 
-        // Save position to scroll when activity return
-        i.putExtra("TrackerPosition", mRecyclerView.getChildAdapterPosition(viewRoot));
+        //Define click actions
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item)
+            {
+                // Create an intent to open Settings activity
+                final Intent intent = new Intent();
 
-        //Start edit activity
-        startActivityForResult(i, 0);
+                //Define request intent to update an existing tracker
+                intent.putExtra("Request", REQUEST_UPDATE);
+
+                // Put tracker data on intent
+                intent.putExtra("Tracker", tracker);
+
+                switch (item.getItemId())
+                {
+                    case R.id.action_default_settings:
+
+                        //Set intent to open DefaultSettingsActivity
+                        intent.setClass(MainActivity.this, DefaultSettingsActivity.class);
+
+                        //Start edit activity
+                        startActivityForResult(intent, REQUEST_UPDATE);
+
+                        //End method
+                        return true;
+
+                    case R.id.action_tracker_settings:
+
+                        //Set intent to open DefaultSettingsActivity
+                        intent.setClass(MainActivity.this, TrackerSettingsActivity.class);
+
+                        //Start edit activity
+                        startActivityForResult(intent, REQUEST_UPDATE);
+
+                        //End method
+                        return true;
+
+
+                    case R.id.action_notification_settings:
+
+                        //Set intent to open DefaultSettingsActivity
+                        intent.setClass(MainActivity.this, TrackerSettingsActivity.class);
+
+                        //Define request intent to update an existing tracker
+                        intent.putExtra("UpdateNotifications", true);
+
+                        //Start edit activity
+                        startActivityForResult(intent, REQUEST_UPDATE);
+
+                        //End method
+                        return true;
+
+                }
+                return false;
+            }
+        });
+
+        //Show popup menu
+        popup.show();
     }
 
     @Override
@@ -276,16 +345,17 @@ public class MainActivity
         switch (id)
         {
             case R.id.action_add:
-                //On click, load register activity
-                Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
 
-                //Save tracker position on array
-                intent.putExtra("TrackerPosition", mAdapter.getItemCount());
+                // Create an intent to open Settings activity
+                Intent intent = new Intent(getApplicationContext(), DefaultSettingsActivity.class);
 
-                //Start register activity and wait for result
-                startActivityForResult(intent, 0);
+                // Define request intent to update an existing tracker
+                intent.putExtra("Request", REQUEST_INSERT);
 
-                //End method
+                // Start register activity and wait for result
+                startActivityForResult(intent, REQUEST_INSERT);
+
+                // End method
                 return true;
 
             case R.id.action_refresh:
