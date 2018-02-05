@@ -25,21 +25,10 @@
     <!--  Register activity -->
     <string name="menu_include">Incluir</string>
     <string name="menu_delete">Excluir</string>
-    <string name="title_activity_register">Cadastrar rastreador</string>
-    <string name="txtBasicConfig">Configurações básicas</string>
-    <string name="lblTrackerName">Nome do rastreador:</string>
-    <string name="txtTrackerName">(Nome)</string>
-    <string name="lblTrackerDescription">Descrição (opcional):</string>
-    <string name="lblPhoneNumber">Número de telefone:</string>
-    <string name="txtPhoneNumberHint">67 9999 8888</string>
-    <string name="lblPhoneNumberSubtitle">Confirme que o número informado possua saldo suficiente para responder solicitações por mensagens de texto.</string>
-    <string name="lblFeedID">Chave do Feed ID:</string>
-    <string name="txtFieldIDHint">0I48pmHmVsrh88oe38f0etUjB8pJglLOp</string>
-    <string name="lblFeedIDSubtitle">O campo acima deve ser preenchido com o valor do FEED ID, disponível na página de compartilhamento da SPOT.</string>
-    <string name="txtModel">Modelo</string>
-    <string name="txtColorID">Cor padrão</string>
-    <string name="txtNotification">Notificações</string>
-    <string name="lblLowBattery">Bateria fraca</string>
+
+
+
+
     <string name="txtLowBattery">Quando o rastreador informar que a bateria está abaixo de 30%, uma notificação será exibida neste aparelho.</string>
     <string name="lblTrackerStatus">Status do rastreador</string>
     <string name="txtTrackerStatus">Mostra uma notificação quando o rastreador informar o percentual de bateria e sinal de GSM.</string>
@@ -56,6 +45,86 @@
     <string name="imgLoading">Carregando&#8230;</string>
     <string name="title_activity_detail">DetailActivity</string>
 
+    <!-- Default settings activity -->
+    <string name="title_activity_settings">Novo rastreador</string>
+    <string name="lblBasicConfig">Configurações básicas</string>
+    <string name="lblTrackerName">Nome do rastreador:</string>
+    <string name="txtTrackerName">(Nome)</string>
+    <string name="lblTrackerDescription">Descrição (opcional):</string>
+    <string name="lblModel">Modelo</string>
+    <string name="model_tk102b">TK 102B</string>
+    <string name="model_st940">ST 940</string>
+    <string name="model_spot">SPOT Trace</string>
+    <string name="model_pt39">PT-39</string>
+    <string name="model_gt02">GT-02</string>
+    <string name="lblTrackerIdentification">Identificação do rastreador</string>
+    <string name="lblPhoneNumber">Número de telefone:</string>
+    <string name="txtPhoneNumberHint">67 9999 8888</string>
+    <string name="lblPhoneNumberSubtitle">Informe o número de telefone vinculado ao cartão SIM inserido no rastreador.</string>
+    <string name="lblFeedID">Identificador (Feed ID):</string>
+    <string name="txtFieldIDHint">0I48pmHmVsrh88oe38f0etUjB8pJglLOp</string>
+    <string name="lblFeedIDSubtitle">O campo acima deve ser preenchido com o valor do FEED ID, disponível na página de compartilhamento da SPOT.</string>
+    <string name="lblSuntechID">Identificador (6 dígitos):</string>
+    <string name="txtSuntechHint">696478</string>
+    <string name="lblSuntechSubtitle">Informe o número de identificação do aparelho. Por padrão, o número é composto pelos 6 últimos dígitos do IMEI.</string>
+    <string name="lblColorIdentification">Cor de identificação</string>
+    <string name="lblColorDescription">Selecione uma cor para facilitar a identificação a visualização do rastreador no mapa.</string>
+
+    <!-- Tracker settings activity -->
+    <string name="lblTrackerConfig">Configurações do rastreador</string>
+
+    <string name="title_tracker_tk102b_settings">Configurações - TK 102B</string>
+    <string name="lblLowBattery">Ao atingir um nível crítico de bateria, o rastreador começará a enviar alertas periódicos.</string>
+    <string name="swLowBattery">Enviar alerta de bateria fraca</string>
+    <string name="swMoveoutAlert">Ativar alerta de evasão</string>
+    <string name="lblMoveOutDistance">Limite de distancia:</string>
+    <string name="txtMoveOutHint">200</string>
+    <string name="lblMeters">metros</string>
+    <string name="lblMoveoutAlert">O rastreador enviará alertas em sequência quando detectar movimentação além do limite de tolerância escolhido.</string>
+    <string name="swSpeedAlert">Ativar alerta de velocidade</string>
+    <string name="lblSpeedLimit">Limite de velocidade:</string>
+    <string name="txtSpeedLimitHint">120</string>
+    <string name="lblSpeedLimitUnit">km/h</string>
+    <string name="lblSpeedAlert">Quando o rastreado identificar uma velocidade acima do limite estabelecido, um alerta será enviado.</string>
+    <string name="swStatusCheck">Enviar atualização diária de status</string>
+    <string name="lblStatusCheck">Caso esta opção seja ativada, diariamente o rastreador deverá enviar uma atualização sobre o estado da bateria e a intesidade do sinal GSM.</string>
+    <string name="swUpdateInterval">Enviar localização periodicamente</string>
+    <string name="lblUpdateInterval"> <b>Alerta:</b> Caso ativado, o monitoramento será mais preciso, porém a duração da bateria do rastreador será diretamente afetada por esta opção.</string>
+    <string name="swNotifications">Exibir notificações deste rastreador</string>
+    <string name="lblNotificationTitle">Opções de notificação</string>
+    <string name="lblNotifications">Defina quais eventos gerados pelo rastreador que deverão resultar em uma notificação a ser exibida neste celular.</string>
+    <string name="cbCoordinates">Notificação de localização</string>
+    <string name="cbLowBattery">Notificação de bateria fraca</string>
+    <string name="cbMoveout">Notificação de evasão </string>
+    <string name="cbSpeedLimit">Notificação de limite de velocidade</string>
+    <string name="cbStatusCheck">Notificação de status</string>
+    <string name="cbAvailable">Notificação de disponibilidade</string>
+    <string name="lblAvailableDescription">Se esta opção for ativada, qualquer contato realizado pelo rastreador resultará na exibição de uma notificação neste celular."</string>
+
+    <string name="title_tracker_st940_settings">Configurações - ST 940</string>
+    <string name="swDeepsleep">Ativar ultra-economia de bateria</string>
+    <string name="lblDeepsleep">Caso ativado, o rastreador desativa a maior parte dos sensores e entra em hibernação, ativando poucas vezes ao dia para enviar usa localização.</string>
+    <string name="swEmergency">Ativar modo emergência</string>
+    <string name="lblEmergency">Neste modo, o rastreador enviará alertas constantemente sempre que detectar qualquer movimento ou vibração.</string>
+    <string name="lblEmergencyInterval">Enviar alerta a cada: </string>
+    <string name="txtEmergencyHint">120 </string>
+    <string name="lblSeconds">segundos</string>
+    <string name="swTurnOff">Permitir desligar pelo botão</string>
+    <string name="lblTurnOff">Define se será possível ou não desligar o rastreador pressionando o botão presente no próprio dispositivo.</string>
+    <string name="swMagnetAlert">Ativar alerta de magnetismo </string>
+    <string name="lblMagnetAlert">Quando ativo, o rastreador enviará um alerta ao detectar que o dispositivo foi acoplado ou desacoplado da base magnética.</string>
+    <string name="lblUpdateIdle">Dispositivo parado: </string>
+    <string name="lblUpdateActive">Dispositivo em movimento: </string>
+    <string name="cbEmergency">Notificação de emergência </string>
+    <string name="cbMagnet">Notificação de magnetismo</string>
+
+    <string name="title_tracker_spot_settings">Configurações - SPOT</string>
+    <string name="lblSpotConfig"><b>ALERTA:</b> Este modelo de rastreador não suporta configurações enviadas remotamente. Para realizar qualquer alteração nas configurações do dispositivo, conecte a um computador e utilize o software <b>Atualizador de dispositivo SPOT. \n\n  <a href='https://br.findmespot.com/pg/index.php?cid=225'>Clique aqui para mais informações </a>\n</b>"</string>
+    <string name="cbTurnOff">Notificação de desligamento</string>
+    <string name="cbFunctioning">Notificação de funcionamento</string>
+    <string name="lblFunctioning">Caso habilitada, ainda que o rastreador não detecte nenhum movimento, uma vez por dia ele enviará sua localização para confirmar o seu funcionamento.</string>
+
+
     <!--  Detail activity -->
     <string name="transition_drawable">BackgroundTransition</string>
     <string name="transition_icon">IconTransition</string>
@@ -71,9 +140,7 @@
     <string name="txtWaitingSubtitle">Nenhuma resposta do rastreador foi recebida até o momento. Certifique-se que o mesmo esteja ligado e com sinal da rede de celular.</string>
     <string name="txtFilterResult">Nenhuma coordenada disponível</string>
     <string name="txtFilterResultSubtitle">Não foram encontradas coordenadas com os filtros selecionados. Altere as opções de filtros para exibir mais resultados.</string>
-    <string name="txtTrackerID">Identificação do aparelho</string>
     <string name="txtInterval">Intervalo de atualização</string>
-    <string name="txtIntervalSubtitle"> <b>Alerta:</b> Quanto menor o intervalo de atualização, mais preciso será o rastreamento. Porém, a duração da bateria é afetada diretamente por esta opção.</string>
     <string name="txtInfoBattery">Bateria:</string>
     <string name="txtInfoSignal">Sinal GSM:</string>
 

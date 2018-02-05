@@ -136,7 +136,7 @@ public class MainActivity
             public void onClick(View view) {
 
             //On click, load register activity
-            Intent intent = new Intent(getApplicationContext(), RegisterActivity.class);
+            Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
             startActivityForResult(intent, 0);
             }
         });
@@ -220,7 +220,7 @@ public class MainActivity
                                     getString(R.string.transition_drawable)),
                             new Pair<>(viewRoot.findViewById(R.id.imgTracker),
                                     getString(R.string.transition_icon)),
-                            new Pair<>(viewRoot.findViewById(R.id.lblItemCount),
+                            new Pair<>(viewRoot.findViewById(R.id.lblTrackerName),
                                     getString(R.string.transition_title)),
                             new Pair<>(viewRoot.findViewById(R.id.txtTrackerModel),
                                     getString(R.string.transition_subtitle)));
@@ -277,7 +277,7 @@ public class MainActivity
         {
             case R.id.action_add:
                 //On click, load register activity
-                Intent intent = new Intent(getApplicationContext(), RegisterActivity.class);
+                Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
 
                 //Save tracker position on array
                 intent.putExtra("TrackerPosition", mAdapter.getItemCount());

@@ -177,7 +177,7 @@ public class DetailActivity
         imgToolbarIcon.setCircleBackgroundColor(Color.parseColor(tracker.getBackgroundColor()));
 
         //Set model item image
-        imgToolbarIcon.setBackgroundResource(getResources().getIdentifier(tracker.getModel(), "mipmap", getPackageName()));
+        imgToolbarIcon.setImageDrawable(getResources().getDrawable(getResources().getIdentifier("model_" + tracker.getModel().toLowerCase(), "drawable", getPackageName())));
 
         //Change loading color
         progressBar.getIndeterminateDrawable().setColorFilter(imgToolbarIcon.getCircleBackgroundColor(), android.graphics.PorterDuff.Mode.SRC_IN);

@@ -18,7 +18,7 @@
         android:layout_weight="0.5"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
         android:scaleType="fitStart"
-        app:srcCompat="@mipmap/logo_pf" />
+        app:srcCompat="@drawable/logo_pf" />
 
     <TextView
         android:paddingTop="@dimen/nav_header_vertical_spacing"

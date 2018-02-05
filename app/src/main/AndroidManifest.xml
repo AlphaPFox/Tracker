@@ -30,25 +30,25 @@
              You can define the keys for the debug and release targets in src/debug/ and src/release/. 
         -->
 
+
         <!-- Firebase ID service -->
-        <service android:name="br.gov.dpf.tracker.Firebase.FirebaseInstanceID">
+        <service android:name=".Firebase.FirebaseInstanceID">
             <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
 
         <!-- Firebase Messaging service -->
-        <service android:name="br.gov.dpf.tracker.Firebase.MessagingService">
+        <service android:name=".Firebase.MessagingService">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
 
         <!-- Broadcast receiver class -->
         <receiver
             android:name=".Components.TrackerBroadcastReceiver"
-            android:exported="false" >
-        </receiver>
+            android:exported="false" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -70,25 +70,25 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
-            android:name=".RegisterActivity"
-            android:label="@string/title_activity_register"
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings"
             android:parentActivityName=".MainActivity"
-            android:configChanges="orientation"
-            android:theme="@style/AppTheme.NoActionBar"/>
-
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".TrackerActivity"
+            android:label="@string/title_tracker_tk102b_settings"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".FilterActivity"
             android:label="@string/action_filter"
             android:parentActivityName=".DetailActivity"
-            android:theme="@style/AppTheme.NoActionBar"/>
-
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".DetailActivity"
             android:label="@string/title_activity_detail"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

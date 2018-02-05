@@ -88,9 +88,6 @@ public class TrackerAdapter
         //Get tracker using index position
         final Tracker tracker = getSnapshot(position).toObject(Tracker.class);
 
-        //Check notification options for this tracker
-        checkNotificationSubscriptions(tracker.getIdentification());
-
         // - replace the contents of the view with that element
         holder.txtTrackerName.setText(tracker.formatName());
         holder.txtTrackerModel.setText(tracker.getModel());
@@ -107,7 +104,7 @@ public class TrackerAdapter
         holder.imageView.setCircleBackgroundColor(Color.parseColor(tracker.getBackgroundColor()));
 
         //Set model item image
-        holder.imageView.setBackgroundResource(mActivity.getResources().getIdentifier(tracker.getModel(), "mipmap", mActivity.getPackageName()));
+        holder.imageView.setImageDrawable(mActivity.getResources().getDrawable(mActivity.getResources().getIdentifier("model_" + tracker.getModel().toLowerCase(), "drawable", mActivity.getPackageName())));
 
         //Change color to loading animation
         holder.progressBar.getIndeterminateDrawable().setColorFilter(holder.imageView.getCircleBackgroundColor(), android.graphics.PorterDuff.Mode.SRC_IN);
@@ -214,33 +211,6 @@ public class TrackerAdapter
                     });
                 }
             });
-        }
-    }
-
-    private void checkNotificationSubscriptions(String trackerID)
-    {
-        if(!sharedPreferences.contains(trackerID + "_NotifyLowBattery"))
-        {
-            //Get firebase messaging instance
-            FirebaseMessaging notifications = FirebaseMessaging.getInstance();
-
-            //Get shared preferences editor
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-
-            //Subscribe to default topic Low Battery Alert
-            editor.putBoolean(trackerID + "_NotifyLowBattery", true);
-            notifications.subscribeToTopic(trackerID + "_NotifyLowBattery");
-
-            //Subscribe to default topic Movement Alert
-            editor.putBoolean(trackerID + "_NotifyMovement", true);
-            notifications.subscribeToTopic(trackerID + "_NotifyMovement");
-
-            //Subscribe to default topic Tracker Stopped Alert
-            editor.putBoolean(trackerID + "_NotifyStopped", true);
-            notifications.subscribeToTopic(trackerID + "_NotifyStopped");
-
-            //Apply changes
-            editor.apply();
         }
     }
 
@@ -418,7 +388,7 @@ public class TrackerAdapter
             super(itemView);
 
             //Text fields
-            txtTrackerName = itemView.findViewById(R.id.lblItemCount);
+            txtTrackerName = itemView.findViewById(R.id.lblTrackerName);
             txtTrackerModel = itemView.findViewById(R.id.txtTrackerModel);
             txtLastUpdateValue = itemView.findViewById(R.id.txtLastUpdate);
             txtBatteryLevel = itemView.findViewById(R.id.lblBatteryLevel);

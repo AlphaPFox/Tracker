@@ -15,26 +15,18 @@ import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.GridLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.xw.repo.BubbleSeekBar;
 
-import br.gov.dpf.tracker.Entities.Model;
 import br.gov.dpf.tracker.Entities.Tracker;
 
 public class RegisterActivity extends AppCompatActivity
@@ -75,8 +67,11 @@ public class RegisterActivity extends AppCompatActivity
         //Handle click events for color options
         loadColors((GridLayout) findViewById(R.id.vwColors));
 
+        //Handle click events for model options
+        loadModels((LinearLayout) findViewById(R.id.vwModels));
+
         //Set support text
-        ((TextView) findViewById(R.id.txtIntervalAlert)).setText(getResources().getText(R.string.txtIntervalSubtitle));
+        ((TextView) findViewById(R.id.txtIntervalAlert)).setText(getResources().getText(R.string.lblUpdateInterval));
 
         //Set seek bar sections
         ((BubbleSeekBar) findViewById(R.id.seekBar)).setCustomSectionTextArray(new BubbleSeekBar.CustomSectionTextArray() {
@@ -118,10 +113,10 @@ public class RegisterActivity extends AppCompatActivity
         //Load tracker data on text views
         ((EditText) findViewById(R.id.txtTrackerName)).setText(tracker.getName());
         ((EditText) findViewById(R.id.txtTrackerDescription)).setText(tracker.getDescription());
-        ((EditText) findViewById(R.id.txtTrackerID)).setText(tracker.getIdentification());
+        ((EditText) findViewById(R.id.txtTrackerIdentification)).setText(tracker.getIdentification());
 
         //Disable update of tracker unique ID
-        findViewById(R.id.txtTrackerID).setEnabled(false);
+        findViewById(R.id.txtTrackerIdentification).setEnabled(false);
 
         //Set update interval options
         ((BubbleSeekBar) findViewById(R.id.seekBar)).setProgress(getSectionByUpdateInterval(tracker.getUpdateInterval()));
@@ -164,7 +159,7 @@ public class RegisterActivity extends AppCompatActivity
 
         //Get tracker name and identification
         String trackerName = ((EditText) findViewById(R.id.txtTrackerName)).getText().toString();
-        String trackerIdentification = ((EditText) findViewById(R.id.txtTrackerID)).getText().toString();
+        String trackerIdentification = ((EditText) findViewById(R.id.txtTrackerIdentification)).getText().toString();
 
         //Check user input
         if(trackerName.isEmpty() || trackerIdentification.isEmpty())
@@ -299,9 +294,9 @@ public class RegisterActivity extends AppCompatActivity
     public void changeLabels(String model)
     {
         //Get text fields from layout
-        TextView lblTrackerID = findViewById(R.id.lblTrackerID);
-        TextView lblTrackerSubtitle = findViewById(R.id.lblTrackerIDSubtitle);
-        EditText txtTrackerID = findViewById(R.id.txtTrackerID);
+        TextView lblTrackerID = findViewById(R.id.lblTrackerIdentification);
+        TextView lblTrackerSubtitle = findViewById(R.id.lblTrackerIdentificationSubtitle);
+        EditText txtTrackerID = findViewById(R.id.txtTrackerIdentification);
 
         //Get resources manager
         Resources resources = getResources();
@@ -400,6 +395,58 @@ public class RegisterActivity extends AppCompatActivity
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void loadModels(final LinearLayout vwModels)
+    {
+        //For each device model
+        for (int i = 0; i < vwModels.getChildCount(); i++)
+        {
+
+            //Get checkbox representing a color
+            LinearLayout vwModel = (LinearLayout) vwModels.getChildAt(i);
+
+            vwModel.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View view) {
+
+                    //When clicked, for each device model
+                    for (int i = 0; i < vwModels.getChildCount(); i++)
+                    {
+                        //Set background transparent = not selected
+                        vwModels.getChildAt(i).setBackgroundColor(getResources().getColor(R.color.Transparent));
+                    }
+
+                    //Set background color only for the selected device model
+                    view.setBackgroundColor(getResources().getColor(R.color.colorSelected));
+
+                    //Get current selected model
+                    mModel = view.getTag().toString();
+
+                    //Change layout labels according to selected model
+                    changeLabels(mModel);
+                }
+            });
+
+            //If activity is in edit mode and this is the corresponding tracker color
+            if(tracker != null && vwModel.getTag().equals(tracker.getModel()))
+            {
+                //Set background color only for the selected device model
+                vwModel.setBackgroundColor(getResources().getColor(R.color.colorSelected));
+
+                //Get current selected model
+                mModel = tracker.getModel();
+            }
+        }
+
+        //If activity is not in edit mode
+        if(tracker == null)
+        {
+            //Select first item as default
+            vwModels.getChildAt(0).setBackgroundColor(getResources().getColor(R.color.colorSelected));
+        }
+
     }
 
     public void loadColors(final GridLayout vwColors){
