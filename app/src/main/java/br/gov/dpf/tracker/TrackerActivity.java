@@ -20,13 +20,13 @@ import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.xw.repo.BubbleSeekBar;
 
+import br.gov.dpf.tracker.Entities.Configuration;
 import br.gov.dpf.tracker.Entities.Tracker;
 
 import static br.gov.dpf.tracker.SettingsActivity.RESULT_ERROR;
@@ -391,10 +391,27 @@ public class TrackerActivity extends AppCompatActivity {
         //Get notification options switch
         boolean showNotifications = ((SwitchCompat) findViewById(R.id.swNotifications)).isChecked();
 
+        //Get configuration collection
+        CollectionReference configs = firestoreDB.collection("Tracker/Configurations");
+
         //Check model value
         switch (tracker.getModel())
         {
             case "tk102b":
+
+                //Get tracker configuration options
+                SwitchCompat swLowBatery = findViewById(R.id.swLowBattery);
+                SwitchCompat swStatusCheck = findViewById(R.id.swStatusCheck);
+                SwitchCompat swMoveOutAlert = findViewById(R.id.swMoveoutAlert);
+                SwitchCompat swSpeedAlert = findViewById((R.id.swSpeedAlert));
+                SwitchCompat swUpdateInterval = findViewById(R.id.swUpdateInterval);
+
+
+                if(swStatusCheck.isChecked())
+                {
+                    Configuration lowBattery = new Configuration("low123456", Configuration.COMMAND_TYPE_SMS);
+                }
+                    transaction.set(configs.document("LowBattery"), )
 
                 //Update user notification preferences
                 updateNotificationOption(R.id.cbCoordinates, "Coordinates", showNotifications, editor);
