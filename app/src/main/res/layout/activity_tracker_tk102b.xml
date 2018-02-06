@@ -58,48 +58,56 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="2dp"
-                        android:layout_marginEnd="8dp"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginTop="8dp"
+                        android:layout_margin="8dp"
                         android:background="#82b3d6" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp"
-                        android:layout_marginStart="8dp"
                         android:animateLayoutChanges="true"
-                        android:orientation="vertical"
-                        android:padding="8dp">
+                        android:orientation="vertical">
 
                         <android.support.v7.widget.SwitchCompat
-                            android:tag="StatusCheck"
+                            android:tag="Config_StatusCheck"
                             android:id="@+id/swStatusCheck"
-                            android:layout_width="270dp"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
                             android:checked="true"
                             android:text="@string/swStatusCheck" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
                             android:text="@string/lblStatusCheck"
                             android:textSize="12sp" />
 
                         <TextView
-                            android:tag="StatusCheck"
+                            android:tag="Config_StatusCheck"
                             android:visibility="gone"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:textSize="13sp"
                             android:textColor="#FF0000" />
 
-                        <android.support.v7.widget.SwitchCompat
-                            android:tag="Shock"
-                            android:id="@+id/swShockAlert"
-                            android:layout_width="270dp"
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
                             android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:background="#DDD" />
+
+                        <android.support.v7.widget.SwitchCompat
+                            android:tag="Config_Shock"
+                            android:id="@+id/swShockAlert"
+                            android:layout_width="match_parent"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
                             android:layout_height="wrap_content"
                             android:checked="false"
                             android:text="@string/swShockAlert" />
@@ -107,23 +115,35 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
                             android:text="@string/lblShockAlert"
                             android:textSize="12sp" />
 
                         <TextView
-                            android:tag="Shock"
+                            android:tag="Config_Shock"
                             android:visibility="gone"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
                             android:textSize="13sp"
                             android:textColor="#FF0000" />
 
-                        <android.support.v7.widget.SwitchCompat
-                            android:tag="MoveOut"
-                            android:id="@+id/swMoveoutAlert"
-                            android:layout_width="270dp"
-                            android:layout_height="wrap_content"
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
                             android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:background="#DDD" />
+
+                        <android.support.v7.widget.SwitchCompat
+                            android:tag="Config_MoveOut"
+                            android:id="@+id/swMoveoutAlert"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
                             android:checked="false"
                             android:text="@string/swMoveoutAlert" />
 
@@ -131,6 +151,8 @@
                             android:id="@+id/vwMoveoutAlert"
                             android:layout_width="270dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
                             android:gravity="center"
                             android:orientation="horizontal"
                             android:visibility="gone">
@@ -164,23 +186,35 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
                             android:text="@string/lblMoveoutAlert"
                             android:textSize="12sp" />
 
                         <TextView
-                            android:tag="MoveOut"
+                            android:tag="Config_MoveOut"
                             android:visibility="gone"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
                             android:textSize="13sp"
                             android:textColor="#FF0000" />
 
-                        <android.support.v7.widget.SwitchCompat
-                            android:tag="OverSpeed"
-                            android:id="@+id/swSpeedAlert"
-                            android:layout_width="270dp"
-                            android:layout_height="wrap_content"
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
                             android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:background="#DDD" />
+
+                        <android.support.v7.widget.SwitchCompat
+                            android:tag="Config_OverSpeed"
+                            android:id="@+id/swSpeedAlert"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
                             android:checked="false"
                             android:text="@string/swSpeedAlert" />
 
@@ -188,6 +222,8 @@
                             android:id="@+id/vwSpeedLimit"
                             android:layout_width="270dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
                             android:gravity="center"
                             android:orientation="horizontal"
                             android:visibility="gone">
@@ -221,34 +257,45 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
                             android:text="@string/lblSpeedAlert"
                             android:textSize="12sp" />
 
                         <TextView
-                            android:tag="OverSpeed"
+                            android:tag="Config_OverSpeed"
                             android:visibility="gone"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginEnd="8dp"
                             android:textSize="13sp"
                             android:textColor="#FF0000" />
 
-                        <android.support.v7.widget.SwitchCompat
-                            android:tag="PeriodicUpdate"
-                            android:id="@+id/swPeriodicUpdate"
-                            android:layout_width="270dp"
-                            android:layout_height="wrap_content"
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
                             android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:background="#DDD" />
+
+                        <android.support.v7.widget.SwitchCompat
+                            android:tag="Config_PeriodicUpdate"
+                            android:id="@+id/swPeriodicUpdate"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
                             android:checked="false"
                             android:text="@string/swUpdateInterval" />
 
                         <com.xw.repo.BubbleSeekBar
-                            android:tag="PeriodicUpdate"
+                            android:tag="Config_PeriodicUpdate"
                             android:id="@+id/sbPeriodicUpdate"
                             android:visibility="gone"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="8dp"
-                            android:layout_marginTop="8dp"
+                            android:layout_margin="8dp"
                             android:focusable="true"
                             android:focusableInTouchMode="true"
                             app:bsb_auto_adjust_section_mark="true"
@@ -270,14 +317,18 @@
                             android:id="@+id/lblUpdateInterval"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
                             android:text="@string/lblUpdateInterval"
                             android:textSize="12sp" />
 
                         <TextView
-                            android:tag="PeriodicUpdate"
+                            android:tag="Config_PeriodicUpdate"
                             android:visibility="gone"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
                             android:textColor="#1b8118"
                             android:textSize="13sp"
                             android:layout_marginBottom="8dp" />
@@ -345,7 +396,7 @@
                             android:orientation="vertical">
 
                             <CheckBox
-                                android:tag="Coordinates"
+                                android:tag="Notify_Coordinates"
                                 android:checked="true"
                                 android:id="@+id/cbCoordinates"
                                 android:layout_width="match_parent"
@@ -354,7 +405,7 @@
                                 android:text="@string/cbCoordinates" />
 
                             <CheckBox
-                                android:tag="LowBattery"
+                                android:tag="Notify_LowBattery"
                                 android:id="@+id/cbLowBattery"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -363,7 +414,7 @@
                                 android:text="@string/cbLowBattery" />
 
                             <CheckBox
-                                android:tag="StatusCheck"
+                                android:tag="Notify_StatusCheck"
                                 android:id="@+id/cbStatusCheck"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -372,7 +423,7 @@
                                 android:text="@string/cbStatusCheck" />
 
                             <CheckBox
-                                android:tag="Shock"
+                                android:tag="Notify_Shock"
                                 android:id="@+id/cbShockAlert"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -382,7 +433,7 @@
                                 android:text="@string/cbShockAlert" />
 
                             <CheckBox
-                                android:tag="MoveOut"
+                                android:tag="Notify_MoveOut"
                                 android:id="@+id/cbMoveout"
                                 android:enabled="false"
                                 android:layout_width="match_parent"
@@ -391,7 +442,7 @@
                                 android:text="@string/cbMoveout" />
 
                             <CheckBox
-                                android:tag="OverSpeed"
+                                android:tag="Notify_OverSpeed"
                                 android:id="@+id/cbSpeedLimit"
                                 android:enabled="false"
                                 android:layout_width="match_parent"
@@ -400,7 +451,7 @@
                                 android:text="@string/cbSpeedLimit" />
 
                             <CheckBox
-                                android:tag="Available"
+                                android:tag="Notify_Available"
                                 android:id="@+id/cbAvailable"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"

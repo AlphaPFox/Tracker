@@ -141,7 +141,7 @@
                             android:orientation="vertical">
 
                             <CheckBox
-                                android:tag="Coordinates"
+                                android:tag="Notify_Coordinates"
                                 android:checked="true"
                                 android:id="@+id/cbCoordinates"
                                 android:layout_width="match_parent"
@@ -150,7 +150,7 @@
                                 android:text="@string/cbCoordinates" />
 
                             <CheckBox
-                                android:tag="LowBattery"
+                                android:tag="Notify_LowBattery"
                                 android:id="@+id/cbLowBattery"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -159,7 +159,7 @@
                                 android:text="@string/cbLowBattery" />
 
                             <CheckBox
-                                android:tag="TurnOff"
+                                android:tag="Notify_TurnOff"
                                 android:id="@+id/cbTurnOff"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -168,7 +168,7 @@
                                 android:text="@string/cbTurnOff" />
 
                             <CheckBox
-                                android:tag="Functioning"
+                                android:tag="Notify_Functioning"
                                 android:id="@+id/cbFunctioning"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"

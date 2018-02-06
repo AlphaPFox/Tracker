@@ -688,7 +688,7 @@ public class TrackerSettingsActivity extends AppCompatActivity
     private void loadConfiguration(Configuration config)
     {
         //Get all views with tag corresponding to config
-        ArrayList<View> views = getViewsByTag(findViewById(android.R.id.content), config.getName());
+        ArrayList<View> views = getViewsByTag(findViewById(android.R.id.content), "Config_" + config.getName());
 
         //For each view related to this config
         for(View view : views)
