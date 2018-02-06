@@ -73,6 +73,7 @@
                         android:padding="8dp">
 
                         <android.support.v7.widget.SwitchCompat
+                            android:tag="DeepSleep"
                             android:id="@+id/swDeepsleep"
                             android:layout_width="270dp"
                             android:layout_height="wrap_content"
@@ -86,6 +87,7 @@
                             android:textSize="12sp" />
 
                         <android.support.v7.widget.SwitchCompat
+                            android:tag="Emergency"
                             android:id="@+id/swEmergency"
                             android:layout_width="270dp"
                             android:layout_height="wrap_content"
@@ -108,6 +110,7 @@
                                 android:textStyle="bold" />
 
                             <EditText
+                                android:tag="Emergency"
                                 android:id="@+id/txtEmergency"
                                 android:layout_width="45dp"
                                 android:layout_height="35dp"
@@ -133,6 +136,7 @@
                             android:textSize="12sp" />
 
                         <android.support.v7.widget.SwitchCompat
+                            android:tag="TurnOff"
                             android:id="@+id/swTurnOff"
                             android:layout_width="270dp"
                             android:layout_height="wrap_content"
@@ -147,6 +151,7 @@
                             android:textSize="12sp" />
 
                         <android.support.v7.widget.SwitchCompat
+                            android:tag="Magnet"
                             android:id="@+id/swMagnetAlert"
                             android:layout_width="270dp"
                             android:layout_height="wrap_content"
@@ -161,17 +166,19 @@
                             android:textSize="12sp" />
 
                         <android.support.v7.widget.SwitchCompat
-                            android:id="@+id/swUpdateInterval"
+                            android:tag="UpdateActive"
+                            android:id="@+id/swPeriodicUpdate"
                             android:layout_width="270dp"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:checked="true"
+                            android:checked="false"
                             android:text="@string/swUpdateInterval" />
 
                         <LinearLayout
                             android:id="@+id/vwUpdateInterval"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:visibility="gone"
                             android:orientation="vertical"
                             android:layout_marginStart="8dp">
 
@@ -183,6 +190,7 @@
                                 android:textStyle="bold" />
 
                             <com.xw.repo.BubbleSeekBar
+                                android:tag="UpdateIdle"
                                 android:id="@+id/seekBarIdle"
                                 android:visibility="visible"
                                 android:layout_width="match_parent"
@@ -193,11 +201,11 @@
                                 android:focusableInTouchMode="true"
                                 app:bsb_auto_adjust_section_mark="true"
                                 app:bsb_bubble_color="@color/colorAccent"
-                                app:bsb_bubble_text_color="@color/colorPrimaryDark"
+                                app:bsb_bubble_text_color="#FFF"
                                 app:bsb_is_float_type="false"
                                 app:bsb_max="24"
-                                app:bsb_min="1"
-                                app:bsb_progress="18"
+                                app:bsb_min="0"
+                                app:bsb_progress="12"
                                 app:bsb_second_track_color="@color/colorAccent"
                                 app:bsb_section_count="4"
                                 app:bsb_section_text_position="below_section_mark"
@@ -215,6 +223,7 @@
                                 android:textStyle="bold" />
 
                             <com.xw.repo.BubbleSeekBar
+                                android:tag="UpdateActive"
                                 android:id="@+id/seekBarActive"
                                 android:visibility="visible"
                                 android:layout_width="match_parent"
@@ -225,9 +234,9 @@
                                 android:focusableInTouchMode="true"
                                 app:bsb_auto_adjust_section_mark="true"
                                 app:bsb_bubble_color="@color/colorAccent"
-                                app:bsb_bubble_text_color="@color/colorPrimaryDark"
+                                app:bsb_bubble_text_color="#FFF"
                                 app:bsb_max="3600"
-                                app:bsb_min="1"
+                                app:bsb_min="0"
                                 app:bsb_progress="900"
                                 app:bsb_second_track_color="@color/colorAccent"
                                 app:bsb_section_count="4"
@@ -311,6 +320,7 @@
                             android:orientation="vertical">
 
                             <CheckBox
+                                android:tag="Coordinates"
                                 android:id="@+id/cbCoordinates"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -319,6 +329,7 @@
                                 android:text="@string/cbCoordinates" />
 
                             <CheckBox
+                                android:tag="Emergency"
                                 android:id="@+id/cbEmergency"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -327,6 +338,7 @@
                                 android:text="@string/cbEmergency" />
 
                             <CheckBox
+                                android:tag="Magnet"
                                 android:id="@+id/cbMagnet"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -335,6 +347,7 @@
                                 android:text="@string/cbMagnet" />
 
                             <CheckBox
+                                android:tag="Available"
                                 android:id="@+id/cbAvailable"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"

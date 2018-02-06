@@ -179,7 +179,7 @@
                             android:textColor="#000" />
 
                         <com.xw.repo.BubbleSeekBar
-                            android:id="@+id/sbUpdateInterval"
+                            android:id="@+id/sbPeriodicUpdate"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="5dp"

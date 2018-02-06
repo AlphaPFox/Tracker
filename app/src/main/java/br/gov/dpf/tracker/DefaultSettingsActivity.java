@@ -306,7 +306,9 @@ public class DefaultSettingsActivity extends AppCompatActivity {
         if(editMode)
         {
             //Add a new option
-            menu.add(Menu.NONE, R.id.action_settings, Menu.NONE, "Alterar modelo do rastreador");
+            menu.add(Menu.NONE, R.id.action_default_settings, Menu.NONE, "Alterar modelo do rastreador");
+            menu.add(Menu.NONE, R.id.action_tracker_settings, Menu.NONE, "Configurações do dispositivo");
+            menu.add(Menu.NONE, R.id.action_notification_settings, Menu.NONE, "Opções de notificação");
         }
 
         return super.onCreateOptionsMenu(menu);
@@ -319,7 +321,7 @@ public class DefaultSettingsActivity extends AppCompatActivity {
             case android.R.id.home:
 
                 //Set result
-                setResult(MainActivity.RESULT_CANCELED, getIntent());
+                setResult(MainActivity.RESULT_CANCELED);
 
                 //End activity (returns to parent activity -> OnActivityResult)
                 finish();
@@ -335,10 +337,31 @@ public class DefaultSettingsActivity extends AppCompatActivity {
                 //End method
                 return true;
 
-            case R.id.action_settings:
+            case R.id.action_default_settings:
 
                 //Method called to save data
                 findViewById(R.id.vwModelCardView).setVisibility(View.VISIBLE);
+
+                //End method
+                return true;
+
+            case R.id.action_tracker_settings:
+            case R.id.action_notification_settings:
+
+                //Create intent to call next activity (Tracker Configurations)
+                Intent intent = new Intent(DefaultSettingsActivity.this, TrackerSettingsActivity.class);
+
+                //Put tracker data on intent
+                intent.putExtra("Tracker", tracker);
+
+                //Inform activity intention: change tracker model
+                intent.putExtra("UpdateNotifications", (item.getItemId() == R.id.action_notification_settings));
+
+                //Inform activity intention: insert new tracker
+                intent.putExtra("Request", MainActivity.REQUEST_UPDATE);
+
+                //Start next activity
+                startActivityForResult(intent, MainActivity.REQUEST_UPDATE);
 
                 //End method
                 return true;
@@ -347,6 +370,15 @@ public class DefaultSettingsActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onBackPressed()
+    {
+        //Set result
+        setResult(MainActivity.RESULT_CANCELED);
+
+        //End activity (returns to parent activity -> OnActivityResult)
+        finish();
+    }
 
     public void changeLabels(String model)
     {
@@ -436,7 +468,7 @@ public class DefaultSettingsActivity extends AppCompatActivity {
                 vwModel.setBackgroundColor(getResources().getColor(R.color.colorSelected));
 
                 //Get current selected color
-                mColor = tracker.getBackgroundColor();
+                mModel = tracker.getModel();
             }
         }
 

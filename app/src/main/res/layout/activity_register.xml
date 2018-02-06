@@ -82,7 +82,7 @@
                             android:textSize="12sp" />
 
                         <com.xw.repo.BubbleSeekBar
-                            android:id="@+id/sbUpdateInterval"
+                            android:id="@+id/sbPeriodicUpdate"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"

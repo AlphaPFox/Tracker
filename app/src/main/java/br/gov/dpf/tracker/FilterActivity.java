@@ -48,7 +48,7 @@ public class FilterActivity extends AppCompatActivity implements View.OnClickLis
         swShowCircle = findViewById(R.id.swShowCircle);
         startDate = findViewById(R.id.txtStartDate);
         endDate = findViewById(R.id.txtEndDate);
-        seekBar = findViewById(R.id.sbUpdateInterval);
+        seekBar = findViewById(R.id.sbPeriodicUpdate);
         txtCoordinatesNumber = findViewById(R.id.txtCoordinatesNumber);
 
         //Get layout items used on this method only

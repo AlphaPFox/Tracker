@@ -1,6 +1,14 @@
 package br.gov.dpf.tracker.Entities;
 
+import android.graphics.Color;
+import android.view.View;
+import android.widget.TextView;
+
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 public class Configuration
 {
@@ -8,11 +16,9 @@ public class Configuration
 
     private String mValue;
 
-    private String mStatus;
+    private Map<String, Object> mStatus;
 
     private boolean mEnabled;
-
-    private Date mDatetime;
 
     public Configuration()
     {
@@ -23,6 +29,12 @@ public class Configuration
         mName = name;
         mValue = value;
         mEnabled = enabled;
+        mStatus = new HashMap<>();
+
+        mStatus.put("step", "REQUESTED");
+        mStatus.put("description", "Status: Aguardando envio...");
+        mStatus.put("datetime", new Date());
+        mStatus.put("completed", false);
     }
 
     public String getName() {
@@ -41,11 +53,11 @@ public class Configuration
         this.mValue = mValue;
     }
 
-    public String getStatus() {
+    public Map<String, Object> getStatus() {
         return mStatus;
     }
 
-    public void setStatus(String mStatus) {
+    public void setStatus(Map<String, Object> mStatus) {
         this.mStatus = mStatus;
     }
 
@@ -55,13 +67,5 @@ public class Configuration
 
     public void setEnabled(boolean mEnabled) {
         this.mEnabled = mEnabled;
-    }
-
-    public Date getDatetime() {
-        return mDatetime;
-    }
-
-    public void setDatetime(Date mDatetime) {
-        this.mDatetime = mDatetime;
     }
 }

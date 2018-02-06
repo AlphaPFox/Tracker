@@ -74,7 +74,7 @@ public class RegisterActivity extends AppCompatActivity
         ((TextView) findViewById(R.id.txtIntervalAlert)).setText(getResources().getText(R.string.lblUpdateInterval));
 
         //Set seek bar sections
-        ((BubbleSeekBar) findViewById(R.id.sbUpdateInterval)).setCustomSectionTextArray(new BubbleSeekBar.CustomSectionTextArray() {
+        ((BubbleSeekBar) findViewById(R.id.sbPeriodicUpdate)).setCustomSectionTextArray(new BubbleSeekBar.CustomSectionTextArray() {
             @NonNull
             @Override
             public SparseArray<String> onCustomize(int sectionCount, @NonNull SparseArray<String> array) {
@@ -147,7 +147,7 @@ public class RegisterActivity extends AppCompatActivity
                 vwScrollMain.smoothScrollTo(0, findViewById(R.id.vwUpdateInterval).getTop());
 
                 //Request focus on seek bar
-                findViewById(R.id.sbUpdateInterval).requestFocus();
+                findViewById(R.id.sbPeriodicUpdate).requestFocus();
             }
         });
     }

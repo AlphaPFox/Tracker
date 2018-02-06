@@ -73,6 +73,7 @@
                         android:padding="8dp">
 
                         <android.support.v7.widget.SwitchCompat
+                            android:tag="StatusCheck"
                             android:id="@+id/swStatusCheck"
                             android:layout_width="270dp"
                             android:layout_height="wrap_content"
@@ -86,7 +87,16 @@
                             android:text="@string/lblStatusCheck"
                             android:textSize="12sp" />
 
+                        <TextView
+                            android:tag="StatusCheck"
+                            android:visibility="gone"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="13sp"
+                            android:textColor="#FF0000" />
+
                         <android.support.v7.widget.SwitchCompat
+                            android:tag="Shock"
                             android:id="@+id/swShockAlert"
                             android:layout_width="270dp"
                             android:layout_marginTop="8dp"
@@ -100,7 +110,16 @@
                             android:text="@string/lblShockAlert"
                             android:textSize="12sp" />
 
+                        <TextView
+                            android:tag="Shock"
+                            android:visibility="gone"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="13sp"
+                            android:textColor="#FF0000" />
+
                         <android.support.v7.widget.SwitchCompat
+                            android:tag="MoveOut"
                             android:id="@+id/swMoveoutAlert"
                             android:layout_width="270dp"
                             android:layout_height="wrap_content"
@@ -123,6 +142,7 @@
                                 android:textStyle="bold" />
 
                             <EditText
+                                android:tag="MoveOut"
                                 android:id="@+id/txtMoveoutDistance"
                                 android:layout_width="45dp"
                                 android:layout_height="35dp"
@@ -147,7 +167,16 @@
                             android:text="@string/lblMoveoutAlert"
                             android:textSize="12sp" />
 
+                        <TextView
+                            android:tag="MoveOut"
+                            android:visibility="gone"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="13sp"
+                            android:textColor="#FF0000" />
+
                         <android.support.v7.widget.SwitchCompat
+                            android:tag="OverSpeed"
                             android:id="@+id/swSpeedAlert"
                             android:layout_width="270dp"
                             android:layout_height="wrap_content"
@@ -170,6 +199,7 @@
                                 android:textStyle="bold" />
 
                             <EditText
+                                android:tag="OverSpeed"
                                 android:id="@+id/txtSpeedLimit"
                                 android:layout_width="45dp"
                                 android:layout_height="35dp"
@@ -194,8 +224,17 @@
                             android:text="@string/lblSpeedAlert"
                             android:textSize="12sp" />
 
+                        <TextView
+                            android:tag="OverSpeed"
+                            android:visibility="gone"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="13sp"
+                            android:textColor="#FF0000" />
+
                         <android.support.v7.widget.SwitchCompat
-                            android:id="@+id/swUpdateInterval"
+                            android:tag="PeriodicUpdate"
+                            android:id="@+id/swPeriodicUpdate"
                             android:layout_width="270dp"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
@@ -203,7 +242,8 @@
                             android:text="@string/swUpdateInterval" />
 
                         <com.xw.repo.BubbleSeekBar
-                            android:id="@+id/sbUpdateInterval"
+                            android:tag="PeriodicUpdate"
+                            android:id="@+id/sbPeriodicUpdate"
                             android:visibility="gone"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -230,9 +270,17 @@
                             android:id="@+id/lblUpdateInterval"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="8dp"
                             android:text="@string/lblUpdateInterval"
                             android:textSize="12sp" />
+
+                        <TextView
+                            android:tag="PeriodicUpdate"
+                            android:visibility="gone"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="#1b8118"
+                            android:textSize="13sp"
+                            android:layout_marginBottom="8dp" />
 
                     </LinearLayout>
                 </LinearLayout>
@@ -297,6 +345,7 @@
                             android:orientation="vertical">
 
                             <CheckBox
+                                android:tag="Coordinates"
                                 android:checked="true"
                                 android:id="@+id/cbCoordinates"
                                 android:layout_width="match_parent"
@@ -305,6 +354,7 @@
                                 android:text="@string/cbCoordinates" />
 
                             <CheckBox
+                                android:tag="LowBattery"
                                 android:id="@+id/cbLowBattery"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -313,6 +363,7 @@
                                 android:text="@string/cbLowBattery" />
 
                             <CheckBox
+                                android:tag="StatusCheck"
                                 android:id="@+id/cbStatusCheck"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -321,6 +372,7 @@
                                 android:text="@string/cbStatusCheck" />
 
                             <CheckBox
+                                android:tag="Shock"
                                 android:id="@+id/cbShockAlert"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -330,6 +382,7 @@
                                 android:text="@string/cbShockAlert" />
 
                             <CheckBox
+                                android:tag="MoveOut"
                                 android:id="@+id/cbMoveout"
                                 android:enabled="false"
                                 android:layout_width="match_parent"
@@ -338,6 +391,7 @@
                                 android:text="@string/cbMoveout" />
 
                             <CheckBox
+                                android:tag="OverSpeed"
                                 android:id="@+id/cbSpeedLimit"
                                 android:enabled="false"
                                 android:layout_width="match_parent"
@@ -346,6 +400,7 @@
                                 android:text="@string/cbSpeedLimit" />
 
                             <CheckBox
+                                android:tag="Available"
                                 android:id="@+id/cbAvailable"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
