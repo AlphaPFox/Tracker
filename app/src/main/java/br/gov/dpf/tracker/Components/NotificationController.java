@@ -134,8 +134,8 @@ public class NotificationController
                     .setSmallIcon(R.drawable.ic_tracker_notification_24dp)
                     .setGroup(notificationGroup.getGroupKey())
                     .setContentTitle(notification.getTitle())
-                    .setContentInfo(notificationGroup.tracker.getName() + " (" + notificationGroup.tracker.getModel() + ")")
-                    .setSubText(notificationGroup.tracker.getName() + " (" + notificationGroup.tracker.getModel() + ")")
+                    .setContentInfo(notificationGroup.tracker.getName() + " (" + notificationGroup.tracker.formatTrackerModel() + ")")
+                    .setSubText(notificationGroup.tracker.getName() + " (" + notificationGroup.tracker.formatTrackerModel() + ")")
                     .setContentText(notification.getContent())
                     .setWhen(notification.getDatetime())
                     .setAutoCancel(true)
@@ -146,7 +146,7 @@ public class NotificationController
             //Build notification without using new features
             single_notification = new NotificationCompat.Builder(context, "CHANEL")
                     .setSmallIcon(R.drawable.ic_tracker_notification_24dp)
-                    .setContentTitle(notificationGroup.tracker.getName() + " (" + notificationGroup.tracker.getModel() + ")")
+                    .setContentTitle(notificationGroup.tracker.getName() + " (" + notificationGroup.tracker.formatTrackerModel() + ")")
                     .setContentText(notification.getTitle())
                     .setWhen(notification.getDatetime())
                     .setAutoCancel(true)
@@ -256,8 +256,8 @@ public class NotificationController
         NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
 
         //Set notification title
-        summaryBuilder.setContentTitle(notificationGroup.tracker.getName() + " (" + notificationGroup.tracker.getModel() + ")");
-        inboxStyle.setBigContentTitle(notificationGroup.tracker.getName() + " (" + notificationGroup.tracker.getModel() + ")");
+        summaryBuilder.setContentTitle(notificationGroup.tracker.getName() + " (" + notificationGroup.tracker.formatTrackerModel() + ")");
+        inboxStyle.setBigContentTitle(notificationGroup.tracker.getName() + " (" + notificationGroup.tracker.formatTrackerModel() + ")");
 
         //Set notification color
         summaryBuilder.setColor(Color.parseColor(notificationGroup.tracker.getBackgroundColor()));
@@ -272,7 +272,7 @@ public class NotificationController
             summaryBuilder.setContentText(notification.getStyledMessage());
 
             //Set summary text
-            inboxStyle.setSummaryText(notificationGroup.tracker.getName() + " (" + notificationGroup.tracker.getModel() + ")");
+            inboxStyle.setSummaryText(notificationGroup.tracker.getName() + " (" + notificationGroup.tracker.formatTrackerModel() + ")");
         }
         else if(notificationGroup.notifications.size() == 2)
         {
@@ -284,7 +284,7 @@ public class NotificationController
             summaryBuilder.setContentText(first_notification.getTitle() + " / " + second_notification.getTitle());
 
             //Set summary text
-            inboxStyle.setSummaryText(notificationGroup.tracker.getName() + " (" + notificationGroup.tracker.getModel() + ")");
+            inboxStyle.setSummaryText(notificationGroup.tracker.getName() + " (" + notificationGroup.tracker.formatTrackerModel() + ")");
         }
         else
         {
@@ -295,7 +295,7 @@ public class NotificationController
             summaryBuilder.setContentText(first_notification.getTitle() + " / + " + (notificationGroup.notifications.size() - 1) + " notificações");
 
             //Set summary text
-            inboxStyle.setSummaryText(notificationGroup.tracker.getName() + " (" + notificationGroup.tracker.getModel() + ")");
+            inboxStyle.setSummaryText(notificationGroup.tracker.getName() + " (" + notificationGroup.tracker.formatTrackerModel() + ")");
         }
 
         //File path to model image

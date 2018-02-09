@@ -94,12 +94,12 @@ public class TrackerAdapter
         // - replace the contents of the view with that element
         holder.txtTrackerName.setText(tracker.formatName());
         holder.txtTrackerModel.setText(tracker.formatTrackerModel());
-        holder.txtBatteryLevel.setText(tracker.getSignalLevel());
-        holder.txtSignalLevel.setText(tracker.getBatteryLevel());
+        holder.txtBatteryLevel.setText(tracker.getBatteryLevel());
+        holder.txtSignalLevel.setText(tracker.getSignalLevel());
 
         //Check if tracker has an coordinate available
-        if(tracker.getLastUpdate() != null)
-            holder.txtLastUpdateValue.setText(formatDateTime((Date) tracker.getLastUpdate().get("datetime"), false));
+        if(tracker.getLastCoordinate() != null)
+            holder.txtLastUpdateValue.setText(formatDateTime((Date) tracker.getLastCoordinate().get("datetime"), false));
         else
             holder.txtLastUpdateValue.setText(mActivity.getResources().getString(R.string.txtWaitingTitle));
 
@@ -146,7 +146,7 @@ public class TrackerAdapter
         holder.mapView.setClickable(false);
 
         //If tracker has coordinates available
-        if (tracker.getLastUpdate() != null)
+        if (tracker.getLastCoordinate() != null)
         {
             //Load map
             holder.mapView.onCreate(null);
@@ -156,7 +156,7 @@ public class TrackerAdapter
                 public void onMapReady(final GoogleMap googleMap) {
 
                     //Get coordinates
-                    GeoPoint dbCoordinates = (GeoPoint) tracker.getLastUpdate().get("coordinates");
+                    GeoPoint dbCoordinates = (GeoPoint) tracker.getLastCoordinate().get("location");
 
                     //Initialize map
                     MapsInitializer.initialize(mActivity);
@@ -175,7 +175,7 @@ public class TrackerAdapter
                     googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinates, 14));
 
                     //If coordinates come from a GSM tower cell
-                    if(tracker.getLastUpdate().get("type") == "GSM" && sharedPreferences.getBoolean("ShowCircle", true))
+                    if(tracker.getLastCoordinate().get("type") == "GSM" && sharedPreferences.getBoolean("ShowCircle", true))
                     {
                         //Add circle representing cell tower signal coverage
                         googleMap.addCircle(new CircleOptions()
@@ -191,7 +191,7 @@ public class TrackerAdapter
 
                     //Define map marker settings
                     MarkerOptions markerOptions = new MarkerOptions().
-                            icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(formatTime((Date) tracker.getLastUpdate().get("datetime"))))).
+                            icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(formatTime((Date) tracker.getLastCoordinate().get("datetime"))))).
                             position(coordinates).
                             anchor(iconFactory.getAnchorU(), iconFactory.getAnchorV());
 
@@ -207,7 +207,7 @@ public class TrackerAdapter
                         public void onMapLoaded() {
 
                             //If coordinates is available
-                            if (googleMap.getMapType() != GoogleMap.MAP_TYPE_NONE && tracker.getLastUpdate() != null)
+                            if (googleMap.getMapType() != GoogleMap.MAP_TYPE_NONE && tracker.getLastCoordinate() != null)
                             {
                                 //Hide loading animation
                                 ((View) holder.progressBar.getParent()).animate().setDuration(500).alpha(0f);

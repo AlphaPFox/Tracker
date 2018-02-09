@@ -3,13 +3,7 @@ package br.gov.dpf.tracker.Entities;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.google.firebase.firestore.GeoPoint;
-
-import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
-
-import br.gov.dpf.tracker.Components.GeoPointParcelable;
 
 @SuppressWarnings("unused")
 public class Tracker implements Parcelable {
@@ -29,6 +23,8 @@ public class Tracker implements Parcelable {
     private String mBackgroundColor;
 
     private Map<String, Object> mLastUpdate;
+
+    private Map<String, Object> mLastCoordinate;
 
     //Required by FireStore DB
     public Tracker() {
@@ -91,9 +87,17 @@ public class Tracker implements Parcelable {
 
     public void setSignalLevel(String mSignalLevel) { this.mSignalLevel = mSignalLevel; }
 
-    public Map<String, Object> getLastUpdate() { return mLastUpdate; }
+    public Map<String, Object> getLastCoordinate() { return mLastCoordinate; }
 
-    public void setLastUpdate(Map<String, Object> mLastUpdate) { this.mLastUpdate = mLastUpdate; }
+    public void setLastCoordinate(Map<String, Object> mLastUpdate) { this.mLastCoordinate = mLastUpdate; }
+
+    public Map<String, Object> getLastUpdate() {
+        return mLastUpdate;
+    }
+
+    public void setLastUpdate(Map<String, Object> mLastUpdate) {
+        this.mLastUpdate = mLastUpdate;
+    }
 
     protected Tracker(Parcel in) {
         mName = in.readString();

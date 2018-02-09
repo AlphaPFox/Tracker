@@ -25,6 +25,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
+import java.util.HashMap;
+
 import br.gov.dpf.tracker.Entities.Tracker;
 
 public class DefaultSettingsActivity extends AppCompatActivity {

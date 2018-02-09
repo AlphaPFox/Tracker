@@ -141,15 +141,6 @@
                             android:orientation="vertical">
 
                             <CheckBox
-                                android:tag="Notify_Coordinates"
-                                android:checked="true"
-                                android:id="@+id/cbCoordinates"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:text="@string/cbCoordinates" />
-
-                            <CheckBox
                                 android:tag="Notify_LowBattery"
                                 android:id="@+id/cbLowBattery"
                                 android:layout_width="match_parent"
@@ -166,6 +157,24 @@
                                 android:layout_marginTop="8dp"
                                 android:checked="true"
                                 android:text="@string/cbTurnOff" />
+
+                            <CheckBox
+                                android:id="@+id/cbMovement"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:checked="true"
+                                android:tag="Notify_Movement"
+                                android:text="@string/cbMovement" />
+
+                            <CheckBox
+                                android:id="@+id/cbStopped"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:checked="true"
+                                android:tag="Notify_Stopped"
+                                android:text="@string/cbStopped" />
 
                             <CheckBox
                                 android:tag="Notify_Functioning"

@@ -12,11 +12,11 @@ public class Coordinates
 
     private String mAddress;
 
-    private int mBatteryLevel;
+    private String mBatteryLevel;
 
-    private int mSignalLevel;
+    private String mSignalLevel;
 
-    private float mSpeed;
+    private String mSpeed;
 
     private Date mDatetime;
 
@@ -44,22 +44,22 @@ public class Coordinates
         this.mAddress = mAddress;
     }
 
-    public int getBatteryLevel() {
+    public String getBatteryLevel() {
 
         return mBatteryLevel;
     }
 
-    public void setBatteryLevel(int mBatteryLevel) {
+    public void setBatteryLevel(String mBatteryLevel) {
 
         this.mBatteryLevel = mBatteryLevel;
     }
 
-    public int getSignalLevel() {
+    public String getSignalLevel() {
 
         return mSignalLevel;
     }
 
-    public void setSignalLevel(int mSignalLevel) {
+    public void setSignalLevel(String mSignalLevel) {
 
         this.mSignalLevel = mSignalLevel;
     }
@@ -81,12 +81,12 @@ public class Coordinates
         this.mLastDatetime = mLastDatetime;
     }
 
-    public float getSpeed() {
+    public String getSpeed() {
 
         return mSpeed;
     }
 
-    public void setSpeed(float mSpeed) {
+    public void setSpeed(String mSpeed) {
 
         this.mSpeed = mSpeed;
     }
@@ -101,16 +101,16 @@ public class Coordinates
 
     public String getStringBatteryLevel()
     {
-        if(mBatteryLevel > 0)
-            return String.valueOf(mBatteryLevel) + "%";
+        if(mBatteryLevel != null)
+            return mBatteryLevel;
         else
-            return "Não disponível";
+            return "N/D";
     }
     public String getStringSignalLevel()
     {
-        if(mSignalLevel > 0)
-            return String.valueOf(mSignalLevel) + "%";
+        if(mSignalLevel != null)
+            return mSignalLevel;
         else
-            return "Não disponível";
+            return "N/D";
     }
 }

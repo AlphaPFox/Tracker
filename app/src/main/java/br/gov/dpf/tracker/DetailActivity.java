@@ -63,6 +63,8 @@ import br.gov.dpf.tracker.Firestore.CoordinatesAdapter;
 import br.gov.dpf.tracker.Firestore.TrackerAdapter;
 import de.hdodenhof.circleimageview.CircleImageView;
 
+import static br.gov.dpf.tracker.MainActivity.REQUEST_UPDATE;
+
 public class DetailActivity
         extends AppCompatActivity
         implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
@@ -372,7 +374,7 @@ public class DetailActivity
                 args.putString("BatteryLevel", coordinates.getStringBatteryLevel());
                 args.putString("SignalLevel", coordinates.getStringSignalLevel());
                 args.putString("TrackerName", tracker.getName());
-                args.putString("TrackerModel", tracker.getModel());
+                args.putString("TrackerModel", tracker.formatTrackerModel());
                 args.putString("TrackerColor", tracker.getBackgroundColor());
                 args.putString("Datetime", new SimpleDateFormat("dd/MM/yyyy hh:mm", Locale.getDefault()).format(coordinates.getDatetime()));
 
@@ -567,13 +569,16 @@ public class DetailActivity
             case R.id.action_edit:
             {
                 // Create intent to go to edit page
-                Intent registerActivity = new Intent(this, RegisterActivity.class);
+                Intent intent = new Intent(this, DefaultSettingsActivity.class);
 
                 //Put tracker data on intent
-                registerActivity.putExtra("Tracker", tracker);
+                intent.putExtra("Tracker", tracker);
+
+                //Define request intent to update an existing tracker
+                intent.putExtra("Request", REQUEST_UPDATE);
 
                 //Start edit activity
-                startActivityForResult(registerActivity, REQUEST_EDIT);
+                startActivityForResult(intent, REQUEST_UPDATE);
 
                 //End method
                 return true;

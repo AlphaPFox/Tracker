@@ -62,38 +62,57 @@
                         android:background="#82b3d6" />
 
                     <LinearLayout
+                        android:id="@+id/vwConfigurations"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:animateLayoutChanges="true"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:paddingBottom="8dp">
 
                         <android.support.v7.widget.SwitchCompat
                             android:tag="Config_StatusCheck"
                             android:id="@+id/swStatusCheck"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
                             android:layout_marginStart="16dp"
                             android:layout_marginEnd="16dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
                             android:checked="true"
                             android:text="@string/swStatusCheck" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:layout_marginEnd="16dp"
-                            android:text="@string/lblStatusCheck"
-                            android:textSize="12sp" />
-
-                        <TextView
-                            android:tag="Config_StatusCheck"
-                            android:visibility="gone"
-                            android:layout_marginStart="16dp"
-                            android:layout_marginEnd="16dp"
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textSize="13sp"
-                            android:textColor="#FF0000" />
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:orientation="horizontal"
+                            android:layout_gravity="center">
+
+                            <ImageView
+                                android:id="@+id/imgStatusCheck"
+                                android:tag="Config_StatusCheck"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:layout_gravity="top"
+                                android:layout_marginBottom="8dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_marginTop="8dp"
+                                android:src="@drawable/status_ok"
+                                android:visibility="gone" />
+
+                            <TextView
+                                android:tag="Config_StatusCheck"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:layout_gravity="center"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/lblStatusCheck"
+                                android:textSize="12sp" />
+
+
+                        </LinearLayout>
 
                         <View
                             android:layout_width="match_parent"
@@ -112,23 +131,39 @@
                             android:checked="false"
                             android:text="@string/swShockAlert" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:layout_marginEnd="16dp"
-                            android:text="@string/lblShockAlert"
-                            android:textSize="12sp" />
-
-                        <TextView
-                            android:tag="Config_Shock"
-                            android:visibility="gone"
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="16dp"
                             android:layout_marginEnd="16dp"
-                            android:textSize="13sp"
-                            android:textColor="#FF0000" />
+                            android:orientation="horizontal"
+                            android:layout_gravity="bottom">
+
+                            <ImageView
+                                android:id="@+id/imgShockAlert"
+                                android:tag="Config_Shock"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:layout_gravity="top"
+                                android:layout_marginBottom="8dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_marginTop="8dp"
+                                android:visibility="gone" />
+
+                            <TextView
+                                android:tag="Config_Shock"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:layout_gravity="center"
+                                android:layout_weight="1"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:text="@string/lblShockAlert"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
 
                         <View
                             android:layout_width="match_parent"
@@ -149,57 +184,37 @@
 
                         <LinearLayout
                             android:id="@+id/vwMoveoutAlert"
-                            android:layout_width="270dp"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
                             android:layout_marginEnd="16dp"
-                            android:gravity="center"
-                            android:orientation="horizontal"
-                            android:visibility="gone">
+                            android:layout_marginStart="16dp"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:id="@+id/imgMoveOut"
+                                android:tag="Config_MoveOut"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:layout_gravity="top"
+                                android:layout_marginBottom="8dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_marginTop="8dp"
+                                android:visibility="gone" />
 
                             <TextView
-                                android:layout_width="wrap_content"
+                                android:tag="Config_MoveOut"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="@string/lblMoveOutDistance"
-                                android:textStyle="bold" />
-
-                            <EditText
-                                android:tag="MoveOut"
-                                android:id="@+id/txtMoveoutDistance"
-                                android:layout_width="45dp"
-                                android:layout_height="35dp"
-                                android:layout_marginEnd="4dp"
-                                android:layout_marginStart="8dp"
-                                android:ems="10"
-                                android:gravity="center_horizontal"
-                                android:hint="@string/txtMoveOutHint"
-                                android:inputType="number"
-                                android:textSize="14sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/lblMeters" />
+                                android:text="@string/lblMoveoutAlert"
+                                android:textSize="12sp" />
 
                         </LinearLayout>
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:layout_marginEnd="16dp"
-                            android:text="@string/lblMoveoutAlert"
-                            android:textSize="12sp" />
 
-                        <TextView
-                            android:tag="Config_MoveOut"
-                            android:visibility="gone"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:layout_marginEnd="16dp"
-                            android:textSize="13sp"
-                            android:textColor="#FF0000" />
 
                         <View
                             android:layout_width="match_parent"
@@ -218,59 +233,73 @@
                             android:checked="false"
                             android:text="@string/swSpeedAlert" />
 
+
                         <LinearLayout
                             android:id="@+id/vwSpeedLimit"
-                            android:layout_width="270dp"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
                             android:layout_marginEnd="16dp"
-                            android:gravity="center"
+                            android:layout_marginStart="16dp"
                             android:orientation="horizontal"
                             android:visibility="gone">
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/lblSpeedLimit"
-                                android:textStyle="bold" />
+                            <ImageView
+                                android:id="@+id/imgSpeedLimit"
+                                android:tag="Config_OverSpeed"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:layout_gravity="top"
+                                android:layout_marginBottom="8dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_marginTop="8dp"
+                                android:visibility="gone" />
 
-                            <EditText
-                                android:tag="OverSpeed"
-                                android:id="@+id/txtSpeedLimit"
-                                android:layout_width="45dp"
-                                android:layout_height="35dp"
-                                android:layout_marginEnd="4dp"
-                                android:layout_marginStart="8dp"
-                                android:ems="10"
-                                android:gravity="center_horizontal"
-                                android:hint="@string/txtSpeedLimitHint"
-                                android:inputType="number"
-                                android:textSize="14sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
+                            <LinearLayout
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="@string/lblSpeedLimitUnit" />
+                                android:layout_gravity="center"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/lblSpeedLimit"
+                                    android:textStyle="bold" />
+
+                                <EditText
+                                    android:id="@+id/txtSpeedLimit"
+                                    android:layout_width="45dp"
+                                    android:layout_height="35dp"
+                                    android:layout_marginEnd="4dp"
+                                    android:layout_marginStart="8dp"
+                                    android:ems="10"
+                                    android:gravity="center_horizontal"
+                                    android:hint="@string/txtSpeedLimitHint"
+                                    android:inputType="number"
+                                    android:tag="OverSpeed"
+                                    android:textSize="14sp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/lblSpeedLimitUnit" />
+
+                            </LinearLayout>
 
                         </LinearLayout>
 
                         <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:tag="Config_OverSpeed"
+                            android:clickable="true"
+                            android:focusable="true"
                             android:layout_marginStart="16dp"
                             android:layout_marginEnd="16dp"
-                            android:text="@string/lblSpeedAlert"
-                            android:textSize="12sp" />
-
-                        <TextView
-                            android:tag="Config_OverSpeed"
-                            android:visibility="gone"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:layout_marginEnd="8dp"
-                            android:textSize="13sp"
-                            android:textColor="#FF0000" />
+                            android:text="@string/lblSpeedAlert"
+                            android:textSize="12sp" />
 
                         <View
                             android:layout_width="match_parent"
@@ -289,51 +318,66 @@
                             android:checked="false"
                             android:text="@string/swUpdateInterval" />
 
-                        <com.xw.repo.BubbleSeekBar
-                            android:tag="Config_PeriodicUpdate"
-                            android:id="@+id/sbPeriodicUpdate"
-                            android:visibility="gone"
+                        <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="8dp"
-                            android:focusable="true"
-                            android:focusableInTouchMode="true"
-                            app:bsb_auto_adjust_section_mark="true"
-                            app:bsb_bubble_color="@color/colorAccent"
-                            app:bsb_bubble_text_color="@color/colorPrimaryDark"
-                            app:bsb_hide_bubble="true"
-                            app:bsb_max="6"
-                            app:bsb_min="0"
-                            app:bsb_progress="2"
-                            app:bsb_second_track_color="@color/colorAccent"
-                            app:bsb_section_count="6"
-                            app:bsb_section_text_position="below_section_mark"
-                            app:bsb_show_section_mark="true"
-                            app:bsb_show_section_text="true"
-                            app:bsb_touch_to_seek="true"
-                            app:bsb_track_color="#888" />
+                            android:layout_height="match_parent"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginStart="16dp"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:id="@+id/imgPeriodicUpdate"
+                                android:tag="Config_PeriodicUpdate"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:layout_gravity="top"
+                                android:layout_marginEnd="8dp"
+                                android:layout_marginTop="8dp"
+                                android:visibility="gone" />
+
+                            <com.xw.repo.BubbleSeekBar
+                                android:id="@+id/sbPeriodicUpdate"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="8dp"
+                                android:layout_marginTop="8dp"
+                                android:focusable="true"
+                                android:focusableInTouchMode="true"
+                                android:tag="Config_PeriodicUpdate"
+                                android:visibility="gone"
+                                app:bsb_auto_adjust_section_mark="true"
+                                app:bsb_bubble_color="@color/colorAccent"
+                                app:bsb_bubble_text_color="@color/colorPrimaryDark"
+                                app:bsb_hide_bubble="true"
+                                app:bsb_max="6"
+                                app:bsb_min="0"
+                                app:bsb_progress="2"
+                                app:bsb_second_track_color="@color/colorAccent"
+                                app:bsb_section_count="6"
+                                app:bsb_section_text_position="below_section_mark"
+                                app:bsb_show_section_mark="true"
+                                app:bsb_show_section_text="true"
+                                app:bsb_touch_to_seek="true"
+                                app:bsb_track_color="#888" />
+
+                        </LinearLayout>
 
                         <TextView
-                            android:id="@+id/lblUpdateInterval"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:tag="Config_PeriodicUpdate"
+                            android:clickable="true"
+                            android:focusable="true"
                             android:layout_marginStart="16dp"
                             android:layout_marginEnd="16dp"
+                            android:layout_width="match_parent"
+                            android:id="@+id/lblUpdateInterval"
+                            android:layout_height="wrap_content"
                             android:text="@string/lblUpdateInterval"
                             android:textSize="12sp" />
 
-                        <TextView
-                            android:tag="Config_PeriodicUpdate"
-                            android:visibility="gone"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:layout_marginEnd="16dp"
-                            android:textColor="#1b8118"
-                            android:textSize="13sp"
-                            android:layout_marginBottom="8dp" />
-
                     </LinearLayout>
+
                 </LinearLayout>
             </android.support.v7.widget.CardView>
 
@@ -369,7 +413,7 @@
                         android:background="#82b3d6" />
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:animateLayoutChanges="true"
                         android:orientation="vertical"
@@ -377,7 +421,7 @@
 
                         <android.support.v7.widget.SwitchCompat
                             android:id="@+id/swNotifications"
-                            android:layout_width="270dp"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:checked="true"
                             android:text="@string/swNotifications" />
@@ -390,81 +434,90 @@
 
                         <LinearLayout
                             android:id="@+id/vwNotificationOptions"
-                            android:layout_width="250dp"
-                            android:layout_marginStart="16dp"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
                             android:orientation="vertical">
 
                             <CheckBox
-                                android:tag="Notify_Coordinates"
-                                android:checked="true"
-                                android:id="@+id/cbCoordinates"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:text="@string/cbCoordinates" />
-
-                            <CheckBox
-                                android:tag="Notify_LowBattery"
-                                android:id="@+id/cbLowBattery"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:checked="true"
-                                android:text="@string/cbLowBattery" />
-
-                            <CheckBox
-                                android:tag="Notify_StatusCheck"
                                 android:id="@+id/cbStatusCheck"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
                                 android:checked="true"
+                                android:tag="Notify_StatusCheck"
                                 android:text="@string/cbStatusCheck" />
 
                             <CheckBox
-                                android:tag="Notify_Shock"
+                                android:id="@+id/cbLowBattery"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:checked="true"
+                                android:tag="Notify_LowBattery"
+                                android:text="@string/cbLowBattery" />
+
+                            <CheckBox
+                                android:id="@+id/cbMovement"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:checked="true"
+                                android:tag="Notify_Movement"
+                                android:text="@string/cbMovement" />
+
+                            <CheckBox
+                                android:id="@+id/cbStopped"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:checked="false"
+                                android:tag="Notify_Stopped"
+                                android:text="@string/cbStopped" />
+
+                            <CheckBox
                                 android:id="@+id/cbShockAlert"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
-                                android:enabled="false"
                                 android:checked="false"
+                                android:enabled="false"
+                                android:tag="Notify_Shock"
                                 android:text="@string/cbShockAlert" />
 
                             <CheckBox
-                                android:tag="Notify_MoveOut"
                                 android:id="@+id/cbMoveout"
-                                android:enabled="false"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
+                                android:enabled="false"
+                                android:tag="Notify_MoveOut"
                                 android:text="@string/cbMoveout" />
 
                             <CheckBox
-                                android:tag="Notify_OverSpeed"
                                 android:id="@+id/cbSpeedLimit"
-                                android:enabled="false"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
+                                android:enabled="false"
+                                android:tag="Notify_OverSpeed"
                                 android:text="@string/cbSpeedLimit" />
 
                             <CheckBox
-                                android:tag="Notify_Available"
                                 android:id="@+id/cbAvailable"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
+                                android:tag="Notify_Available"
                                 android:text="@string/cbAvailable" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/lblAvailableDescription"
-                                android:textSize="12sp"
+                                android:layout_marginBottom="16dp"
                                 android:layout_marginStart="8dp"
-                                android:layout_marginBottom="16dp" />
+                                android:text="@string/lblAvailableDescription"
+                                android:textSize="12sp" />
 
                         </LinearLayout>
 

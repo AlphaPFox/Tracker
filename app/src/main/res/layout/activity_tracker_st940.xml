@@ -64,113 +64,267 @@
                         android:background="#82b3d6" />
 
                     <LinearLayout
+                        android:id="@+id/vwConfigurations"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp"
-                        android:layout_marginStart="8dp"
                         android:orientation="vertical"
-                        android:animateLayoutChanges="true"
-                        android:padding="8dp">
+                        android:animateLayoutChanges="true">
 
                         <android.support.v7.widget.SwitchCompat
                             android:tag="Config_DeepSleep"
                             android:id="@+id/swDeepsleep"
-                            android:layout_width="270dp"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
                             android:checked="false"
                             android:text="@string/swDeepsleep" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/lblDeepsleep"
-                            android:textSize="12sp" />
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:orientation="horizontal"
+                            android:layout_gravity="bottom">
+
+                            <ImageView
+                                android:id="@+id/imgDeepSleep"
+                                android:tag="Config_DeepSleep"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:layout_gravity="top"
+                                android:layout_marginBottom="8dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_marginTop="8dp"
+                                android:visibility="gone" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_weight="1"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:tag="Config_DeepSleep"
+                                android:text="@string/lblDeepsleep"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:background="#DDD" />
 
                         <android.support.v7.widget.SwitchCompat
                             android:tag="Config_Emergency"
                             android:id="@+id/swEmergency"
-                            android:layout_width="270dp"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
                             android:checked="false"
                             android:text="@string/swEmergency" />
 
                         <LinearLayout
                             android:id="@+id/vwEmergency"
-                            android:layout_width="270dp"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:gravity="center"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginStart="16dp"
                             android:orientation="horizontal"
                             android:visibility="gone">
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/lblEmergencyInterval"
-                                android:textStyle="bold" />
-
-                            <EditText
+                            <ImageView
+                                android:id="@+id/imgEmergency"
                                 android:tag="Config_Emergency"
-                                android:id="@+id/txtEmergency"
-                                android:layout_width="45dp"
-                                android:layout_height="35dp"
-                                android:layout_marginEnd="4dp"
-                                android:layout_marginStart="8dp"
-                                android:ems="10"
-                                android:gravity="center_horizontal"
-                                android:hint="@string/txtEmergencyHint"
-                                android:inputType="number"
-                                android:textSize="14sp" />
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:layout_gravity="top"
+                                android:layout_marginBottom="8dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_marginTop="8dp"
+                                android:visibility="gone" />
 
-                            <TextView
-                                android:layout_width="wrap_content"
+                            <LinearLayout
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="@string/lblSeconds" />
+                                android:layout_gravity="center"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/lblEmergencyInterval"
+                                    android:textStyle="bold" />
+
+                                <EditText
+                                    android:tag="Config_Emergency"
+                                    android:id="@+id/txtEmergency"
+                                    android:layout_width="45dp"
+                                    android:layout_height="35dp"
+                                    android:layout_marginEnd="4dp"
+                                    android:layout_marginStart="8dp"
+                                    android:ems="10"
+                                    android:gravity="center_horizontal"
+                                    android:hint="@string/txtEmergencyHint"
+                                    android:inputType="number"
+                                    android:textSize="14sp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/lblSeconds" />
+                        </LinearLayout>
+
+
+                        <TextView
+                            android:tag="Config_Emergency"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:layout_gravity="center"
+                            android:layout_weight="1"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="@string/lblDeepsleep"
+                            android:textSize="12sp" />
 
                         </LinearLayout>
 
                         <TextView
+                            android:tag="Config_Emergency"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/lblEmergency"
                             android:textSize="12sp" />
 
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:background="#DDD" />
+
                         <android.support.v7.widget.SwitchCompat
                             android:tag="Config_TurnOff"
                             android:id="@+id/swTurnOff"
-                            android:layout_width="270dp"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
                             android:checked="false"
                             android:text="@string/swTurnOff" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/lblTurnOff"
-                            android:textSize="12sp" />
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:orientation="horizontal"
+                            android:layout_gravity="bottom">
+
+                            <ImageView
+                                android:id="@+id/imgTurnOff"
+                                android:tag="Config_TurnOff"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:layout_gravity="top"
+                                android:layout_marginBottom="8dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_marginTop="8dp"
+                                android:visibility="gone" />
+
+                            <TextView
+                                android:tag="Config_TurnOff"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_weight="1"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:text="@string/lblTurnOff"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:background="#DDD" />
 
                         <android.support.v7.widget.SwitchCompat
                             android:tag="Config_Magnet"
                             android:id="@+id/swMagnetAlert"
-                            android:layout_width="270dp"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
                             android:checked="true"
                             android:text="@string/swMagnetAlert" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/lblMagnetAlert"
-                            android:textSize="12sp" />
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:orientation="horizontal"
+                            android:layout_gravity="bottom">
+
+                            <ImageView
+                                android:id="@+id/imgMagnet"
+                                android:tag="Config_Magnet"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:layout_gravity="top"
+                                android:layout_marginBottom="8dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_marginTop="8dp"
+                                android:visibility="gone" />
+
+                            <TextView
+                                android:tag="Config_Magnet"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_weight="1"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:text="@string/lblMagnetAlert"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:background="#DDD" />
 
                         <android.support.v7.widget.SwitchCompat
                             android:tag="Config_UpdateActive"
                             android:id="@+id/swPeriodicUpdate"
-                            android:layout_width="270dp"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
                             android:checked="false"
                             android:text="@string/swUpdateInterval" />
 
@@ -178,74 +332,135 @@
                             android:id="@+id/vwUpdateInterval"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:visibility="gone"
+                            android:layout_gravity="bottom"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginStart="16dp"
                             android:orientation="vertical"
-                            android:layout_marginStart="8dp">
+                            android:visibility="gone">
 
-                            <TextView
+                            <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:text="@string/lblUpdateIdle"
-                                android:textStyle="bold" />
+                                android:orientation="horizontal">
 
-                            <com.xw.repo.BubbleSeekBar
-                                android:tag="Config_UpdateIdle"
-                                android:id="@+id/seekBarIdle"
-                                android:visibility="visible"
+                                <ImageView
+                                    android:id="@+id/imgUpdateIdle"
+                                    android:tag="Config_UpdateIdle"
+                                    android:layout_width="32dp"
+                                    android:layout_height="32dp"
+                                    android:layout_gravity="center"
+                                    android:layout_marginBottom="8dp"
+                                    android:layout_marginEnd="8dp"
+                                    android:layout_marginTop="8dp"
+                                    android:clickable="true"
+                                    android:focusable="true"
+                                    android:visibility="gone" />
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginTop="8dp"
+                                        android:text="@string/lblUpdateIdle"
+                                        android:textStyle="bold" />
+
+                                    <com.xw.repo.BubbleSeekBar
+                                        android:id="@+id/seekBarIdle"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginBottom="8dp"
+                                        android:layout_marginTop="4dp"
+                                        android:focusable="true"
+                                        android:focusableInTouchMode="true"
+                                        android:tag="Config_UpdateIdle"
+                                        app:bsb_auto_adjust_section_mark="true"
+                                        app:bsb_bubble_color="@color/colorAccent"
+                                        app:bsb_bubble_text_color="#FFF"
+                                        app:bsb_hide_bubble="true"
+                                        app:bsb_is_float_type="false"
+                                        app:bsb_max="24"
+                                        app:bsb_min="0"
+                                        app:bsb_progress="12"
+                                        app:bsb_second_track_color="@color/colorAccent"
+                                        app:bsb_section_count="4"
+                                        app:bsb_section_text_position="below_section_mark"
+                                        app:bsb_show_section_mark="true"
+                                        app:bsb_show_section_text="true"
+                                        app:bsb_touch_to_seek="true"
+                                        app:bsb_track_color="#888" />
+
+                                </LinearLayout>
+
+                            </LinearLayout>
+
+                            <View
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
+                                android:layout_height="1dp"
                                 android:layout_marginBottom="8dp"
-                                android:layout_marginTop="4dp"
-                                android:focusable="true"
-                                android:focusableInTouchMode="true"
-                                app:bsb_auto_adjust_section_mark="true"
-                                app:bsb_bubble_color="@color/colorAccent"
-                                app:bsb_bubble_text_color="#FFF"
-                                app:bsb_is_float_type="false"
-                                app:bsb_max="24"
-                                app:bsb_min="0"
-                                app:bsb_progress="12"
-                                app:bsb_second_track_color="@color/colorAccent"
-                                app:bsb_section_count="4"
-                                app:bsb_section_text_position="below_section_mark"
-                                app:bsb_show_section_mark="true"
-                                app:bsb_hide_bubble="true"
-                                app:bsb_touch_to_seek="true"
-                                app:bsb_show_section_text="true"
-                                app:bsb_track_color="#888" />
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
-                                android:text="@string/lblUpdateActive"
-                                android:textStyle="bold" />
+                                android:background="#DDD" />
 
-                            <com.xw.repo.BubbleSeekBar
-                                android:tag="Config_UpdateActive"
-                                android:id="@+id/seekBarActive"
-                                android:visibility="visible"
+                            <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginBottom="8dp"
-                                android:layout_marginTop="4dp"
-                                android:focusable="true"
-                                android:focusableInTouchMode="true"
-                                app:bsb_auto_adjust_section_mark="true"
-                                app:bsb_bubble_color="@color/colorAccent"
-                                app:bsb_bubble_text_color="#FFF"
-                                app:bsb_max="3600"
-                                app:bsb_min="0"
-                                app:bsb_progress="900"
-                                app:bsb_second_track_color="@color/colorAccent"
-                                app:bsb_section_count="4"
-                                app:bsb_hide_bubble="true"
-                                app:bsb_touch_to_seek="true"
-                                app:bsb_section_text_position="below_section_mark"
-                                app:bsb_show_section_mark="true"
-                                app:bsb_show_section_text="true"
-                                app:bsb_track_color="#888" />
+                                android:orientation="horizontal">
+
+                                <ImageView
+                                    android:id="@+id/imgUpdateActive"
+                                    android:tag="Config_UpdateActive"
+                                    android:layout_width="32dp"
+                                    android:layout_height="32dp"
+                                    android:layout_gravity="center"
+                                    android:layout_marginBottom="8dp"
+                                    android:layout_marginEnd="8dp"
+                                    android:layout_marginTop="8dp"
+                                    android:clickable="true"
+                                    android:focusable="true"
+                                    android:visibility="gone" />
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginTop="8dp"
+                                        android:text="@string/lblUpdateActive"
+                                        android:textStyle="bold" />
+
+                                    <com.xw.repo.BubbleSeekBar
+                                        android:id="@+id/seekBarActive"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginBottom="8dp"
+                                        android:layout_marginTop="4dp"
+                                        android:focusable="true"
+                                        android:focusableInTouchMode="true"
+                                        android:tag="Config_UpdateActive"
+                                        app:bsb_auto_adjust_section_mark="true"
+                                        app:bsb_bubble_color="@color/colorAccent"
+                                        app:bsb_bubble_text_color="#FFF"
+                                        app:bsb_hide_bubble="true"
+                                        app:bsb_max="3600"
+                                        app:bsb_min="0"
+                                        app:bsb_progress="900"
+                                        app:bsb_second_track_color="@color/colorAccent"
+                                        app:bsb_section_count="4"
+                                        app:bsb_section_text_position="below_section_mark"
+                                        app:bsb_show_section_mark="true"
+                                        app:bsb_show_section_text="true"
+                                        app:bsb_touch_to_seek="true"
+                                        app:bsb_track_color="#888" />
+
+                                </LinearLayout>
+
+                            </LinearLayout>
 
                         </LinearLayout>
 
@@ -253,6 +468,8 @@
                             android:id="@+id/lblUpdateInterval"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
                             android:layout_marginBottom="8dp"
                             android:text="@string/lblUpdateInterval"
                             android:textSize="12sp" />
@@ -293,7 +510,7 @@
                         android:background="#82b3d6" />
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:animateLayoutChanges="true"
                         android:orientation="vertical"
@@ -301,7 +518,7 @@
 
                         <android.support.v7.widget.SwitchCompat
                             android:id="@+id/swNotifications"
-                            android:layout_width="270dp"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:checked="true"
                             android:text="@string/swNotifications" />
@@ -314,44 +531,53 @@
 
                         <LinearLayout
                             android:id="@+id/vwNotificationOptions"
-                            android:layout_width="250dp"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="16dp"
                             android:orientation="vertical">
 
                             <CheckBox
-                                android:tag="Notify_Coordinates"
-                                android:id="@+id/cbCoordinates"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:checked="true"
-                                android:text="@string/cbCoordinates" />
-
-                            <CheckBox
-                                android:tag="Notify_Emergency"
                                 android:id="@+id/cbEmergency"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
                                 android:checked="true"
+                                android:tag="Notify_Emergency"
                                 android:text="@string/cbEmergency" />
 
                             <CheckBox
-                                android:tag="Notify_Magnet"
                                 android:id="@+id/cbMagnet"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
                                 android:checked="true"
+                                android:tag="Notify_Magnet"
                                 android:text="@string/cbMagnet" />
 
                             <CheckBox
-                                android:tag="Notify_Available"
+                                android:id="@+id/cbMovement"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:checked="true"
+                                android:tag="Notify_Movement"
+                                android:text="@string/cbMovement" />
+
+                            <CheckBox
+                                android:id="@+id/cbStopped"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:checked="true"
+                                android:tag="Notify_Stopped"
+                                android:text="@string/cbStopped" />
+
+                            <CheckBox
                                 android:id="@+id/cbAvailable"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
+                                android:tag="Notify_Available"
                                 android:text="@string/cbAvailable" />
 
                             <TextView

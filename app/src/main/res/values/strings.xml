@@ -80,10 +80,8 @@
     <string name="lblShockAlert">Caso ativado, o rastreador enviará um alerta ao detectar qualquer vibração do dispositivo.</string>
     <string name="swShockAlert">Ativar alerta de vibração</string>
     <string name="swMoveoutAlert">Ativar alerta de evasão</string>
-    <string name="lblMoveOutDistance">Limite de distancia:</string>
-    <string name="txtMoveOutHint">200</string>
     <string name="lblMeters">metros</string>
-    <string name="lblMoveoutAlert">O rastreador enviará alertas em sequência quando detectar movimentação além do limite de tolerância escolhido.</string>
+    <string name="lblMoveoutAlert">O rastreador enviará alertas em sequência quando se movimentar acima de 200 metros da posição atual.</string>
     <string name="swSpeedAlert">Ativar alerta de velocidade</string>
     <string name="lblSpeedLimit">Limite de velocidade:</string>
     <string name="txtSpeedLimitHint">120</string>
@@ -96,7 +94,8 @@
     <string name="swNotifications">Exibir notificações deste rastreador</string>
     <string name="lblNotificationTitle">Opções de notificação</string>
     <string name="lblNotifications">Defina quais eventos gerados pelo rastreador que deverão resultar em uma notificação a ser exibida neste celular.</string>
-    <string name="cbCoordinates">Notificação de localização</string>
+    <string name="cbMovement">Notificação de movimentação</string>
+    <string name="cbStopped">Notificação de permanência</string>
     <string name="cbLowBattery">Notificação de bateria fraca</string>
     <string name="cbMoveout">Notificação de evasão </string>
     <string name="cbShockAlert">Notificação de vibração </string>
@@ -165,6 +164,11 @@
     <string name="imgAddress">Endereço</string>
     <string name="imgDatetime">Data/hora</string>
     <string name="btnClose">Fechar</string>
+    <string name="menu_detail">Visualizar detalhes</string>
+    <string name="menu_default_settings">Configurações básicas</string>
+    <string name="menu_tracker_settings">Configurações do rastreador</string>
+    <string name="menu_notification_settings">Opções de notificação</string>
+    <string name="menu_delete_tracker">Excluir rastreador</string>
 
     <string-array name="weekdays">
         <item>Domingo</item>

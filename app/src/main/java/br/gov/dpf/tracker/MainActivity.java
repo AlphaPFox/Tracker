@@ -22,12 +22,13 @@ import android.support.v7.widget.Toolbar;
 import android.transition.Fade;
 import android.util.Pair;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
@@ -47,6 +48,11 @@ public class MainActivity
     private TrackerAdapter mAdapter;
     private Query mQuery;
 
+    //Store current Firestore DB instance
+    private FirebaseFirestore mFireStoreDB;
+
+    //Save current activity scroll position
+    private int scrollPosition = 0;
 
     //Define possible result operations
     public static int RESULT_ERROR = -1;
@@ -83,7 +89,7 @@ public class MainActivity
         mSwipeRefresh.setColorSchemeResources(R.color.colorAccent);
 
         //Initialize db instance
-        FirebaseFirestore mFireStoreDB = FirebaseFirestore.getInstance();
+        mFireStoreDB = FirebaseFirestore.getInstance();
 
         //Define db search query
         mQuery = mFireStoreDB.collection("Tracker").orderBy("lastUpdate", Query.Direction.DESCENDING);
@@ -112,8 +118,7 @@ public class MainActivity
             protected void onError(FirebaseFirestoreException e) {
 
                 // Show a snack bar on errors
-                Snackbar.make(findViewById(android.R.id.content),
-                        "Error: check logs for info.", Snackbar.LENGTH_LONG).show();
+                Snackbar.make(findViewById(android.R.id.content), "Erro ao carregar informações.", Snackbar.LENGTH_LONG).show();
             }
         };
 
@@ -157,29 +162,6 @@ public class MainActivity
         });
     }
 
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mAdapter.startListening();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        mAdapter.stopListening();
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig)
-    {
-        //Change recycler view items size if orientation changes
-        mRecyclerLayoutManager.resizeOnOrientationChange();
-
-        //Call super method
-        super.onConfigurationChanged(newConfig);
-    }
-
     //Close loading indicator from swipe refresh
     public void dismissLoading()
     {
@@ -199,6 +181,9 @@ public class MainActivity
         {
             // Show success message
             Snackbar.make(findViewById(android.R.id.content), "Rastreador " + (requestCode == REQUEST_INSERT ? "cadastrado" : "atualizado") + " com sucesso.", Snackbar.LENGTH_LONG).show();
+
+            //Scroll to previously saved position
+            mRecyclerLayoutManager.scrollToPosition(scrollPosition);
         }
         else if (resultCode == RESULT_ERROR)
         {
@@ -257,7 +242,48 @@ public class MainActivity
         }
     }
 
-    public void OnTrackerEdit(final Tracker tracker, View viewRoot)
+    public void OnTrackerDelete(final Tracker tracker)
+    {
+        //Create confirmation dialog
+        new AlertDialog.Builder(this)
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setTitle("Deletar rastreador")
+            .setMessage("Confirma a exclusão do rastreador " + tracker.getName() + "?")
+            .setPositiveButton("Sim", new DialogInterface.OnClickListener()
+            {
+                @Override
+                public void onClick(DialogInterface dialog, int which)
+                {
+                    //Execute DB operation
+                    mFireStoreDB
+                            .collection("Tracker")
+                            .document(tracker.getIdentification())
+                            .delete()
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+
+                                    // Show a snack bar success message
+                                    Snackbar.make(findViewById(android.R.id.content), "Rastreador excluído com sucesso.", Snackbar.LENGTH_LONG).show();
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+
+                                    // Show a snack bar success message
+                                    Snackbar.make(findViewById(android.R.id.content), "Erro ao excluir rastreador.", Snackbar.LENGTH_LONG).show();
+
+                                }
+                            });
+                }
+
+            })
+            .setNegativeButton("Não", null)
+            .show();
+    }
+
+    public void OnTrackerEdit(final Tracker tracker, final View viewRoot)
     {
         //Create a new popup menu
         PopupMenu popup = new PopupMenu(this, viewRoot.findViewById(R.id.imgEdit));
@@ -270,6 +296,7 @@ public class MainActivity
             @Override
             public boolean onMenuItemClick(MenuItem item)
             {
+
                 // Create an intent to open Settings activity
                 final Intent intent = new Intent();
 
@@ -279,8 +306,19 @@ public class MainActivity
                 // Put tracker data on intent
                 intent.putExtra("Tracker", tracker);
 
+                // Save current position
+                scrollPosition = mRecyclerView.getScrollState();
+
                 switch (item.getItemId())
                 {
+                    case R.id.action_detail:
+
+                        //Call method to open detail activity
+                        OnTrackerSelected(tracker, viewRoot);
+
+                        //End method
+                        return true;
+
                     case R.id.action_default_settings:
 
                         //Set intent to open DefaultSettingsActivity
@@ -318,6 +356,13 @@ public class MainActivity
                         //End method
                         return true;
 
+                    case R.id.action_delete:
+
+                        //Call method to confirm tracker deletion
+                        OnTrackerDelete(tracker);
+
+                        //End method
+                        return true;
                 }
                 return false;
             }
@@ -397,6 +442,48 @@ public class MainActivity
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mAdapter.startListening();
+    }
+
+    @Override
+    protected void onPause()
+    {
+        //Save current scroll position
+        scrollPosition = mRecyclerLayoutManager.findFirstCompletelyVisibleItemPosition();
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume()
+    {
+        //Scroll to previously saved position
+        mRecyclerLayoutManager.scrollToPosition(scrollPosition);
+
+        //Clear variable
+        scrollPosition = 0;
+        super.onResume();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mAdapter.stopListening();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig)
+    {
+        //Change recycler view items size if orientation changes
+        mRecyclerLayoutManager.resizeOnOrientationChange();
+
+        //Call super method
+        super.onConfigurationChanged(newConfig);
     }
 
     //Check if API is available
