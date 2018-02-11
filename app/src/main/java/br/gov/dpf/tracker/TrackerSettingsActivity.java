@@ -608,16 +608,11 @@ public class TrackerSettingsActivity extends AppCompatActivity
         {
             //Initialize configuration array
             configurations = new HashMap<>();
+
+            //Insert tracker on DB
+            transaction.set(firestoreDB.collection("Tracker").document(tracker.getIdentification()), tracker);
         }
-
-        //Reinitialize last update array
-        tracker.setLastUpdate(new HashMap<String, Object>());
-
-        //Flag configuration update
-        tracker.getLastUpdate().put("status", "REQUESTED");
-
-        //If activity is changing tracker model
-        if (getIntent().getBooleanExtra("UpdateModel", false))
+        else if (getIntent().getBooleanExtra("UpdateModel", false)) //If changing tracker model
         {
             //For each previous model configuration
             for(String configName : configurations.keySet())
@@ -625,9 +620,6 @@ public class TrackerSettingsActivity extends AppCompatActivity
                 //Add to transaction delete old configuration
                 transaction.delete(configCollection.document(configName));
         }
-
-        //Update tracker status
-        transaction.set(firestoreDB.collection("Tracker").document(tracker.getIdentification()), tracker);
 
         //Get notification options switch
         boolean showNotifications = ((SwitchCompat) findViewById(R.id.swNotifications)).isChecked();
@@ -852,6 +844,9 @@ public class TrackerSettingsActivity extends AppCompatActivity
 
             //Update configuration
             transaction.set(collection.document(configName), config);
+
+            //Update tracker to request a new update from server
+            transaction.update(firestoreDB.document("Tracker/" + tracker.getIdentification()), "lastUpdate", null);
         }
     }
 

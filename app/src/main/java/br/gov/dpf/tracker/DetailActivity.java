@@ -374,7 +374,7 @@ public class DetailActivity
                 args.putString("BatteryLevel", coordinates.getStringBatteryLevel());
                 args.putString("SignalLevel", coordinates.getStringSignalLevel());
                 args.putString("TrackerName", tracker.getName());
-                args.putString("TrackerModel", tracker.formatTrackerModel());
+                args.putString("TrackerModel", tracker.getModel());
                 args.putString("TrackerColor", tracker.getBackgroundColor());
                 args.putString("Datetime", new SimpleDateFormat("dd/MM/yyyy hh:mm", Locale.getDefault()).format(coordinates.getDatetime()));
 

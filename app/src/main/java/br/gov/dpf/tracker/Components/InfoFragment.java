@@ -61,7 +61,7 @@ public class InfoFragment extends Fragment {
         imgModel.setCircleBackgroundColor(Color.parseColor(arguments.getString("TrackerColor")));
 
         //Set model item image
-        imgModel.setImageDrawable(getResources().getDrawable(getResources().getIdentifier("model_" + arguments.getString("TrackerModel").toLowerCase(), "drawable", getActivity().getPackageName())));
+        imgModel.setImageDrawable(getResources().getDrawable(getResources().getIdentifier("model_" + arguments.getString("TrackerModel"), "drawable", getActivity().getPackageName())));
 
         //Set title bar background color
         vwTitleBar.setBackgroundColor(imgModel.getCircleBackgroundColor());

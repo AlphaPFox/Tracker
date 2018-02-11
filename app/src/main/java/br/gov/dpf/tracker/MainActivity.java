@@ -92,7 +92,7 @@ public class MainActivity
         mFireStoreDB = FirebaseFirestore.getInstance();
 
         //Define db search query
-        mQuery = mFireStoreDB.collection("Tracker").orderBy("lastUpdate", Query.Direction.DESCENDING);
+        mQuery = mFireStoreDB.collection("Tracker");
 
         // RecyclerView
         mAdapter = new TrackerAdapter(this, mQuery) {

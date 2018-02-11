@@ -26,6 +26,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import br.gov.dpf.tracker.Entities.Tracker;
 
@@ -133,6 +134,7 @@ public class DefaultSettingsActivity extends AppCompatActivity {
         //Get tracker name and identification
         String trackerName = ((EditText) findViewById(R.id.txtTrackerName)).getText().toString();
         String trackerIdentification = ((EditText) findViewById(R.id.txtTrackerIdentification)).getText().toString();
+        String trackerDescription = ((EditText) findViewById(R.id.txtTrackerDescription)).getText().toString();
 
         //Check user input
         if(trackerName.isEmpty() || trackerIdentification.isEmpty())
@@ -153,66 +155,68 @@ public class DefaultSettingsActivity extends AppCompatActivity {
             //Check if activity is in edit mode
             if(editMode)
             {
-                //Update tracker data
-                tracker.setName(trackerName);
-                tracker.setDescription(((EditText) findViewById(R.id.txtTrackerDescription)).getText().toString());
-                tracker.setIdentification(trackerIdentification);
+                //Create an update map
+                Map<String,Object> updates = new HashMap<>();
 
-                //Update tracker color
-                tracker.setBackgroundColor(mColor);
+                //Get fields to be updated
+                updates.put("name", trackerName);
+                updates.put("description", trackerDescription);
+                updates.put("backgroundColor", mColor);
+                updates.put("model", mModel);
 
-                //Check if user is changing tracker model
-                if(!tracker.getModel().equals(mModel))
-                {
-                    //Save new tracker model
-                    tracker.setModel(mModel);
+                // Perform update on DB
+                FirebaseFirestore.getInstance()
+                        .collection("Tracker")
+                        .document(tracker.getIdentification())
+                        .update(updates)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
 
-                    //Create intent to call next activity (Tracker Configurations)
-                    Intent intent = new Intent(DefaultSettingsActivity.this, TrackerSettingsActivity.class);
+                                //If changing tracker model, add a new step before finish
+                                if(!tracker.getModel().equals(mModel))
+                                {
+                                    //Save new tracker model
+                                    tracker.setModel(mModel);
 
-                    //Put tracker data on intent
-                    intent.putExtra("Tracker", tracker);
+                                    //Create intent to call next activity (Tracker Configurations)
+                                    Intent intent = new Intent(DefaultSettingsActivity.this, TrackerSettingsActivity.class);
 
-                    //Inform activity intention: change tracker model
-                    intent.putExtra("UpdateModel", true);
+                                    //Put tracker data on intent
+                                    intent.putExtra("Tracker", tracker);
 
-                    //Inform activity intention: insert new tracker
-                    intent.putExtra("Request", MainActivity.REQUEST_UPDATE);
+                                    //Inform activity intention: update existing tracker
+                                    intent.putExtra("Request", MainActivity.REQUEST_UPDATE);
 
-                    //Start next activity
-                    startActivityForResult(intent, MainActivity.REQUEST_UPDATE);
-                }
-                else
-                {
-                    // If editing an existing tracker
-                    FirebaseFirestore.getInstance()
-                            .collection("Tracker")
-                            .document(tracker.getIdentification())
-                            .set(tracker, SetOptions.merge())
-                            .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
+                                    //Inform activity intention: change tracker model
+                                    intent.putExtra("UpdateModel", true);
 
+                                    //Start next activity
+                                    startActivityForResult(intent, MainActivity.REQUEST_UPDATE);
+                                }
+                                else
+                                {
                                     //Set result editing result - OK
                                     setResult(MainActivity.RESULT_SUCCESS);
 
                                     //End activity (returns to parent activity -> OnActivityResult)
                                     finish();
-
                                 }
-                            })
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
 
-                                    //Set result editing result - OK
-                                    setResult(MainActivity.RESULT_ERROR);
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
 
-                                    //End activity (returns to parent activity -> OnActivityResult)
-                                    finish();
-                                }
-                            });
-                }
+                                //Set result editing result - OK
+                                setResult(MainActivity.RESULT_ERROR);
+
+                                //End activity (returns to parent activity -> OnActivityResult)
+                                finish();
+                            }
+                        });
+
             }
             else
             {

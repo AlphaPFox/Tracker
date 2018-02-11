@@ -91,14 +91,6 @@ public class Tracker implements Parcelable {
 
     public void setLastCoordinate(Map<String, Object> mLastUpdate) { this.mLastCoordinate = mLastUpdate; }
 
-    public Map<String, Object> getLastUpdate() {
-        return mLastUpdate;
-    }
-
-    public void setLastUpdate(Map<String, Object> mLastUpdate) {
-        this.mLastUpdate = mLastUpdate;
-    }
-
     protected Tracker(Parcel in) {
         mName = in.readString();
         mDescription = in.readString();
