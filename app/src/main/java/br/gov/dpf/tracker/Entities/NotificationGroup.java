@@ -54,20 +54,26 @@ public class NotificationGroup {
     public void addNotification(NotificationMessage newNotification, NotificationManagerCompat notificationManager)
     {
         //For each existing notification on this group
-        for(NotificationMessage notification : notifications)
+        for(int i = 0; i < notifications.size(); i++)
         {
+            //Get notification at specified index
+            NotificationMessage notification = notifications.get(i);
+
             //If it is from the same topic
             if(notification.getTopic().equals((newNotification.getTopic())))
             {
-                //Remove old notification (will be replaced)
-                notifications.remove(notification);
+                //Replace old notification
+                notifications.add(i, newNotification);
 
                 //Cancel old notification
                 notificationManager.cancel(notification.getNotificationID());
+
+                //Notification replaced, end method
+                return;
             }
         }
 
-        //Add new notification
+        //No notification with the same topic, add new notification
         notifications.add(newNotification);
     }
 

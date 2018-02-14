@@ -3,6 +3,7 @@ package br.gov.dpf.tracker.Entities;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Date;
 import java.util.Map;
 
 @SuppressWarnings("unused")
@@ -22,9 +23,11 @@ public class Tracker implements Parcelable {
 
     private String mBackgroundColor;
 
-    private Map<String, Object> mLastUpdate;
+    private Date mLastUpdate;
 
     private Map<String, Object> mLastCoordinate;
+
+    private Map<String, Object> mLastConfiguration;
 
     //Required by FireStore DB
     public Tracker() {
@@ -87,9 +90,21 @@ public class Tracker implements Parcelable {
 
     public void setSignalLevel(String mSignalLevel) { this.mSignalLevel = mSignalLevel; }
 
+    public Date getLastUpdate() {
+        return mLastUpdate;
+    }
+
+    public void setLastUpdate(Date mLastUpdate) {
+        this.mLastUpdate = mLastUpdate;
+    }
+
     public Map<String, Object> getLastCoordinate() { return mLastCoordinate; }
 
-    public void setLastCoordinate(Map<String, Object> mLastUpdate) { this.mLastCoordinate = mLastUpdate; }
+    public void setLastCoordinate(Map<String, Object> mLastCoordinate) { this.mLastCoordinate = mLastCoordinate; }
+
+    public Map<String, Object> getLastConfiguration() { return mLastConfiguration; }
+
+    public void setLastConfiguration(Map<String, Object> mLastConfiguration) { this.mLastConfiguration = mLastConfiguration; }
 
     protected Tracker(Parcel in) {
         mName = in.readString();
@@ -99,6 +114,8 @@ public class Tracker implements Parcelable {
         mBatteryLevel = in.readString();
         mSignalLevel = in.readString();
         mBackgroundColor = in.readString();
+        long tmpLastUpdate = in.readLong();
+        mLastUpdate = tmpLastUpdate != -1 ? new Date(tmpLastUpdate) : null;
     }
 
     @Override
@@ -115,6 +132,7 @@ public class Tracker implements Parcelable {
         dest.writeString(mBatteryLevel);
         dest.writeString(mSignalLevel);
         dest.writeString(mBackgroundColor);
+        dest.writeLong(mLastUpdate != null ? mLastUpdate.getTime() : -1L);
     }
 
     public static final Parcelable.Creator<Tracker> CREATOR = new Parcelable.Creator<Tracker>() {

@@ -29,9 +29,14 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.Query;
+
+import java.util.Collections;
+import java.util.Comparator;
 
 import br.gov.dpf.tracker.Components.GridAutoLayoutManager;
 import br.gov.dpf.tracker.Entities.Tracker;
@@ -41,12 +46,12 @@ public class MainActivity
         extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private RecyclerView mRecyclerView;
+
+    //Load components used on recycler view
     public GridAutoLayoutManager mRecyclerLayoutManager;
+    private RecyclerView mRecyclerView;
     private View mEmptyView, mLoadingView;
-    private SwipeRefreshLayout mSwipeRefresh;
     private TrackerAdapter mAdapter;
-    private Query mQuery;
 
     //Store current Firestore DB instance
     private FirebaseFirestore mFireStoreDB;
@@ -68,35 +73,38 @@ public class MainActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Check if google maps is available for this device
         checkGoogleMapsAPI();
 
+        //Build toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //Set drawer layout components
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
 
+        //Set drawer toggle
         drawer.addDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
 
+        //Initialize navigation view
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        //Get views to replace recycler view while loading or if empty
         mLoadingView = findViewById(R.id.vwLoadingCardView);
         mEmptyView = findViewById(R.id.vwEmptyCardView);
-
-        mSwipeRefresh = findViewById(R.id.swipeRefreshLayout);
-        mSwipeRefresh.setColorSchemeResources(R.color.colorAccent);
 
         //Initialize db instance
         mFireStoreDB = FirebaseFirestore.getInstance();
 
-        //Define db search query
-        mQuery = mFireStoreDB.collection("Tracker");
+        //Disable offline data
+        //mFireStoreDB.setFirestoreSettings(new FirebaseFirestoreSettings.Builder().setPersistenceEnabled(false).build());
 
         // RecyclerView
-        mAdapter = new TrackerAdapter(this, mQuery) {
-
+        mAdapter = new TrackerAdapter(this, mFireStoreDB.collection("Tracker").orderBy("lastUpdate", Query.Direction.DESCENDING))
+        {
             @Override
             protected void onDataChanged()
             {
@@ -110,8 +118,6 @@ public class MainActivity
                 //Hide loading view
                 mLoadingView.setVisibility(View.GONE);
 
-                //Dismiss loading indicator if present
-                dismissLoading();
             }
 
             @Override
@@ -151,26 +157,6 @@ public class MainActivity
 
             }
         });
-
-        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-
-                // Refresh items
-                mAdapter.setQuery(mQuery);
-            }
-        });
-    }
-
-    //Close loading indicator from swipe refresh
-    public void dismissLoading()
-    {
-        //Keep loading indicator for UI response
-        new Handler().postDelayed(new Runnable() {
-            @Override public void run() {
-                mSwipeRefresh.setRefreshing(false);
-            }
-        }, 600);
     }
 
     @Override
@@ -404,9 +390,7 @@ public class MainActivity
                 return true;
 
             case R.id.action_refresh:
-                // Refresh items
-                mSwipeRefresh.setRefreshing(true);
-                mAdapter.setQuery(mQuery);
+
                 return true;
 
             case R.id.action_settings:

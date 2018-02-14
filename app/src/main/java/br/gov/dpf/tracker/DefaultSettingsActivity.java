@@ -25,6 +25,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -163,6 +164,7 @@ public class DefaultSettingsActivity extends AppCompatActivity {
                 updates.put("description", trackerDescription);
                 updates.put("backgroundColor", mColor);
                 updates.put("model", mModel);
+                updates.put("lastUpdate", new Date());
 
                 // Perform update on DB
                 FirebaseFirestore.getInstance()
@@ -231,6 +233,9 @@ public class DefaultSettingsActivity extends AppCompatActivity {
 
                 //Save tracker color
                 tracker.setBackgroundColor(mColor);
+
+                //Save create date
+                tracker.setLastUpdate(new Date());
 
                 //Run query to check if there is already a tracker with this identification
                 FirebaseFirestore.getInstance()

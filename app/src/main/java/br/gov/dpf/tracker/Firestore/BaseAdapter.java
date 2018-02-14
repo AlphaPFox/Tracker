@@ -61,7 +61,6 @@ public abstract class BaseAdapter<VH extends RecyclerView.ViewHolder>
                     break;
             }
         }
-
         onDataChanged();
     }
 

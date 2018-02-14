@@ -74,6 +74,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:clickable="true"
+            android:contentDescription="@string/imgEdit"
             android:focusable="true"
             android:foreground="?attr/selectableItemBackground"
             android:padding="8dp"
@@ -85,12 +86,12 @@
             android:id="@+id/googleMap"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:background="#EEE"
-            app:layout_constraintBottom_toTopOf="@+id/imgLastUpdate"
+            app:layout_constraintBottom_toTopOf="@+id/bottom_panel"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/inset_divider"
@@ -101,86 +102,166 @@
             android:id="@+id/loadingBackground"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:background="#EEE"
             android:gravity="center"
-            app:layout_constraintBottom_toTopOf="@+id/imgLastUpdate"
+            app:layout_constraintBottom_toTopOf="@+id/bottom_panel"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/inset_divider">
 
             <ProgressBar
-                android:id="@+id/progressBar"
+                android:id="@+id/indeterminateProgress"
                 android:layout_width="200dp"
                 android:layout_height="200dp"
                 android:background="@drawable/map_icon"
                 android:indeterminateDrawable="@drawable/loading" />
 
+            <br.gov.dpf.tracker.Components.CircleProgressBar
+                android:id="@+id/circleProgressBar"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:background="@drawable/map_icon"
+                android:visibility="gone"
+                app:progressBarThickness="5dp" />
+
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/imgLastUpdate"
-            android:layout_width="wrap_content"
-            android:layout_height="20dp"
-            android:layout_marginBottom="8dp"
-            android:layout_marginStart="8dp"
-            android:contentDescription="@string/imgBatteryLevel"
-            android:src="@drawable/ic_access_time_black_24dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <TextView
-            android:id="@+id/txtLastUpdate"
-            android:layout_width="0dp"
-            android:layout_height="20dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="2dp"
-            android:text="@string/txtWaitingTitle"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            android:textColor="#DE000000"
-            app:layout_constraintEnd_toStartOf="@+id/imgBatteryLevel"
-            app:layout_constraintStart_toEndOf="@id/imgLastUpdate"
-            app:layout_constraintTop_toTopOf="@+id/imgLastUpdate"
-            tools:text="Aguardando dados..." />
-
-        <ImageView
-            android:id="@+id/imgBatteryLevel"
-            android:layout_width="15dp"
-            android:layout_height="20dp"
-            android:contentDescription="@string/imgBatteryLevel"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_battery_90_black_24dp"
-            app:layout_constraintEnd_toStartOf="@+id/lblBatteryLevel"
-            app:layout_constraintTop_toTopOf="@+id/txtLastUpdate" />
-
-        <TextView
-            android:id="@+id/lblBatteryLevel"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/bottom_panel"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintEnd_toStartOf="@+id/imgSignalLevel"
-            app:layout_constraintTop_toTopOf="@+id/imgBatteryLevel"
-            tools:text="93%" />
+            android:orientation="horizontal"
+            android:layout_margin="8dp"
+            app:layout_constraintBottom_toBottomOf="parent">
 
-        <ImageView
-            android:id="@+id/imgSignalLevel"
-            android:layout_width="wrap_content"
-            android:layout_height="20dp"
-            android:contentDescription="@string/imgSignalLevel"
-            android:src="@drawable/ic_signal_cellular_3_bar_black_24dp"
-            app:layout_constraintEnd_toStartOf="@+id/lblSignalLevel"
-            app:layout_constraintTop_toTopOf="@+id/lblBatteryLevel" />
+            <android.support.constraint.ConstraintLayout
+                android:id="@+id/vwLastCoordinate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone">
 
-        <TextView
-            android:id="@+id/lblSignalLevel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/imgSignalLevel"
-            tools:text="85%" />
+                <ImageView
+                    android:id="@+id/imgLastUpdate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp"
+                    android:contentDescription="@string/imgBatteryLevel"
+                    android:src="@drawable/ic_access_time_black_24dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <TextView
+                    android:id="@+id/txtLastUpdate"
+                    android:layout_width="0dp"
+                    android:layout_height="20dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginStart="2dp"
+                    android:text="@string/txtWaitingTitle"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    android:textColor="#DE000000"
+                    app:layout_constraintEnd_toStartOf="@+id/imgBatteryLevel"
+                    app:layout_constraintStart_toEndOf="@id/imgLastUpdate"
+                    app:layout_constraintTop_toTopOf="@+id/imgLastUpdate"
+                    tools:text="Aguardando dados..." />
+
+                <ImageView
+                    android:id="@+id/imgBatteryLevel"
+                    android:layout_width="15dp"
+                    android:layout_height="20dp"
+                    android:contentDescription="@string/imgBatteryLevel"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_battery_90_black_24dp"
+                    app:layout_constraintEnd_toStartOf="@+id/lblBatteryLevel"
+                    app:layout_constraintTop_toTopOf="@+id/txtLastUpdate" />
+
+                <TextView
+                    android:id="@+id/lblBatteryLevel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintEnd_toStartOf="@+id/imgSignalLevel"
+                    app:layout_constraintTop_toTopOf="@+id/imgBatteryLevel"
+                    tools:text="93%" />
+
+                <ImageView
+                    android:id="@+id/imgSignalLevel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp"
+                    android:contentDescription="@string/imgSignalLevel"
+                    android:src="@drawable/ic_signal_cellular_3_bar_black_24dp"
+                    app:layout_constraintEnd_toStartOf="@+id/lblSignalLevel"
+                    app:layout_constraintTop_toTopOf="@+id/lblBatteryLevel" />
+
+                <TextView
+                    android:id="@+id/lblSignalLevel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/imgSignalLevel"
+                    tools:text="85%" />
+
+            </android.support.constraint.ConstraintLayout>
+
+            <android.support.constraint.ConstraintLayout
+                android:id="@+id/vwConfiguration"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="visible">
+
+                <ImageView
+                    android:id="@+id/imgStatus"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription="@string/lblTrackerConfig"
+                    android:src="@drawable/ic_settings_grey_40dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <TextView
+                    android:id="@+id/txtConfigDescription"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="2dp"
+                    android:layout_marginTop="2dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    android:textColor="#DE333333"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toEndOf="@id/imgStatus"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="Reiniciando configurações" />
+
+                <TextView
+                    android:id="@+id/txtStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="2dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    android:textColor="#DE000000"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toEndOf="@id/imgStatus"
+                    app:layout_constraintTop_toBottomOf="@id/txtConfigDescription"
+                    tools:text="Processo de configuração finalizado" />
+
+                <TextView
+                    android:id="@+id/txtProgress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAllCaps="false"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    android:textColor="#3f9d2c"
+                    android:textSize="12sp"
+                    android:textStyle="bold|italic"
+                    app:layout_constraintBottom_toBottomOf="@+id/txtStatus"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    tools:text="80%" />
+
+            </android.support.constraint.ConstraintLayout>
+
+        </LinearLayout>
+
 
     </android.support.constraint.ConstraintLayout>
 

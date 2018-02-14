@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import br.gov.dpf.tracker.Components.CircleProgressBar;
 import br.gov.dpf.tracker.Components.InfoFragment;
 import br.gov.dpf.tracker.Components.TrackerUpdater;
 import br.gov.dpf.tracker.Entities.Coordinates;
@@ -81,7 +82,7 @@ public class DetailActivity
     private InfoWindowManager infoWindowManager;
     private LinearLayout mLoadingBackground;
     private RecyclerView mRecyclerView;
-    private CircleImageView imgToolbarIcon;
+    private CircleProgressBar circleProgressBar;
     private DisplayMetrics mMetrics;
 
     //Database components
@@ -127,11 +128,11 @@ public class DetailActivity
         //Get display metrics
         mMetrics = Resources.getSystem().getDisplayMetrics();
 
-        //if intent contains tracker data
-        if (intent.hasExtra("Tracker"))
-        {
-            loadLayout(intent);
-        }
+        //Get tracker data from intent
+        tracker = intent.getParcelableExtra("Tracker");
+
+        // Load layout elements using tracker data
+        loadLayout(intent);
 
         // Load coordinates data
         loadDataset();
@@ -148,9 +149,6 @@ public class DetailActivity
 
     public void loadLayout(Intent intent)
     {
-        //Get tracker data from intent
-        tracker = intent.getParcelableExtra("Tracker");
-
         //Get sliding layout
         mLayout = findViewById(R.id.sliding_layout);
 
@@ -169,11 +167,12 @@ public class DetailActivity
         buildQuery(intent);
 
         //Get layout elements
-        imgToolbarIcon = mToolbar.findViewById(R.id.imgModel);
+        CircleImageView imgToolbarIcon = mToolbar.findViewById(R.id.imgModel);
         TextView txtToolbarTitle = mToolbar.findViewById(R.id.txtToolbarTitle);
         TextView txtToolbarSubtitle = mToolbar.findViewById(R.id.txtToolbarSubtitle);
         ProgressBar progressBar = findViewById(R.id.progressBar);
         mLoadingBackground = findViewById(R.id.loadingBackground);
+        circleProgressBar = findViewById(R.id.circleProgressBar);
 
         //Set circle image background color
         imgToolbarIcon.setCircleBackgroundColor(Color.parseColor(tracker.getBackgroundColor()));
@@ -183,6 +182,7 @@ public class DetailActivity
 
         //Change loading color
         progressBar.getIndeterminateDrawable().setColorFilter(imgToolbarIcon.getCircleBackgroundColor(), android.graphics.PorterDuff.Mode.SRC_IN);
+        circleProgressBar.setColor(imgToolbarIcon.getCircleBackgroundColor());
 
         //Set toolbar texts
         txtToolbarTitle.setText(tracker.formatName());
@@ -509,9 +509,6 @@ public class DetailActivity
             }
             else if(requestCode == REQUEST_EDIT)
             {
-                //Respond to previous activity intention (INSERT/EDIT/DELETE tracker)
-                TrackerAdapter.manageTracker(intent, mLayout);
-
                 //Load changes on layout
                 loadLayout(intent);
 
@@ -610,11 +607,6 @@ public class DetailActivity
                             @Override
                             public void onClick(DialogInterface dialog, int which)
                             {
-                                //Create updater object
-                                TrackerUpdater updater = new TrackerUpdater();
-
-                                //Request update
-                                updater.requestUpdate(mLayout, tracker);
                             }
                         })
                         .setNegativeButton("Não (FCM)", new DialogInterface.OnClickListener()

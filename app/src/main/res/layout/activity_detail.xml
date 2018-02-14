@@ -39,8 +39,17 @@
                 android:id="@+id/progressBar"
                 android:layout_width="200dp"
                 android:layout_height="200dp"
+                android:visibility="gone"
                 android:background="@drawable/map_icon"
                 android:indeterminateDrawable="@drawable/loading" />
+
+            <br.gov.dpf.tracker.Components.CircleProgressBar
+                android:id="@+id/circleProgressBar"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:background="@drawable/map_icon"
+                app:progress="0"
+                app:progressBarThickness="5dp"/>
 
         </LinearLayout>
 

@@ -59,7 +59,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="2dp"
                         android:layout_margin="8dp"
-                        android:background="#82b3d6" />
+                        android:background="#644286f5" />
 
                     <LinearLayout
                         android:id="@+id/vwConfigurations"
@@ -241,7 +241,7 @@
                             android:layout_marginEnd="16dp"
                             android:layout_marginStart="16dp"
                             android:orientation="horizontal"
-                            android:visibility="gone">
+                            android:visibility="visible">
 
                             <ImageView
                                 android:id="@+id/imgSpeedLimit"
@@ -259,47 +259,44 @@
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:orientation="horizontal">
+                                android:orientation="vertical">
+
+                                <com.xw.repo.BubbleSeekBar
+                                    android:id="@+id/sbSpeed"
+                                    android:tag="Config_OverSpeed"
+                                    android:visibility="gone"
+                                    android:layout_marginTop="8dp"
+                                    android:layout_marginBottom="8dp"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:focusable="true"
+                                    android:focusableInTouchMode="true"
+                                    app:bsb_bubble_color="@color/colorAccent"
+                                    app:bsb_bubble_text_color="#FFF"
+                                    app:bsb_hide_bubble="false"
+                                    app:bsb_max="200"
+                                    app:bsb_min="50"
+                                    app:bsb_progress="80"
+                                    app:bsb_second_track_color="@color/colorAccent"
+                                    app:bsb_section_count="3"
+                                    app:bsb_section_text_position="below_section_mark"
+                                    app:bsb_show_section_mark="true"
+                                    app:bsb_show_section_text="true"
+                                    app:bsb_touch_to_seek="true"
+                                    app:bsb_track_color="#888" />
 
                                 <TextView
-                                    android:layout_width="wrap_content"
+                                    android:tag="Config_OverSpeed"
+                                    android:clickable="true"
+                                    android:focusable="true"
+                                    android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:text="@string/lblSpeedLimit"
-                                    android:textStyle="bold" />
-
-                                <EditText
-                                    android:id="@+id/txtSpeedLimit"
-                                    android:layout_width="45dp"
-                                    android:layout_height="35dp"
-                                    android:layout_marginEnd="4dp"
-                                    android:layout_marginStart="8dp"
-                                    android:ems="10"
-                                    android:gravity="center_horizontal"
-                                    android:hint="@string/txtSpeedLimitHint"
-                                    android:inputType="number"
-                                    android:tag="OverSpeed"
-                                    android:textSize="14sp" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/lblSpeedLimitUnit" />
+                                    android:text="@string/lblSpeedAlert"
+                                    android:textSize="12sp" />
 
                             </LinearLayout>
 
                         </LinearLayout>
-
-                        <TextView
-                            android:tag="Config_OverSpeed"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:layout_marginStart="16dp"
-                            android:layout_marginEnd="16dp"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/lblSpeedAlert"
-                            android:textSize="12sp" />
 
                         <View
                             android:layout_width="match_parent"
@@ -327,54 +324,61 @@
 
                             <ImageView
                                 android:id="@+id/imgPeriodicUpdate"
-                                android:tag="Config_PeriodicUpdate"
-                                android:clickable="true"
-                                android:focusable="true"
                                 android:layout_width="32dp"
                                 android:layout_height="32dp"
                                 android:layout_gravity="top"
                                 android:layout_marginEnd="8dp"
                                 android:layout_marginTop="8dp"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:tag="Config_PeriodicUpdate"
                                 android:visibility="gone" />
 
-                            <com.xw.repo.BubbleSeekBar
-                                android:id="@+id/sbPeriodicUpdate"
+                            <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginBottom="8dp"
-                                android:layout_marginTop="8dp"
-                                android:focusable="true"
-                                android:focusableInTouchMode="true"
-                                android:tag="Config_PeriodicUpdate"
-                                android:visibility="gone"
-                                app:bsb_auto_adjust_section_mark="true"
-                                app:bsb_bubble_color="@color/colorAccent"
-                                app:bsb_bubble_text_color="@color/colorPrimaryDark"
-                                app:bsb_hide_bubble="true"
-                                app:bsb_max="6"
-                                app:bsb_min="0"
-                                app:bsb_progress="2"
-                                app:bsb_second_track_color="@color/colorAccent"
-                                app:bsb_section_count="6"
-                                app:bsb_section_text_position="below_section_mark"
-                                app:bsb_show_section_mark="true"
-                                app:bsb_show_section_text="true"
-                                app:bsb_touch_to_seek="true"
-                                app:bsb_track_color="#888" />
+                                android:orientation="vertical">
+
+                                <com.xw.repo.BubbleSeekBar
+                                    android:id="@+id/sbPeriodicUpdate"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="8dp"
+                                    android:layout_marginTop="8dp"
+                                    android:focusable="true"
+                                    android:focusableInTouchMode="true"
+                                    android:tag="Config_PeriodicUpdate"
+                                    android:visibility="gone"
+                                    app:bsb_auto_adjust_section_mark="true"
+                                    app:bsb_bubble_color="@color/colorAccent"
+                                    app:bsb_bubble_text_color="#FFF"
+                                    app:bsb_hide_bubble="true"
+                                    app:bsb_max="6"
+                                    app:bsb_min="0"
+                                    app:bsb_progress="2"
+                                    app:bsb_second_track_color="@color/colorAccent"
+                                    app:bsb_section_count="6"
+                                    app:bsb_section_text_position="below_section_mark"
+                                    app:bsb_show_section_mark="true"
+                                    app:bsb_show_section_text="true"
+                                    app:bsb_touch_to_seek="true"
+                                    app:bsb_track_color="#888" />
+
+                                <TextView
+                                    android:tag="Config_PeriodicUpdate"
+                                    android:clickable="true"
+                                    android:focusable="true"
+                                    android:layout_width="match_parent"
+                                    android:id="@+id/lblUpdateInterval"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/lblUpdateInterval"
+                                    android:textSize="12sp" />
+
+                            </LinearLayout>
+
+
 
                         </LinearLayout>
-
-                        <TextView
-                            android:tag="Config_PeriodicUpdate"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:layout_marginStart="16dp"
-                            android:layout_marginEnd="16dp"
-                            android:layout_width="match_parent"
-                            android:id="@+id/lblUpdateInterval"
-                            android:layout_height="wrap_content"
-                            android:text="@string/lblUpdateInterval"
-                            android:textSize="12sp" />
 
                     </LinearLayout>
 
@@ -410,7 +414,7 @@
                         android:layout_marginEnd="8dp"
                         android:layout_marginStart="8dp"
                         android:layout_marginTop="8dp"
-                        android:background="#82b3d6" />
+                        android:background="#644286f5" />
 
                     <LinearLayout
                         android:layout_width="match_parent"

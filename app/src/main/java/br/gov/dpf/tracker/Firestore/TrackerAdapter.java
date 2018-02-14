@@ -37,7 +37,9 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.maps.android.ui.IconGenerator;
 
 import java.util.Date;
+import java.util.Map;
 
+import br.gov.dpf.tracker.Components.CircleProgressBar;
 import br.gov.dpf.tracker.Entities.Tracker;
 import br.gov.dpf.tracker.MainActivity;
 import br.gov.dpf.tracker.R;
@@ -94,14 +96,6 @@ public class TrackerAdapter
         // - replace the contents of the view with that element
         holder.txtTrackerName.setText(tracker.formatName());
         holder.txtTrackerModel.setText(tracker.formatTrackerModel());
-        holder.txtBatteryLevel.setText(tracker.getBatteryLevel());
-        holder.txtSignalLevel.setText(tracker.getSignalLevel());
-
-        //Check if tracker has an coordinate available
-        if(tracker.getLastCoordinate() != null)
-            holder.txtLastUpdateValue.setText(formatDateTime((Date) tracker.getLastCoordinate().get("datetime"), false));
-        else
-            holder.txtLastUpdateValue.setText(mActivity.getResources().getString(R.string.txtWaitingTitle));
 
         //Set user defined color
         holder.imageView.setCircleBackgroundColor(Color.parseColor(tracker.getBackgroundColor()));
@@ -109,8 +103,8 @@ public class TrackerAdapter
         //Set model item image
         holder.imageView.setImageDrawable(mActivity.getResources().getDrawable(mActivity.getResources().getIdentifier("model_" + tracker.getModel().toLowerCase(), "drawable", mActivity.getPackageName())));
 
-        //Change color to loading animation
-        holder.progressBar.getIndeterminateDrawable().setColorFilter(holder.imageView.getCircleBackgroundColor(), android.graphics.PorterDuff.Mode.SRC_IN);
+        //Change color to default loading animation
+        holder.indeterminateProgress.getIndeterminateDrawable().setColorFilter(holder.imageView.getCircleBackgroundColor(), android.graphics.PorterDuff.Mode.SRC_IN);
 
         //Set item click listener
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -210,147 +204,113 @@ public class TrackerAdapter
                             if (googleMap.getMapType() != GoogleMap.MAP_TYPE_NONE && tracker.getLastCoordinate() != null)
                             {
                                 //Hide loading animation
-                                ((View) holder.progressBar.getParent()).animate().setDuration(500).alpha(0f);
+                                ((View) holder.indeterminateProgress.getParent()).animate().setDuration(500).alpha(0f);
                             }
                         }
                     });
                 }
             });
         }
-    }
 
-    public static void manageTracker(final Intent intent, final View rootView)
-    {
-        //Get Firestore DB instance
-        final FirebaseFirestore mFireStoreDB = FirebaseFirestore.getInstance();
+        //Get last configuration
+        Map<String, Object> configuration = tracker.getLastConfiguration();
 
-        //Load tracker data from previous activity
-        final Tracker tracker = intent.getParcelableExtra("Tracker");
+        //Get current date
+        Date now = new Date();
 
-        //Check previous activity intent is to delete this tracker
-        if (intent.hasExtra("DeleteTracker"))
+        //Check if last tracker configuration occurred less than 30 minutes ago
+        if(configuration != null && now.getTime() - ((Date)configuration.get("datetime")).getTime() < 30*60*1000)
         {
-            //Create transaction batch
-            final WriteBatch batch = mFireStoreDB.batch();
+            //Hide last coordinate panel to show configuration status
+            holder.lastCoordinate.setVisibility(View.GONE);
+            holder.lastConfiguration.setVisibility(View.VISIBLE);
 
-            //Delete operation to be performed if user don't cancel
-            batch.delete(mFireStoreDB.collection("Tracker").document(tracker.getIdentification()));
-
-            //Inform user that an delete operation is going to happen
-            final Snackbar message = Snackbar
-                    .make(rootView, "Exclusão em andamento...", Snackbar.LENGTH_LONG);
-
-            //Set available action
-            message.setAction("CANCELAR", new View.OnClickListener()
+            //If configuration is in progress
+            if(configuration.get("progress") != null)
             {
-                @Override
-                public void onClick(View view) {
+                //Get configuration progress
+                int progress = Integer.valueOf(configuration.get("progress").toString());
 
-                    //Undo tracker delete
-                    message.dismiss();
+                //Check if configuration started
+                if(progress == 0)
+                {
+                    //If configuration still at 0% set color to red
+                    holder.txtProgress.setTextColor(Color.RED);
+
+                    //Show circle progress bar to indicate configuration progress
+                    holder.indeterminateProgress.setVisibility(View.VISIBLE);
+                    holder.circleProgressBar.setVisibility(View.GONE);
+
+                    //Show configuration progress (%)
+                    holder.txtProgress.setText(mActivity.getResources().getString(R.string.txtConfigurating, progress));
                 }
-            });
+                else if(progress < 100)
+                {
+                    //Configuration stared, show progress in green color
+                    holder.txtProgress.setTextColor(Color.parseColor("#3f9d2c"));
 
-            //Set dismiss event callback
-            message.addCallback(new Snackbar.Callback() {
+                    //Show circle progress bar to indicate configuration progress
+                    holder.indeterminateProgress.setVisibility(View.GONE);
+                    holder.circleProgressBar.setVisibility(View.VISIBLE);
+                    holder.circleProgressBar.setProgress(progress);
 
-                @Override
-                public void onDismissed(Snackbar snackbar, int event) {
+                    //Change color to loading animation
+                    holder.circleProgressBar.setColor(holder.imageView.getCircleBackgroundColor());
 
-                    //If user did not canceled delete operation
-                    if(event == DISMISS_EVENT_TIMEOUT)
-                    {
-                        // Commit the delete operation
-                        batch.commit()
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-
-                                        //Update notifications with empty intent to remove subscription to topics
-                                        TrackerAdapter.updateTrackerNotifications(new Intent(), tracker.getIdentification(), rootView.getContext());
-
-                                        //Show success message
-                                        Snackbar.make(rootView, "Exclusão finalizada com sucesso!", Snackbar.LENGTH_LONG).show();
-                                    }
-                                })
-                                .addOnFailureListener(new OnFailureListener()
-                                {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-
-                                        //Show error message
-                                        Snackbar.make(rootView, "Erro durante a exclusão: " + e.getMessage(), Snackbar.LENGTH_LONG).show();
-                                    }
-                                });
-                    }
+                    //Show configuration progress (%)
+                    holder.txtProgress.setText(mActivity.getResources().getString(R.string.txtConfigurating, progress));
                 }
-            });
+                else
+                {
+                    //Configuration finished, clear text from progress indicator
+                    holder.txtProgress.setText("");
 
-            //Show snack bar
-            message.show();
-        }
-        else if (intent.hasExtra("InsertTracker") || intent.hasExtra("UpdateTracker"))
-        {
-            // If not DELETE intent, then this is an INSERT/UPDATE database operation
-            mFireStoreDB.collection("Tracker").document(tracker.getIdentification())
-                    .set(tracker, SetOptions.merge())
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            //Update notification options
-                            TrackerAdapter.updateTrackerNotifications(intent, tracker.getIdentification(), rootView.getContext());
+                    //Show circle progress bar to indicate configuration progress
+                    holder.indeterminateProgress.setVisibility(View.VISIBLE);
+                    holder.circleProgressBar.setVisibility(View.GONE);
+                }
+            }
 
-                            //Create snack bar to show feed back to user
-                            Snackbar.make(rootView, "Rastreador " + (intent.hasExtra("InsertTracker") ? "cadastrado" : "atualizado") +" com sucesso" , Snackbar.LENGTH_LONG).show();
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Snackbar.make(rootView, "Erro na operação: " + e.toString(), Snackbar.LENGTH_LONG).show();
-                        }
-                    });
-        }
-    }
+            //Set configuration status text
+            holder.txtConfigDescription.setText(configuration.get("description").toString());
+            holder.txtStatus.setText(configuration.get("status").toString());
 
-    private static void updateTrackerNotifications(Intent i, String TrackerID, Context context)
-    {
-        //Get shared preferences
-        SharedPreferences.Editor sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context).edit();
-
-        //Get firebase messaging instance
-        FirebaseMessaging notifications = FirebaseMessaging.getInstance();
-
-        //Save options
-        updateNotificationOption(sharedPreferences, notifications, i, TrackerID, "NotifyLowBattery");
-        updateNotificationOption(sharedPreferences, notifications, i, TrackerID, "NotifyMovement");
-        updateNotificationOption(sharedPreferences, notifications, i, TrackerID, "NotifyStopped");
-        updateNotificationOption(sharedPreferences, notifications, i, TrackerID, "NotifyStatus");
-        updateNotificationOption(sharedPreferences, notifications, i, TrackerID, "NotifyAvailable");
-        updateNotificationOption(sharedPreferences, notifications, i, TrackerID, "NotifySMSResponse");
-
-        //Commit changes on shared preferences
-        sharedPreferences.apply();
-    }
-
-    private static void updateNotificationOption(SharedPreferences.Editor sharedPreferences, FirebaseMessaging notifications, Intent i, String TrackerID, String topic)
-    {
-        //If user wants to receive this notification
-        if(i.getBooleanExtra(topic, false))
-        {
-            //Subscribe to notification topic
-            notifications.subscribeToTopic(TrackerID + "_" + topic);
-
-            //Save option on shared preferences
-            sharedPreferences.putBoolean(TrackerID + "_" + topic, true);
+            //Select image to represent configuration status
+            switch (configuration.get("step").toString())
+            {
+                case "ERROR":
+                    holder.imgStatus.setImageResource(R.drawable.status_error);
+                    holder.txtProgress.setTextColor(Color.RED);
+                    break;
+                case "SUCCESS":
+                    holder.imgStatus.setImageResource(R.drawable.status_ok);
+                    break;
+                default:
+                    holder.imgStatus.setImageResource(R.drawable.ic_settings_grey_40dp);
+                    break;
+            }
         }
         else
         {
-            //Unsubscribe to notification topic
-            notifications.unsubscribeFromTopic(TrackerID + "_" + topic);
+            //Show panel to indicate last coordinate available
+            holder.lastCoordinate.setVisibility(View.VISIBLE);
+            holder.lastConfiguration.setVisibility(View.GONE);
 
-            //Remove option from shared preferences
-            sharedPreferences.putBoolean(TrackerID + "_" + topic, false);
+            //Show last known battery level and signal level
+            holder.txtBatteryLevel.setText(tracker.getBatteryLevel());
+            holder.txtSignalLevel.setText(tracker.getSignalLevel());
+
+            //If tracker has an coordinate available
+            if(tracker.getLastCoordinate() != null)
+            {
+                //Show last coordinate datetime
+                holder.txtLastUpdateValue.setText(formatDateTime((Date) tracker.getLastCoordinate().get("datetime"), false));
+            }
+            else
+            {
+                //No data available, show default message
+                holder.txtLastUpdateValue.setText(mActivity.getResources().getString(R.string.txtWaitingTitle));
+            }
         }
     }
 
@@ -366,7 +326,7 @@ public class TrackerAdapter
         }
 
         //Show loading animation again
-        ((View) holder.progressBar.getParent()).animate().setDuration(500).alpha(1f);
+        ((View) holder.indeterminateProgress.getParent()).animate().setDuration(500).alpha(1f);
 
         super.onViewRecycled(holder);
     }
@@ -378,10 +338,12 @@ public class TrackerAdapter
             extends RecyclerView.ViewHolder {
 
         // each data item is just a string in this case
-        TextView txtTrackerName, txtTrackerModel, txtLastUpdateValue, txtBatteryLevel, txtSignalLevel;
-        ImageView imgEdit;
+        TextView txtTrackerName, txtTrackerModel, txtLastUpdateValue, txtBatteryLevel, txtSignalLevel, txtStatus, txtProgress, txtConfigDescription;
+        View lastCoordinate, lastConfiguration;
+        ImageView imgEdit, imgStatus;
         CircleImageView imageView;
-        ProgressBar progressBar;
+        CircleProgressBar circleProgressBar;
+        ProgressBar indeterminateProgress;
         MapView mapView;
 
         //Google maps object
@@ -398,15 +360,22 @@ public class TrackerAdapter
             txtLastUpdateValue = itemView.findViewById(R.id.txtLastUpdate);
             txtBatteryLevel = itemView.findViewById(R.id.lblBatteryLevel);
             txtSignalLevel = itemView.findViewById(R.id.lblSignalLevel);
+            txtStatus = itemView.findViewById(R.id.txtStatus);
+            txtProgress = itemView.findViewById(R.id.txtProgress);
+            txtConfigDescription = itemView.findViewById(R.id.txtConfigDescription);
 
-            //Progress bar
-            progressBar = itemView.findViewById(R.id.progressBar);
-
-            //Circle image view
+            //Image views
             imageView = itemView.findViewById(R.id.imgTracker);
-
-            //Edit image view
+            imgStatus = itemView.findViewById(R.id.imgStatus);
             imgEdit = itemView.findViewById(R.id.imgEdit);
+
+            //Layout panels
+            lastConfiguration = itemView.findViewById(R.id.vwConfiguration);
+            lastCoordinate = itemView.findViewById(R.id.vwLastCoordinate);
+
+            //Progress bars
+            indeterminateProgress = itemView.findViewById(R.id.indeterminateProgress);
+            circleProgressBar = itemView.findViewById(R.id.circleProgressBar);
 
             //Google maps view
             mapView = itemView.findViewById(R.id.googleMap);

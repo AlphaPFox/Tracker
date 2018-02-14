@@ -193,11 +193,24 @@ public class NotificationController
         }
 
         //If notification has progress indicator
-        if(notification.getProgress() > 0)
+        if(notification.getTopic().contains("_NotifyUpdate"))
         {
-            //Set progress to notification
+            //Set max priority to this progress notification
             single_notification.setPriority(Notification.PRIORITY_MAX);
-            single_notification.setProgress(100, notification.getProgress(), false);
+
+            //If update has not started yet
+            if(notification.getProgress() == 0)
+            {
+                //Set progress as indeterminate
+                single_notification.setProgress(0, 0, true);
+            }
+            else
+            {
+                //Show progress value
+                single_notification.setProgress(100, notification.getProgress(), false);
+            }
+
+            //Disable cancel on click feature
             single_notification.setAutoCancel(false);
         }
 
@@ -376,13 +389,6 @@ public class NotificationController
 
                 //Dismiss notification
                 notificationManager.cancel(notification.getNotificationID());
-
-                //Check if there is an update related to this notification
-                if (notification.updater != null)
-                {
-                    //Cancel update
-                    notification.updater.dismissUpdate();
-                }
             }
 
             //Dismiss summary
@@ -403,13 +409,6 @@ public class NotificationController
         {
             //Find notification by id
             NotificationMessage notification = notificationGroup.findNotification(notificationID);
-
-            //Check if there is an update related to this notification
-            if(notification != null && notification.updater != null)
-            {
-                //Cancel update
-                notification.updater.dismissUpdate();
-            }
 
             //Remove notification from group
             notificationGroup.notifications.remove(notification);

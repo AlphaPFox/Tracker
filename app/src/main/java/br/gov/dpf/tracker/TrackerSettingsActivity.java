@@ -36,8 +36,10 @@ import com.xw.repo.BubbleSeekBar;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
+import br.gov.dpf.tracker.Components.TrackerUpdater;
 import br.gov.dpf.tracker.Entities.Configuration;
 import br.gov.dpf.tracker.Entities.Tracker;
 
@@ -51,6 +53,9 @@ public class TrackerSettingsActivity extends AppCompatActivity
 
     //Flag indicating if a DB operation is running
     private boolean loading;
+
+    //Flag indicating if any configuration on tracker changed
+    private boolean configChanged;
 
     //Menu item used to confirm and refresh settings
     private MenuItem confirmMenu, refreshMenu;
@@ -371,7 +376,24 @@ public class TrackerSettingsActivity extends AppCompatActivity
         //Set support text
         ((TextView) findViewById(R.id.lblUpdateInterval)).setText(getResources().getText(R.string.lblUpdateInterval));
 
-        //Set seek bar sections
+        //Set speed seek bar sections
+        ((BubbleSeekBar) findViewById(R.id.sbSpeed)).setCustomSectionTextArray(new BubbleSeekBar.CustomSectionTextArray() {
+            @NonNull
+            @Override
+            public SparseArray<String> onCustomize(int sectionCount, @NonNull SparseArray<String> array) {
+                array.clear();
+
+                //Update interval options
+                array.put(0, "50 km/h");
+                array.put(1, "100 km/h");
+                array.put(2, "150 km/h");
+                array.put(3, "200 km/h");
+
+                return array;
+            }
+        });
+
+        //Set periodic update seek bar sections
         ((BubbleSeekBar) findViewById(R.id.sbPeriodicUpdate)).setCustomSectionTextArray(new BubbleSeekBar.CustomSectionTextArray() {
             @NonNull
             @Override
@@ -394,7 +416,7 @@ public class TrackerSettingsActivity extends AppCompatActivity
         //Set visibility events for specific switches
         changeLayoutVisibility(R.id.swShockAlert, -1, R.id.cbShockAlert, R.id.imgShockAlert);
         changeLayoutVisibility(R.id.swMoveoutAlert, -1, R.id.cbMoveout, R.id.imgMoveOut);
-        changeLayoutVisibility(R.id.swSpeedAlert, R.id.vwSpeedLimit, R.id.cbSpeedLimit, R.id.imgSpeedLimit);
+        changeLayoutVisibility(R.id.swSpeedAlert, R.id.sbSpeed, R.id.cbSpeedLimit, R.id.imgSpeedLimit);
         changeLayoutVisibility(R.id.swStatusCheck, -1, R.id.cbStatusCheck, R.id.imgStatusCheck);
         changeLayoutVisibility(R.id.swPeriodicUpdate, R.id.sbPeriodicUpdate, -1, R.id.imgPeriodicUpdate);
         changeLayoutVisibility(R.id.swNotifications, R.id.vwNotificationOptions, -1, -1);
@@ -434,10 +456,28 @@ public class TrackerSettingsActivity extends AppCompatActivity
                 ImageView imageView = findViewById(imageViewID);
 
                 //If checkbox ID is valid
-                if(imageView != null && !isChecked)
+                if(imageView != null)
                 {
-                    //Enable or disable according to option selected
+                    //By default, hide image view
                     imageView.setVisibility(View.GONE);
+
+                    //If no previous configuration available
+                    if(configurations != null)
+                    {
+                        //Get current config name
+                        String configName = imageView.getTag().toString().substring(7);
+
+                        //For each configuration available to this tracker
+                        for(String configuration : configurations.keySet())
+                        {
+                            //Check if switch state is the same as last configuration status
+                            if(configName.equals(configuration) && configurations.get(configName).isEnabled() == isChecked)
+                            {
+                                //Show image
+                                imageView.setVisibility(View.VISIBLE);
+                            }
+                        }
+                    }
                 }
             }
         });
@@ -619,6 +659,9 @@ public class TrackerSettingsActivity extends AppCompatActivity
 
                 //Add to transaction delete old configuration
                 transaction.delete(configCollection.document(configName));
+
+            //Clear configuration array
+            configurations.clear();
         }
 
         //Get notification options switch
@@ -637,16 +680,26 @@ public class TrackerSettingsActivity extends AppCompatActivity
                 SwitchCompat swShockAlert = findViewById(R.id.swShockAlert);
                 SwitchCompat swMoveOutAlert = findViewById(R.id.swMoveoutAlert);
                 SwitchCompat swSpeedAlert = findViewById((R.id.swSpeedAlert));
-                EditText txtSpeedAlert = findViewById(R.id.txtSpeedLimit);
+                BubbleSeekBar sbSpeedAlert = findViewById(R.id.sbSpeed);
                 SwitchCompat swPeriodicUpdate = findViewById(R.id.swPeriodicUpdate);
                 BubbleSeekBar sbPeriodicUpdate = findViewById(R.id.sbPeriodicUpdate);
 
+                //Check if tracker has no previous configuration
+                if(configurations.isEmpty())
+                {
+                    //Set initial configurations
+                    updateConfiguration("Reset", "Reiniciando configurações", Configuration.PRIORITY_MAX, true, null, configCollection, transaction);
+                    updateConfiguration("Begin", "Inicializando dispositivo", Configuration.PRIORITY_HIGH, true, null, configCollection, transaction);
+                    updateConfiguration("Admin", "Definindo usuário administrador", Configuration.PRIORITY_MEDIUM, true, null, configCollection, transaction);
+                    updateConfiguration("Location", "Solicitando localização atual", Configuration.PRIORITY_MIN, true, null, configCollection, transaction);
+                }
+
                 //Update device configuration
-                updateConfiguration("StatusCheck", swStatusCheck.isChecked(), null, configCollection, transaction);
-                updateConfiguration("Shock", swShockAlert.isChecked(), null, configCollection, transaction);
-                updateConfiguration("MoveOut", swMoveOutAlert.isChecked(), null, configCollection, transaction);
-                updateConfiguration("OverSpeed", swSpeedAlert.isChecked(), txtSpeedAlert.getText().toString(), configCollection, transaction);
-                updateConfiguration("PeriodicUpdate", swPeriodicUpdate.isChecked(), getUpdateIntervalBySection(sbPeriodicUpdate.getProgress()), configCollection, transaction);
+                updateConfiguration("Shock",  "Configurando: Alerta de vibração", Configuration.PRIORITY_LOW, swShockAlert.isChecked(), null, configCollection, transaction);
+                updateConfiguration("MoveOut",  "Configurando: Alerta de evasão", Configuration.PRIORITY_LOW, swMoveOutAlert.isChecked(), null, configCollection, transaction);
+                updateConfiguration("OverSpeed",  "Configurando: Alerta de velocidade", Configuration.PRIORITY_LOW, swSpeedAlert.isChecked(), String.format(Locale.getDefault(), "%03d", sbSpeedAlert.getProgress()), configCollection, transaction);
+                updateConfiguration("StatusCheck",  "Configurando: Atualização de status", Configuration.PRIORITY_LOW, swStatusCheck.isChecked(), null, configCollection, transaction);
+                updateConfiguration("PeriodicUpdate", "Configurando: Localização periódica", Configuration.PRIORITY_DEFAULT, swPeriodicUpdate.isChecked(), getUpdateIntervalBySection(sbPeriodicUpdate.getProgress()), configCollection, transaction);
 
                 //Update user notification preferences
                 updateNotificationOption(R.id.cbMovement, showNotifications, editor);
@@ -672,12 +725,12 @@ public class TrackerSettingsActivity extends AppCompatActivity
                 BubbleSeekBar sbIdle = findViewById(R.id.seekBarIdle);
 
                 //Update device configuration
-                updateConfiguration("DeepSleep", swDeepSleep.isChecked(), null, configCollection, transaction);
-                updateConfiguration("Emergency", swEmergency.isChecked(), txtEmergency.getText().toString(), configCollection, transaction);
-                updateConfiguration("TurnOff", swTurnOff.isChecked(), null, configCollection, transaction);
-                updateConfiguration("Magnet", swMagnetAlert.isChecked(), null, configCollection, transaction);
-                updateConfiguration("UpdateIdle", swInterval.isChecked(), String.valueOf(Math.max(sbIdle.getProgress(), 1)), configCollection, transaction);
-                updateConfiguration("UpdateActive", swInterval.isChecked(), String.valueOf(Math.max(sbActive.getProgress(), 1)), configCollection, transaction);
+                updateConfiguration("DeepSleep", "Modo sono profundo", Configuration.PRIORITY_DEFAULT, swDeepSleep.isChecked(), null, configCollection, transaction);
+                updateConfiguration("Emergency", "Alerta de emergência", Configuration.PRIORITY_DEFAULT, swEmergency.isChecked(), txtEmergency.getText().toString(), configCollection, transaction);
+                updateConfiguration("TurnOff", "Opção de desligamento", Configuration.PRIORITY_DEFAULT, swTurnOff.isChecked(), null, configCollection, transaction);
+                updateConfiguration("Magnet", "Alerta de magnetismo", Configuration.PRIORITY_DEFAULT, swMagnetAlert.isChecked(), null, configCollection, transaction);
+                updateConfiguration("UpdateIdle", "Localização: ratreador parado", Configuration.PRIORITY_DEFAULT, swInterval.isChecked(), String.valueOf(Math.max(sbIdle.getProgress(), 1)), configCollection, transaction);
+                updateConfiguration("UpdateActive", "Localização, rastreador em movimento", Configuration.PRIORITY_DEFAULT, swInterval.isChecked(), String.valueOf(Math.max(sbActive.getProgress(), 1)), configCollection, transaction);
 
                 //Update user notification preferences
                 updateNotificationOption(R.id.cbMovement, showNotifications, editor);
@@ -699,6 +752,13 @@ public class TrackerSettingsActivity extends AppCompatActivity
                 break;
         }
 
+        //Check if user changed configuration on this tracker
+        if(configChanged)
+        {
+            //Update tracker to request a new update from server
+            transaction.update(firestoreDB.document("Tracker/" + tracker.getIdentification()), "lastConfiguration", null);
+        }
+
         //Execute DB operation
         transaction
                 .commit()
@@ -709,8 +769,23 @@ public class TrackerSettingsActivity extends AppCompatActivity
                         //Commit changes on shared preferences
                         editor.apply();
 
-                        //Set activity result
-                        setResult(MainActivity.RESULT_SUCCESS);
+                        //If it is a new tracker, or updated configuration an existing tracker
+                        if(!editMode || configChanged)
+                        {
+                            //Initialize updater
+                            TrackerUpdater updateIndicator = new TrackerUpdater(TrackerSettingsActivity.this, tracker);
+
+                            //Request configuration update
+                            updateIndicator.initialize();
+
+                            //Set activity result
+                            setResult(MainActivity.RESULT_SUCCESS, getIntent());
+                        }
+                        else
+                        {
+                            //No changes made by user
+                            setResult(MainActivity.RESULT_CANCELED, getIntent());
+                        }
 
                         //Finish activity
                         finish();
@@ -776,44 +851,40 @@ public class TrackerSettingsActivity extends AppCompatActivity
             }
             else if(view instanceof ImageView)
             {
-                //Get config status
-                if(config.isEnabled())
+                //Show current configuration status
+                if(config.getStatus().get("step").equals("SUCCESS"))
                 {
-                    //Show current configuration status
-                    if((boolean) config.getStatus().get("completed"))
-                    {
-                        //Load success icon
-                        ((ImageView) view).setImageResource(R.drawable.status_ok);
-                    }
-                    else if (config.getStatus().get("step").equals("ERROR"))
-                    {
-                        //Load error icon
-                        ((ImageView) view).setImageResource(R.drawable.status_error);
-                    }
-                    else
-                    {
-                        //Load info icon
-                        ((ImageView) view).setImageResource(R.drawable.status_warning);
-                    }
-
-                    //Show image view
-                    view.setVisibility(View.VISIBLE);
-
-                    //Define image listener
-                    view.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view)
-                        {
-                            //Show status message to user
-                            Snackbar.make(findViewById(android.R.id.content), config.getStatus().get("description").toString(), Snackbar.LENGTH_LONG).show();
-                        }
-                    });
+                    //Load success icon
+                    ((ImageView) view).setImageResource(R.drawable.status_ok);
                 }
+                else if (config.getStatus().get("step").equals("ERROR"))
+                {
+                    //Load error icon
+                    ((ImageView) view).setImageResource(R.drawable.status_error);
+                }
+                else
+                {
+                    //Load info icon
+                    ((ImageView) view).setImageResource(R.drawable.status_warning);
+                }
+
+                //Show image view
+                view.setVisibility(View.VISIBLE);
+
+                //Define image listener
+                view.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view)
+                    {
+                        //Show status message to user
+                        Snackbar.make(findViewById(android.R.id.content), config.getStatus().get("description").toString(), Snackbar.LENGTH_LONG).show();
+                    }
+                });
             }
         }
     }
 
-    private void updateConfiguration(String configName, boolean enabled, String value, CollectionReference collection, WriteBatch transaction)
+    private void updateConfiguration(String configName, String description, int priority, boolean enabled, String value, CollectionReference collection, WriteBatch transaction)
     {
         //Try to get config previously loaded
         Configuration config = configurations.get(configName);
@@ -822,13 +893,15 @@ public class TrackerSettingsActivity extends AppCompatActivity
         if(config == null)
         {
             //Insert new configuration
-            transaction.set(collection.document(configName), new Configuration(configName, value, enabled));
+            transaction.set(collection.document(configName), new Configuration(configName, description, value, enabled, priority));
         }
         else if(config.isEnabled() != enabled || !(config.getValue() == null ? value == null : config.getValue().equals(value)))
         {
             //User changed configuration, update data on DB
             config.setValue(value);
             config.setEnabled(enabled);
+            config.setPriority(priority);
+            config.setDescription(description);
 
             //Initialize new status
             Map<String, Object> status = new HashMap<>();
@@ -845,11 +918,10 @@ public class TrackerSettingsActivity extends AppCompatActivity
             //Update configuration
             transaction.set(collection.document(configName), config);
 
-            //Update tracker to request a new update from server
-            transaction.update(firestoreDB.document("Tracker/" + tracker.getIdentification()), "lastUpdate", null);
+            //Flag to indicate changes on configuration
+            configChanged = true;
         }
     }
-
 
     private void updateNotificationOption(int checkBoxID, boolean showNotifications, SharedPreferences.Editor editor)
     {

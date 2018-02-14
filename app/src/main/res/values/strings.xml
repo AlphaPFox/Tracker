@@ -169,6 +169,8 @@
     <string name="menu_tracker_settings">Configurações do rastreador</string>
     <string name="menu_notification_settings">Opções de notificação</string>
     <string name="menu_delete_tracker">Excluir rastreador</string>
+    <string name="imgEdit">Opções</string>
+    <string name="txtConfigurating">%1$d%%</string>
 
     <string-array name="weekdays">
         <item>Domingo</item>
