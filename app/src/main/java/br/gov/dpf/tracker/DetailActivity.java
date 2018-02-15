@@ -532,13 +532,11 @@ public class DetailActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.detail, menu);
-        MenuItem item = menu.findItem(R.id.action_toggle);
-        if (mLayout != null) {
-            if (mLayout.getPanelState() == PanelState.HIDDEN) {
-                item.setTitle(R.string.action_show);
-            } else {
-                item.setTitle(R.string.action_hide);
-            }
+
+        switch (tracker.getModel())
+        {
+            case "tk102b":
+
         }
         return true;
     }
@@ -546,23 +544,6 @@ public class DetailActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
-            case R.id.action_toggle:
-            {
-                if (mLayout != null)
-                {
-                    if (mLayout.getPanelState() != PanelState.HIDDEN)
-                    {
-                        mLayout.setPanelState(PanelState.HIDDEN);
-                        item.setTitle(R.string.action_show);
-                    }
-                    else
-                    {
-                        mLayout.setPanelState(PanelState.COLLAPSED);
-                        item.setTitle(R.string.action_hide);
-                    }
-                }
-                return true;
-            }
             case R.id.action_edit:
             {
                 // Create intent to go to edit page
@@ -595,7 +576,7 @@ public class DetailActivity
                 return true;
 
             }
-            case R.id.action_request_position:
+            case R.id.action_apply:
             {
                 //Create confirmation dialog
                 new AlertDialog.Builder(this, R.style.Theme_AppCompat_DayNight_Dialog_Alert)

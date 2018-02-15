@@ -144,7 +144,7 @@ public class RegisterActivity extends AppCompatActivity
             public void run() {
 
                 //Scroll to show update interval
-                vwScrollMain.smoothScrollTo(0, findViewById(R.id.vwUpdateInterval).getTop());
+                vwScrollMain.smoothScrollTo(0, findViewById(R.id.vwPeriodicUpdate).getTop());
 
                 //Request focus on seek bar
                 findViewById(R.id.sbPeriodicUpdate).requestFocus();

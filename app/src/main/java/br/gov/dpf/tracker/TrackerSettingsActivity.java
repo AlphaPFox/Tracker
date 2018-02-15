@@ -358,10 +358,10 @@ public class TrackerSettingsActivity extends AppCompatActivity
 
         //Set visibility events for specific switches
         changeLayoutVisibility(R.id.swDeepsleep, -1, -1, R.id.imgDeepSleep);
-        changeLayoutVisibility(R.id.swEmergency, R.id.vwEmergency, R.id.cbEmergency, R.id.imgEmergency);
+        changeLayoutVisibility(R.id.swShock, -1, R.id.cbShock, R.id.imgShock);
         changeLayoutVisibility(R.id.swMagnetAlert, -1, R.id.cbMagnet, R.id.imgMagnet);
         changeLayoutVisibility(R.id.swTurnOff, -1, -1, R.id.imgTurnOff);
-        changeLayoutVisibility(R.id.swPeriodicUpdate, R.id.vwUpdateInterval, -1, -1);
+        changeLayoutVisibility(R.id.swPeriodicUpdate, R.id.vwPeriodicUpdate, -1, -1);
         changeLayoutVisibility(R.id.swNotifications, R.id.vwNotificationOptions, -1, -1);
     }
 
@@ -652,7 +652,8 @@ public class TrackerSettingsActivity extends AppCompatActivity
             //Insert tracker on DB
             transaction.set(firestoreDB.collection("Tracker").document(tracker.getIdentification()), tracker);
         }
-        else if (getIntent().getBooleanExtra("UpdateModel", false)) //If changing tracker model
+        else if (getIntent().getBooleanExtra("UpdateModel", false)) //If changing tracker
+            // model
         {
             //For each previous model configuration
             for(String configName : configurations.keySet())
@@ -716,8 +717,7 @@ public class TrackerSettingsActivity extends AppCompatActivity
 
                 //Get tracker configuration options
                 SwitchCompat swDeepSleep = findViewById(R.id.swDeepsleep);
-                SwitchCompat swEmergency = findViewById(R.id.swEmergency);
-                EditText txtEmergency = findViewById(R.id.txtEmergency);
+                SwitchCompat swEmergency = findViewById(R.id.swShock);
                 SwitchCompat swTurnOff = findViewById(R.id.swTurnOff);
                 SwitchCompat swMagnetAlert = findViewById(R.id.swMagnetAlert);
                 SwitchCompat swInterval = findViewById(R.id.swPeriodicUpdate);
@@ -726,16 +726,16 @@ public class TrackerSettingsActivity extends AppCompatActivity
 
                 //Update device configuration
                 updateConfiguration("DeepSleep", "Modo sono profundo", Configuration.PRIORITY_DEFAULT, swDeepSleep.isChecked(), null, configCollection, transaction);
-                updateConfiguration("Emergency", "Alerta de emergência", Configuration.PRIORITY_DEFAULT, swEmergency.isChecked(), txtEmergency.getText().toString(), configCollection, transaction);
+                updateConfiguration("ShockEmergency", "Alerta de vibração", Configuration.PRIORITY_DEFAULT, swEmergency.isChecked(), null, configCollection, transaction);
                 updateConfiguration("TurnOff", "Opção de desligamento", Configuration.PRIORITY_DEFAULT, swTurnOff.isChecked(), null, configCollection, transaction);
                 updateConfiguration("Magnet", "Alerta de magnetismo", Configuration.PRIORITY_DEFAULT, swMagnetAlert.isChecked(), null, configCollection, transaction);
-                updateConfiguration("UpdateIdle", "Localização: ratreador parado", Configuration.PRIORITY_DEFAULT, swInterval.isChecked(), String.valueOf(Math.max(sbIdle.getProgress(), 1)), configCollection, transaction);
-                updateConfiguration("UpdateActive", "Localização, rastreador em movimento", Configuration.PRIORITY_DEFAULT, swInterval.isChecked(), String.valueOf(Math.max(sbActive.getProgress(), 1)), configCollection, transaction);
+                updateConfiguration("UpdateIdle", "Localização: ratreador parado", Configuration.PRIORITY_DEFAULT, swInterval.isChecked(), (swInterval.isChecked() ? String.valueOf(Math.max(sbIdle.getProgress(), 1)) : "0"), configCollection, transaction);
+                updateConfiguration("UpdateActive", "Localização, rastreador em movimento", Configuration.PRIORITY_DEFAULT, swInterval.isChecked(), (swInterval.isChecked() ? String.valueOf(Math.max(sbActive.getProgress(), 1)) : "0"), configCollection, transaction);
 
                 //Update user notification preferences
                 updateNotificationOption(R.id.cbMovement, showNotifications, editor);
                 updateNotificationOption(R.id.cbStopped, showNotifications, editor);
-                updateNotificationOption(R.id.cbEmergency, showNotifications, editor);
+                updateNotificationOption(R.id.cbShock, showNotifications, editor);
                 updateNotificationOption(R.id.cbMagnet, showNotifications, editor);
                 updateNotificationOption(R.id.cbAvailable, showNotifications, editor);
 
@@ -770,7 +770,7 @@ public class TrackerSettingsActivity extends AppCompatActivity
                         editor.apply();
 
                         //If it is a new tracker, or updated configuration an existing tracker
-                        if(!editMode || configChanged)
+                        if(!editMode || configChanged || getIntent().getBooleanExtra("UpdateModel", false))
                         {
                             //Initialize updater
                             TrackerUpdater updateIndicator = new TrackerUpdater(TrackerSettingsActivity.this, tracker);

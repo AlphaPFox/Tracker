@@ -107,18 +107,15 @@
     <string name="title_tracker_st940_settings">Configurações - ST 940</string>
     <string name="swDeepsleep">Ativar ultra-economia de bateria</string>
     <string name="lblDeepsleep">Caso ativado, o rastreador desativa a maior parte dos sensores e entra em hibernação, ativando poucas vezes ao dia para enviar usa localização.</string>
-    <string name="swEmergency">Ativar modo emergência</string>
-    <string name="lblEmergency">Neste modo, o rastreador enviará alertas constantemente sempre que detectar qualquer movimento ou vibração.</string>
-    <string name="lblEmergencyInterval">Enviar alerta a cada: </string>
-    <string name="txtEmergencyHint">120 </string>
-    <string name="lblSeconds">segundos</string>
+    <string name="swShock">Ativar alerta de vibração</string>
+    <string name="lblShock">Neste modo, o rastreador enviará alertas constantemente a partir do momento que detectar qualquer vibração do dispositivo.</string>
     <string name="swTurnOff">Permitir desligar pelo botão</string>
     <string name="lblTurnOff">Define se será possível ou não desligar o rastreador pressionando o botão presente no próprio dispositivo.</string>
     <string name="swMagnetAlert">Ativar alerta de magnetismo </string>
     <string name="lblMagnetAlert">Quando ativo, o rastreador enviará um alerta ao detectar que o dispositivo foi acoplado ou desacoplado da base magnética.</string>
     <string name="lblUpdateIdle">Dispositivo parado: </string>
     <string name="lblUpdateActive">Dispositivo em movimento: </string>
-    <string name="cbEmergency">Notificação de emergência </string>
+    <string name="cbShock">Notificação de vibração </string>
     <string name="cbMagnet">Notificação de magnetismo</string>
 
     <string name="title_tracker_spot_settings">Configurações - SPOT</string>
