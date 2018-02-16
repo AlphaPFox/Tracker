@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -19,6 +20,9 @@ import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -38,12 +42,16 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.RemoteMessage;
+import com.google.firebase.firestore.WriteBatch;
 import com.google.maps.android.ui.IconGenerator;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout.PanelState;
@@ -54,21 +62,22 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import br.gov.dpf.tracker.Components.CircleProgressBar;
 import br.gov.dpf.tracker.Components.InfoFragment;
 import br.gov.dpf.tracker.Components.TrackerUpdater;
+import br.gov.dpf.tracker.Entities.Configuration;
 import br.gov.dpf.tracker.Entities.Coordinates;
 import br.gov.dpf.tracker.Entities.Tracker;
 import br.gov.dpf.tracker.Firestore.CoordinatesAdapter;
-import br.gov.dpf.tracker.Firestore.TrackerAdapter;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import static br.gov.dpf.tracker.MainActivity.REQUEST_UPDATE;
 
 public class DetailActivity
         extends AppCompatActivity
-        implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
+        implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, EventListener<DocumentSnapshot> {
 
     //Activities request types (RegisterActivity or FilterActivity)
     static int REQUEST_EDIT = 0;
@@ -85,13 +94,22 @@ public class DetailActivity
     private CircleProgressBar circleProgressBar;
     private DisplayMetrics mMetrics;
 
+    //Bottom panel layout components
+    private TextView txtBottomTitle, txtBottomSubtitle;
+    private View vwBottomPanel;
+    private ImageView imgBottom;
+
     //Database components
     private FirebaseFirestore mFireStoreDB;
-    private CoordinatesAdapter mAdapter;
+    private CoordinatesAdapter mCoordinatesAdapter;
+    private ListenerRegistration listener;
     private Query mQuery;
 
     //Object containing tracker data
     public Tracker tracker;
+
+    //Boolean flag to indicate configuration process
+    private boolean configPending;
 
     //Google maps components
     private GoogleMap mMap;
@@ -100,13 +118,13 @@ public class DetailActivity
     @Override
     protected void onStart() {
         super.onStart();
-        mAdapter.startListening();
+        mCoordinatesAdapter.startListening();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        mAdapter.stopListening();
+        mCoordinatesAdapter.stopListening();
     }
 
     @Override
@@ -130,6 +148,9 @@ public class DetailActivity
 
         //Get tracker data from intent
         tracker = intent.getParcelableExtra("Tracker");
+
+        //Get config pending flag (indicate if tracker has pending configurations)
+        configPending = intent.getBooleanExtra("ConfigPending", false);
 
         // Load layout elements using tracker data
         loadLayout(intent);
@@ -173,6 +194,10 @@ public class DetailActivity
         ProgressBar progressBar = findViewById(R.id.progressBar);
         mLoadingBackground = findViewById(R.id.loadingBackground);
         circleProgressBar = findViewById(R.id.circleProgressBar);
+        txtBottomTitle = findViewById(R.id.txtBottomTitle);
+        txtBottomSubtitle = findViewById(R.id.txtBottomSubtitle);
+        vwBottomPanel = findViewById(R.id.vwBottomPanel);
+        imgBottom = findViewById(R.id.imgLoading);
 
         //Set circle image background color
         imgToolbarIcon.setCircleBackgroundColor(Color.parseColor(tracker.getBackgroundColor()));
@@ -211,13 +236,101 @@ public class DetailActivity
             txtToolbarTitle.setTransitionName(getString(R.string.transition_title));
             txtToolbarSubtitle.setTransitionName(getString(R.string.transition_subtitle));
         }
+
+        //If tracker has any configuration pending
+        if(configPending)
+        {
+            //Call method to show update progress
+            monitorConfiguration();
+        }
+    }
+
+    public void monitorConfiguration()
+    {
+        //Get tracker document reference
+        DocumentReference trackerRef = FirebaseFirestore.getInstance().document("Tracker/" + tracker.getIdentification());
+
+        //Listen for changes on tracker document
+        listener = trackerRef.addSnapshotListener(this);
+
+        //Show panel with configuration fields
+        findViewById(R.id.vwBottomPanel).setVisibility(View.VISIBLE);
+
+        //Update message
+        txtBottomTitle.setText("Configurações pendentes");
+        txtBottomSubtitle.setText("Aguarde enquanto o processo de configuração é iniciado");
+
+        //Configuration in progress, create loading animation
+        RotateAnimation rotate = new RotateAnimation(
+                0, 360,
+                Animation.RELATIVE_TO_SELF, 0.5f,
+                Animation.RELATIVE_TO_SELF, 0.5f
+        );
+
+        //Define animation settings
+        rotate.setDuration(3000);
+        rotate.setRepeatCount(Animation.INFINITE);
+        imgBottom.startAnimation(rotate);
+
+        //Set loading image
+        imgBottom.setImageResource(R.drawable.ic_settings_grey_40dp);
+    }
+
+    @Override
+    public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e)
+    {
+        //Check if tracker is available
+        if(documentSnapshot.exists())
+        {
+            //Parse DB result to tracker object
+            tracker = documentSnapshot.toObject(Tracker.class);
+
+            //Try to get configuration status
+            Map<String, Object> configuration = tracker.getLastConfiguration();
+
+            //Check if configuration has not started yet
+            if (configuration != null)
+            {
+                //Set configuration progress
+                circleProgressBar.setProgress(Integer.parseInt(configuration.get("progress").toString()));
+
+                //Set notification title
+                txtBottomTitle.setText(String.format("%s (%s%%)", configuration.get("description").toString(), configuration.get("progress").toString()));
+
+                //Set description
+                txtBottomSubtitle.setText(configuration.get("status").toString());
+
+                //If configuration finished (no longer pending)
+                if (!configuration.get("step").equals("PENDING"))
+                {
+                    //Remove listener
+                    listener.remove();
+
+                    //Select image to represent configuration status
+                    switch (configuration.get("step").toString())
+                    {
+                        case "ERROR":
+                            //Configuration error
+                            imgBottom.setImageResource(R.drawable.status_error);
+                            imgBottom.clearAnimation();
+                            break;
+
+                        case "SUCCESS":
+                            //Configuration success
+                            imgBottom.setImageResource(R.drawable.status_ok);
+                            imgBottom.clearAnimation();
+                            break;
+                    }
+                }
+            }
+        }
     }
 
     //Initialize FireStore data adapter
     public void loadDataset()
     {
         // RecyclerView
-        mAdapter = new CoordinatesAdapter(this, mQuery)
+        mCoordinatesAdapter = new CoordinatesAdapter(this, mQuery)
         {
             @Override
             protected void onDataChanged()
@@ -228,8 +341,8 @@ public class DetailActivity
                     //No items to display, hide recycler view
                     mRecyclerView.setVisibility(View.GONE);
 
-                    //Show empty message layout
-                    findViewById(R.id.vwEmptyRecycler).setVisibility(View.VISIBLE);
+                    //Show bottom panel layout
+                    vwBottomPanel.setVisibility(View.VISIBLE);
 
                     //Set corresponding panel height
                     mLayout.setPanelHeight(getResources().getDimensionPixelSize(R.dimen.panel_empty_height));
@@ -239,8 +352,8 @@ public class DetailActivity
                     //Items available to display, show recycler view
                     mRecyclerView.setVisibility(View.VISIBLE);
 
-                    //Hide empty message
-                    findViewById(R.id.vwEmptyRecycler).setVisibility(View.GONE);
+                    //Hide bottom panel layout if tracker has no pending configurations
+                    vwBottomPanel.setVisibility((configPending ? View.VISIBLE : View.GONE));
 
                     //Check if only one item or if screen is small
                     if(getItemCount() == 1 || mMetrics.heightPixels / mMetrics.density < 530)
@@ -272,7 +385,7 @@ public class DetailActivity
         mRecyclerView = findViewById(R.id.DetailRecycler);
 
         // Attach the adapter to the recycler view to populate items
-        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setAdapter(mCoordinatesAdapter);
 
         // Set linear layout for orientation
         LinearLayoutManager layoutManager = new LinearLayoutManager(mRecyclerView.getContext());
@@ -478,7 +591,7 @@ public class DetailActivity
         mLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
 
         // Call method on marker click
-        onMarkerClick(markers.get(mAdapter.mSnapshots.indexOf(coordinates)));
+        onMarkerClick(markers.get(mCoordinatesAdapter.mSnapshots.indexOf(coordinates)));
     }
 
 
@@ -501,11 +614,11 @@ public class DetailActivity
                 }
 
                 //Inform new query to adapter
-                mAdapter.setQuery(mQuery);
-                mAdapter.notifyDataSetChanged();
+                mCoordinatesAdapter.setQuery(mQuery);
+                mCoordinatesAdapter.notifyDataSetChanged();
 
                 // Attach the adapter to the recycler view to populate items
-                mRecyclerView.setAdapter(mAdapter);
+                mRecyclerView.setAdapter(mCoordinatesAdapter);
             }
             else if(requestCode == REQUEST_EDIT)
             {
@@ -536,7 +649,14 @@ public class DetailActivity
         switch (tracker.getModel())
         {
             case "tk102b":
+                menu.findItem(R.id.action_request_position).setVisible(true);
+                menu.findItem(R.id.action_request_status).setVisible(true);
+                break;
 
+            case "st940":
+                menu.findItem(R.id.action_request_position).setVisible(true);
+                menu.findItem(R.id.action_turn_off).setVisible(true);
+                break;
         }
         return true;
     }
@@ -576,33 +696,121 @@ public class DetailActivity
                 return true;
 
             }
-            case R.id.action_apply:
+            case R.id.action_request_status:
+            {
+                //Create configuration to request location
+                Configuration location  = new Configuration("StatusCheck", "Solicitando atualização de status", null, true, Configuration.PRIORITY_DEFAULT);
+
+                //Initialize transaction
+                WriteBatch transaction = mFireStoreDB.batch();
+
+                //Save configuration on DB
+                transaction.set(mFireStoreDB.document("Tracker/" + tracker.getIdentification() + "/Configurations/StatusCheck"), location);
+
+                //Request new update to this tracker
+                transaction.update(mFireStoreDB.document("Tracker/" + tracker.getIdentification()), "lastConfiguration", null);
+
+                //Commit transaction
+                transaction.commit().addOnSuccessListener(new OnSuccessListener<Void>()
+                {
+                    @Override
+                    public void onSuccess(Void aVoid)
+                    {
+                        //Initialize updater
+                        TrackerUpdater updateIndicator = new TrackerUpdater(DetailActivity.this, tracker);
+
+                        //Request configuration update
+                        updateIndicator.initialize();
+                        //Success message
+                        Snackbar.make(findViewById(android.R.id.content), "Solicitação enviada com sucesso", Snackbar.LENGTH_LONG);
+                    }
+                }).addOnFailureListener(new OnFailureListener()
+                {
+                    @Override
+                    public void onFailure(@NonNull Exception e)
+                    {
+                        //Error message
+                        Snackbar.make(findViewById(android.R.id.content), "Erro: Não foi possível concluir solicitação", Snackbar.LENGTH_LONG);
+                    }
+                });
+
+                break;
+            }
+            case R.id.action_request_position:
+            {
+                //Create configuration to request location
+                Configuration location  = new Configuration("Location", "Solicitando localização atual", null, true, Configuration.PRIORITY_DEFAULT);
+
+                //Initialize transaction
+                WriteBatch transaction = mFireStoreDB.batch();
+
+                //Save configuration on DB
+                transaction.set(mFireStoreDB.document("Tracker/" + tracker.getIdentification() + "/Configurations/Location"), location);
+
+                //Request new update to this tracker
+                transaction.update(mFireStoreDB.document("Tracker/" + tracker.getIdentification()), "lastConfiguration", null);
+
+                //Commit transaction
+                transaction.commit().addOnSuccessListener(new OnSuccessListener<Void>()
+                {
+                    @Override
+                    public void onSuccess(Void aVoid)
+                    {
+                        //Initialize updater
+                        TrackerUpdater updateIndicator = new TrackerUpdater(DetailActivity.this, tracker);
+
+                        //Request configuration update
+                        updateIndicator.initialize();
+                        //Success message
+                        Snackbar.make(findViewById(android.R.id.content), "Solicitação enviada com sucesso", Snackbar.LENGTH_LONG);
+                    }
+                }).addOnFailureListener(new OnFailureListener()
+                {
+                    @Override
+                    public void onFailure(@NonNull Exception e)
+                    {
+                        //Error message
+                        Snackbar.make(findViewById(android.R.id.content), "Erro: Não foi possível concluir solicitação", Snackbar.LENGTH_LONG);
+                    }
+                });
+
+                break;
+            }
+            case R.id.action_reset_config:
             {
                 //Create confirmation dialog
-                new AlertDialog.Builder(this, R.style.Theme_AppCompat_DayNight_Dialog_Alert)
-                        .setIcon(R.drawable.ic_place_black_24dp)
-                        .setTitle("Solicitar posição atual")
-                        .setMessage("O processo pode durar até 5 (cinco) minutos, deseja continuar?")
+                new AlertDialog.Builder(this, R.style.Theme_AppCompat_Light_Dialog_Alert)
+                        .setIcon(R.drawable.ic_settings_grey_40dp)
+                        .setTitle("Reinciar configurações")
+                        .setMessage("Deseja reiniciar as configurações deste rastreador?")
                         .setPositiveButton("Sim", new DialogInterface.OnClickListener()
                         {
                             @Override
                             public void onClick(DialogInterface dialog, int which)
                             {
+                                //Create intent to call next activity (Tracker Configurations)
+                                Intent intent = new Intent(DetailActivity.this, TrackerSettingsActivity.class);
+
+                                //Put tracker data on intent
+                                intent.putExtra("Tracker", tracker);
+
+                                //Inform activity intention: update existing tracker
+                                intent.putExtra("Request", MainActivity.REQUEST_UPDATE);
+
+                                //Inform activity intention: reset configurations
+                                intent.putExtra("ResetConfig", true);
+
+                                //Start next activity
+                                startActivityForResult(intent, REQUEST_UPDATE);
                             }
                         })
-                        .setNegativeButton("Não (FCM)", new DialogInterface.OnClickListener()
+                        .setNegativeButton("Não", new DialogInterface.OnClickListener()
                         {
                             @Override
                             public void onClick(DialogInterface dialog, int which)
                             {
-                                FirebaseMessaging fm = FirebaseMessaging.getInstance();
-
-                                fm.send(new RemoteMessage.Builder("550578036766@gcm.googleapis.com")
-                                        .setMessageId(String.valueOf(new Date().getTime()))
-                                        .setTtl(60)
-                                        .addData("key1", "a value")
-                                        .addData("key2", "another value")
-                                        .build());
+                                //Dismiss dialog, no action
+                                dialog.cancel();
                             }
                         })
                         .show();
@@ -650,8 +858,8 @@ public class DetailActivity
                     .limit(limit);
 
             //Change text from empty view
-            ((TextView) findViewById(R.id.txtWaitingTitle)).setText(getResources().getString(R.string.txtFilterResult));
-            ((TextView) findViewById(R.id.txtWaitingSubtitle)).setText(getResources().getString(R.string.txtFilterResultSubtitle));
+            ((TextView) findViewById(R.id.txtBottomTitle)).setText(getResources().getString(R.string.txtFilterResult));
+            ((TextView) findViewById(R.id.txtBottomSubtitle)).setText(getResources().getString(R.string.txtFilterResultSubtitle));
         }
         else
         {

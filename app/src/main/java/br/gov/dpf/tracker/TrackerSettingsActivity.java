@@ -57,6 +57,9 @@ public class TrackerSettingsActivity extends AppCompatActivity
     //Flag indicating if any configuration on tracker changed
     private boolean configChanged;
 
+    //Flag indicating if user wants to reset tracker configurations
+    private boolean resetConfig;
+
     //Menu item used to confirm and refresh settings
     private MenuItem confirmMenu, refreshMenu;
 
@@ -93,6 +96,9 @@ public class TrackerSettingsActivity extends AppCompatActivity
 
             //Check if activity is in edit mode
             editMode = (getIntent().getIntExtra("Request", MainActivity.REQUEST_INSERT) == MainActivity.REQUEST_UPDATE);
+
+            //Check if user wants to reset previous configurations
+            resetConfig = getIntent().getBooleanExtra("ResetConfig", false);
 
             //Check model value
             switch (tracker.getModel())
@@ -169,8 +175,12 @@ public class TrackerSettingsActivity extends AppCompatActivity
                             // Save current configurations
                             configurations.put(config.getName(), config);
 
-                            // Update layout components to reflect configuration options
-                            loadConfiguration(config);
+                            //If user did not request configuration reset
+                            if(!resetConfig)
+                            {
+                                // Update layout components to reflect configuration options
+                                loadConfiguration(config);
+                            }
                         }
 
                         // if loading indicator is available
@@ -456,7 +466,7 @@ public class TrackerSettingsActivity extends AppCompatActivity
                 ImageView imageView = findViewById(imageViewID);
 
                 //If checkbox ID is valid
-                if(imageView != null)
+                if(imageView != null && !resetConfig)
                 {
                     //By default, hide image view
                     imageView.setVisibility(View.GONE);
@@ -652,8 +662,7 @@ public class TrackerSettingsActivity extends AppCompatActivity
             //Insert tracker on DB
             transaction.set(firestoreDB.collection("Tracker").document(tracker.getIdentification()), tracker);
         }
-        else if (getIntent().getBooleanExtra("UpdateModel", false)) //If changing tracker
-            // model
+        else if (resetConfig)
         {
             //For each previous model configuration
             for(String configName : configurations.keySet())
@@ -753,7 +762,7 @@ public class TrackerSettingsActivity extends AppCompatActivity
         }
 
         //Check if user changed configuration on this tracker
-        if(configChanged)
+        if(configChanged || resetConfig)
         {
             //Update tracker to request a new update from server
             transaction.update(firestoreDB.document("Tracker/" + tracker.getIdentification()), "lastConfiguration", null);
@@ -770,7 +779,7 @@ public class TrackerSettingsActivity extends AppCompatActivity
                         editor.apply();
 
                         //If it is a new tracker, or updated configuration an existing tracker
-                        if(!editMode || configChanged || getIntent().getBooleanExtra("UpdateModel", false))
+                        if(!editMode || configChanged || resetConfig)
                         {
                             //Initialize updater
                             TrackerUpdater updateIndicator = new TrackerUpdater(TrackerSettingsActivity.this, tracker);
@@ -974,7 +983,7 @@ public class TrackerSettingsActivity extends AppCompatActivity
         return views;
     }
 
-    //Set all switchs inside a layout enabled or disabled
+    //Set all switches inside a layout enabled or disabled
     private void enableControls(ViewGroup root, boolean enabled)
     {
         //For each children
@@ -985,7 +994,9 @@ public class TrackerSettingsActivity extends AppCompatActivity
             {
                 //Change enabled status
                 root.getChildAt(i).setEnabled(enabled);
-                ((SwitchCompat) root.getChildAt(i)).setChecked(enabled);
+
+                //Change check status
+                ((SwitchCompat) root.getChildAt(i)).setChecked(false);
             }
         }
     }

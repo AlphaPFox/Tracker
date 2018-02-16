@@ -191,7 +191,7 @@ public class DefaultSettingsActivity extends AppCompatActivity {
                                     intent.putExtra("Request", MainActivity.REQUEST_UPDATE);
 
                                     //Inform activity intention: change tracker model
-                                    intent.putExtra("UpdateModel", true);
+                                    intent.putExtra("ResetConfig", true);
 
                                     //Start next activity
                                     startActivityForResult(intent, MainActivity.REQUEST_UPDATE);

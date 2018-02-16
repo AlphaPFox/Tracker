@@ -1,16 +1,14 @@
 package br.gov.dpf.tracker.Firestore;
 
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -24,16 +22,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.SetOptions;
-import com.google.firebase.firestore.WriteBatch;
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.maps.android.ui.IconGenerator;
 
 import java.util.Date;
@@ -279,13 +269,32 @@ public class TrackerAdapter
             switch (configuration.get("step").toString())
             {
                 case "ERROR":
+                    //Configuration error
                     holder.imgStatus.setImageResource(R.drawable.status_error);
                     holder.txtProgress.setTextColor(Color.RED);
+                    holder.imgStatus.clearAnimation();
                     break;
+
                 case "SUCCESS":
+                    //Configuration success
                     holder.imgStatus.setImageResource(R.drawable.status_ok);
+                    holder.imgStatus.clearAnimation();
                     break;
+
                 default:
+                    //Configuration in progress, create loading animation
+                    RotateAnimation rotate = new RotateAnimation(
+                            0, 360,
+                            Animation.RELATIVE_TO_SELF, 0.5f,
+                            Animation.RELATIVE_TO_SELF, 0.5f
+                    );
+
+                    //Define animation settings
+                    rotate.setDuration(3000);
+                    rotate.setRepeatCount(Animation.INFINITE);
+                    holder.imgStatus.startAnimation(rotate);
+
+                    //Set loading image
                     holder.imgStatus.setImageResource(R.drawable.ic_settings_grey_40dp);
                     break;
             }

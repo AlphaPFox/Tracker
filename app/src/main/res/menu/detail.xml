@@ -12,4 +12,24 @@
         android:title="@string/action_edit"
         android:icon="@drawable/ic_mode_edit_black_24dp"/>
 
+    <item android:id="@+id/action_request_position"
+        app:showAsAction="never"
+        android:visible="false"
+        android:title="Solicitar posição atual" />
+
+    <item android:id="@+id/action_request_status"
+        app:showAsAction="never"
+        android:visible="false"
+        android:title="Solicitar status (Bat./GSM)" />
+
+    <item android:id="@+id/action_turn_off"
+        app:showAsAction="never"
+        android:visible="false"
+        android:title="Desligar temporariamente" />
+
+    <item android:id="@+id/action_reset_config"
+        app:showAsAction="never"
+        android:visible="true"
+        android:title="Reiniciar configurações" />
+
 </menu>

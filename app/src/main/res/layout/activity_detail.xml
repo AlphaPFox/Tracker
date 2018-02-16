@@ -124,14 +124,8 @@
             android:background="#BBB"
             android:layout_gravity="center"/>
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/DetailRecycler"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-        </android.support.v7.widget.RecyclerView>
-
         <android.support.constraint.ConstraintLayout
-            android:id="@+id/vwEmptyRecycler"
+            android:id="@+id/vwBottomPanel"
             android:layout_width="match_parent"
             android:layout_height="85dp"
             android:layout_gravity="bottom"
@@ -142,25 +136,26 @@
                 android:layout_width="70dp"
                 android:layout_height="0dp"
                 android:padding="5dp"
+                android:contentDescription="@string/imgLoading"
                 android:src="@drawable/ic_phonelink_erase_grey_72dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/txtWaitingTitle"
+                android:id="@+id/txtBottomTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
                 android:text="@string/txtWaitingTitle"
                 android:textColor="#444"
                 android:textSize="16sp"
-                app:layout_constraintBottom_toTopOf="@+id/txtWaitingSubtitle"
+                app:layout_constraintBottom_toTopOf="@+id/txtBottomSubtitle"
                 app:layout_constraintStart_toEndOf="@+id/imgLoading"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/txtWaitingSubtitle"
+                android:id="@+id/txtBottomSubtitle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="2dp"
@@ -172,8 +167,14 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/imgLoading"
-                app:layout_constraintTop_toBottomOf="@+id/txtWaitingTitle" />
+                app:layout_constraintTop_toBottomOf="@+id/txtBottomTitle" />
         </android.support.constraint.ConstraintLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/DetailRecycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        </android.support.v7.widget.RecyclerView>
 
     </LinearLayout>
 </com.sothree.slidinguppanel.SlidingUpPanelLayout>

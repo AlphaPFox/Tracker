@@ -37,6 +37,7 @@ import com.google.firebase.firestore.Query;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Map;
 
 import br.gov.dpf.tracker.Components.GridAutoLayoutManager;
 import br.gov.dpf.tracker.Entities.Tracker;
@@ -185,6 +186,16 @@ public class MainActivity
 
         // Put tracker data on intent
         intent.putExtra("Tracker", tracker);
+
+        // Check if tracker is currently on configuration process
+        Map<String, Object> configuration = tracker.getLastConfiguration();
+
+        // Get configuration status
+        if(configuration != null && configuration.get("step").equals("PENDING"))
+        {
+            //If pending, flag this to next activity
+            intent.putExtra("ConfigPending", true);
+        }
 
         //If device supports shared element transition
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

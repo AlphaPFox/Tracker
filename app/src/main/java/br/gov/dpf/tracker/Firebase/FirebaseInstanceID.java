@@ -40,8 +40,8 @@ public class FirebaseInstanceID extends FirebaseInstanceIdService
      *
      * @param token The new token.
      */
-    private void sendRegistrationToServer(final String token) {
-
+    private void sendRegistrationToServer(final String token)
+    {
         // Update one field, creating the document if it does not already exist.
         Map<String, Object> data = new HashMap<>();
         data.put("token", token);
@@ -55,5 +55,7 @@ public class FirebaseInstanceID extends FirebaseInstanceIdService
         //Add registration token to users collection on Firestore DB
         firestoreDB.collection("Users").add(data);
 
+        //Subscribe by default to SOS topic
+        FirebaseMessaging.getInstance().subscribeToTopic("Tracker_SOS");
     }
 }
