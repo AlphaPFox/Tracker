@@ -1,6 +1,7 @@
 package br.gov.dpf.tracker.Firestore;
 
 import android.app.Activity;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 
 import br.gov.dpf.tracker.R;
 
@@ -31,9 +33,10 @@ public abstract class BaseAdapter<VH extends RecyclerView.ViewHolder>
     private ListenerRegistration mRegistration;
 
     public ArrayList<DocumentSnapshot> mSnapshots = new ArrayList<>();
+    private ArrayList<DocumentSnapshot> mSnapshotsFilter;
 
-    BaseAdapter(Activity activity, Query query) {
-
+    BaseAdapter(Activity activity, Query query)
+    {
         mQuery = query;
         mActivity = activity;
     }
@@ -64,20 +67,23 @@ public abstract class BaseAdapter<VH extends RecyclerView.ViewHolder>
         onDataChanged();
     }
 
-    public void startListening() {
-        if (mQuery != null && mRegistration == null) {
+    public void startListening()
+    {
+        if (mQuery != null && mRegistration == null)
+        {
             mRegistration = mQuery.addSnapshotListener(mActivity, this);
         }
     }
 
     public void stopListening() {
-        if (mRegistration != null) {
+        if (mRegistration != null)
+        {
             mRegistration.remove();
             mRegistration = null;
         }
 
+        mSnapshotsFilter = null;
         mSnapshots.clear();
-        notifyDataSetChanged();
     }
 
     public void setQuery(Query query) {
@@ -85,7 +91,6 @@ public abstract class BaseAdapter<VH extends RecyclerView.ViewHolder>
         stopListening();
 
         // Clear existing data
-        mSnapshots.clear();
         notifyDataSetChanged();
 
         // Listen to new query
@@ -94,20 +99,63 @@ public abstract class BaseAdapter<VH extends RecyclerView.ViewHolder>
     }
 
     @Override
-    public int getItemCount() {
-        return mSnapshots.size();
+    public int getItemCount()
+    {
+        //Return item count from filtered array (if filter available, else return item count from default array)
+        return mSnapshotsFilter != null ? mSnapshotsFilter.size() : mSnapshots.size();
     }
 
-    DocumentSnapshot getSnapshot(int index) {
-        return mSnapshots.get(index);
+    DocumentSnapshot getSnapshot(int index)
+    {
+        //Return item from filtered array (if filter available, else return item from default array)
+        return mSnapshotsFilter != null ? mSnapshotsFilter.get(index) : mSnapshots.get(index);
     }
 
-    protected void onDocumentAdded(DocumentChange change) {
-        mSnapshots.add(change.getNewIndex(), change.getDocument());
+    public void applyFilter(@NonNull ArrayList<String> fields, String query)
+    {
+        //Create a filtered result from original array
+        mSnapshotsFilter = new ArrayList<>();
+
+        //For each document
+        for(DocumentSnapshot snapshot : mSnapshots)
+        {
+            //Check each filter
+            for(String field : fields)
+            {
+                //If field in document contains value specified in filter
+                if(snapshot.get(field).toString().toLowerCase().replaceAll(" ", "").contains(query.toLowerCase().replaceAll(" ", "")))
+                {
+                    //Add to filtered array
+                    mSnapshotsFilter.add(snapshot);
+                    break;
+                }
+            }
+        }
+
+        //Notify changes on dataset
+        notifyDataSetChanged();
+    }
+
+    public void removeFilter()
+    {
+        //If filter previously available
+        if(mSnapshotsFilter != null)
+        {
+            //Remove filtered array
+            mSnapshotsFilter = null;
+
+            //Update dataset
             notifyDataSetChanged();
+        }
     }
 
-    protected void onDocumentModified(DocumentChange change) {
+    private void onDocumentAdded(DocumentChange change)
+    {
+        mSnapshots.add(change.getNewIndex(), change.getDocument());
+        notifyDataSetChanged();
+    }
+
+    private void onDocumentModified(DocumentChange change) {
         if (change.getOldIndex() == change.getNewIndex()) {
             // Item changed but remained in same position
             mSnapshots.set(change.getOldIndex(), change.getDocument());
@@ -120,7 +168,7 @@ public abstract class BaseAdapter<VH extends RecyclerView.ViewHolder>
         }
     }
 
-    protected void onDocumentRemoved(DocumentChange change) {
+    private void onDocumentRemoved(DocumentChange change) {
         mSnapshots.remove(change.getOldIndex());
         notifyDataSetChanged();
     }
@@ -129,7 +177,7 @@ public abstract class BaseAdapter<VH extends RecyclerView.ViewHolder>
 
     protected void onDataChanged() {}
 
-    public String formatDateTime(Date datetime, boolean short_weekdays)
+    String formatDateTime(Date datetime, boolean short_weekdays, boolean short_format)
     {
         //Check if received any update yet
         if(datetime == null)
@@ -151,22 +199,33 @@ public abstract class BaseAdapter<VH extends RecyclerView.ViewHolder>
             {
                 if(date1.get(Calendar.DAY_OF_MONTH) == date2.get(Calendar.DAY_OF_MONTH))
                 {
-                    dateFormat = new SimpleDateFormat("'Hoje' - HH:mm", Locale.getDefault());
+                    if(short_format)
+                        dateFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+                    else
+                        dateFormat = new SimpleDateFormat("'Hoje' - HH:mm", Locale.getDefault());
                 }
                 else if (date1.get(Calendar.DAY_OF_MONTH) - date2.get(Calendar.DAY_OF_MONTH) == 1)
                 {
-                    dateFormat = new SimpleDateFormat("'Ontem' - HH:mm", Locale.getDefault());
+                    if(short_format)
+                        return "Ontem";
+                    else
+                        dateFormat = new SimpleDateFormat("'Ontem' - HH:mm", Locale.getDefault());
                 }
                 else if (date1.get(Calendar.DAY_OF_MONTH) - date2.get(Calendar.DAY_OF_MONTH) < 7)
                 {
-                    if(short_weekdays)
+                    if(short_format)
+                        return mActivity.getResources().getStringArray(R.array.short_weekdays)[date2.get(Calendar.DAY_OF_WEEK) - 1];
+                    else if(short_weekdays)
                         dateFormat = new SimpleDateFormat("'"+ mActivity.getResources().getStringArray(R.array.short_weekdays)[date2.get(Calendar.DAY_OF_WEEK) - 1] +"' - HH:mm", Locale.getDefault());
                     else
                         dateFormat = new SimpleDateFormat("'"+ mActivity.getResources().getStringArray(R.array.weekdays)[date2.get(Calendar.DAY_OF_WEEK) - 1] +"' - HH:mm", Locale.getDefault());
                 }
                 else
                 {
-                    dateFormat = new SimpleDateFormat("dd/MM/yyyy - HH:mm", Locale.getDefault());
+                    if(short_format)
+                        dateFormat = new SimpleDateFormat("dd/MM", Locale.getDefault());
+                    else
+                        dateFormat = new SimpleDateFormat("dd/MM/yyyy - HH:mm", Locale.getDefault());
                 }
             }
             else
@@ -178,7 +237,7 @@ public abstract class BaseAdapter<VH extends RecyclerView.ViewHolder>
         }
     }
 
-    public String formatDateTime(Date datetime1, Date datetime2)
+    String formatDateTime(Date datetime1, Date datetime2)
     {
         //Check if received any update yet
         if(datetime1 == null || datetime2 == null)
@@ -198,27 +257,20 @@ public abstract class BaseAdapter<VH extends RecyclerView.ViewHolder>
             if(date1.get(Calendar.DAY_OF_YEAR) == date2.get(Calendar.DAY_OF_YEAR) && date1.get(Calendar.YEAR) == date2.get(Calendar.YEAR))
             {
                 //Use default value
-                return formatDateTime(datetime1, false) + " até " + formatTime(datetime2);
+                return formatDateTime(datetime1, false, false) + " até " + new SimpleDateFormat("HH:mm", Locale.getDefault()).format(datetime2);
             }
             else
             {
                 //Get value from second date time
-                String formatted_text = formatDateTime(datetime2, true);
+                String formatted_text = formatDateTime(datetime2, true, false);
 
                 //If dates in same year
                 if(date1.get(Calendar.YEAR) == date2.get(Calendar.YEAR))
                     formatted_text = formatted_text.replace("/" + String.valueOf(date1.get(Calendar.YEAR)), "");
 
                 //Format text to adapt two dates representation
-                return formatDateTime(datetime1, true) + " até " + formatted_text.substring(0,1).toLowerCase() + formatted_text.substring(1);
+                return formatDateTime(datetime1, true, false) + " até " + formatted_text.substring(0,1).toLowerCase() + formatted_text.substring(1);
             }
         }
-    }
-
-    public String formatTime(Date datetime)
-    {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-
-        return dateFormat.format(datetime);
     }
 }

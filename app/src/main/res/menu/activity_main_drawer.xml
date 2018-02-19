@@ -2,36 +2,65 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
-
-    <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_camera"
-            android:icon="@drawable/ic_menu_camera"
-            android:title="Import" />
-        <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Gallery" />
-        <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="Slideshow" />
-        <item
-            android:id="@+id/nav_manage"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="Tools" />
-    </group>
-
-    <item android:title="Communicate">
+    <item android:title="@string/menu_trackers">
         <menu>
-            <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
-            <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
+            <group>
+                <item
+                    android:id="@+id/menu_add"
+                    android:icon="@drawable/ic_add_black_24dp"
+                    android:title="@string/menu_add" />
+                <item
+                    android:id="@+id/menu_refresh"
+                    android:icon="@drawable/ic_refresh_white_24dp"
+                    android:title="@string/menu_refresh" />
+                <item
+                    android:id="@+id/menu_search"
+                    android:icon="@drawable/ic_search_white_24dp"
+                    android:title="@string/menu_search" />
+            </group>
+        </menu>
+    </item>
+
+    <item android:title="@string/menu_notifications">
+        <menu>
+            <group>
+                <item
+                    android:id="@+id/menu_notification_sound"
+                    android:icon="@drawable/ic_music_note_black_24dp"
+                    android:title="@string/menu_notification_sound" />
+                <item
+                    android:id="@+id/menu_notification_vibrate"
+                    android:icon="@drawable/ic_vibration_black_24dp"
+                    android:title="@string/menu_notification_vibrate" />
+                <item
+                    android:id="@+id/menu_notifications_disable"
+                    android:icon="@drawable/ic_notifications_off_black_24dp"
+                    android:title="@string/menu_notification_disable" />
+            </group>
+        </menu>
+    </item>
+
+    <item android:title="@string/menu_maps">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/map_default"
+                    android:checked="true"
+                    android:icon="@drawable/ic_menu_gallery"
+                    android:title="@string/map_default" />
+                <item
+                    android:id="@+id/map_satellite"
+                    android:icon="@drawable/ic_satellite_black_24dp"
+                    android:title="@string/map_satellite" />
+                <item
+                    android:id="@+id/map_terrain"
+                    android:icon="@drawable/ic_terrain_black_24dp"
+                    android:title="@string/map_terrain" />
+                <item
+                    android:id="@+id/map_hybrid"
+                    android:icon="@drawable/ic_layers_black_24dp"
+                    android:title="@string/map_hybrid" />
+            </group>
         </menu>
     </item>
 

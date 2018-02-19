@@ -57,7 +57,7 @@ public class CoordinatesAdapter extends BaseAdapter<CoordinatesAdapter.ViewHolde
         else
         {
             //Single time
-            holder.txtDatetime.setText(formatDateTime(coordinates.getDatetime(), false));
+            holder.txtDatetime.setText(formatDateTime(coordinates.getDatetime(), false, false));
         }
 
         //Set address

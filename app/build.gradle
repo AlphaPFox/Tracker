@@ -34,6 +34,7 @@ dependencies {
     implementation 'com.android.support:recyclerview-v7:26.1.0'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
 
+
     //External Libraries
     implementation 'com.xw.repo:bubbleseekbar:3.13-lite'
     implementation 'com.appolica:interactive-info-window:v1.0.6'

@@ -1,5 +1,6 @@
 package br.gov.dpf.tracker;
 
+import android.app.SearchManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -21,6 +22,8 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
+import android.text.SpannedString;
 import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -210,6 +213,20 @@ public class DetailActivity
         //Initialize navigation view
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        //Get navigation view header
+        View header = navigationView.getHeaderView(0);
+
+        //Update layout color
+        header.getBackground().setColorFilter(Color.parseColor(tracker.getBackgroundColor()), android.graphics.PorterDuff.Mode.SRC_IN);
+
+        //Update header text fields
+        ((TextView) header.findViewById(R.id.txtName)).setText(tracker.formatName());
+        ((TextView) header.findViewById(R.id.txtModel)).setText(Html.fromHtml(String.format(Html.toHtml(new SpannedString(getText(R.string.txtModel))), tracker.formatTrackerModel())));
+
+        //Update header image
+        ((CircleImageView) header.findViewById(R.id.imgModel)).setBorderColor(Color.parseColor("#" + tracker.getBackgroundColor().substring(3)));
+        ((CircleImageView) header.findViewById(R.id.imgModel)).setImageDrawable(getResources().getDrawable(getResources().getIdentifier("model_" + tracker.getModel().toLowerCase(), "drawable", getPackageName())));
 
         //Define db search query
         buildQuery(intent);
@@ -749,6 +766,7 @@ public class DetailActivity
         mMap.setOnMarkerClickListener(this);
     }
 
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -760,7 +778,7 @@ public class DetailActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
-            case R.id.action_settings:
+            case R.id.menu_default_settings:
             {
                 // Create intent to go to edit page
                 Intent intent = new Intent(this, DefaultSettingsActivity.class);
@@ -949,20 +967,19 @@ public class DetailActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
+        if (id == R.id.menu_notification_sound) {
             // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        } else if (id == R.id.menu_notification_vibrate) {
 
-        } else if (id == R.id.nav_slideshow) {
+        } else if (id == R.id.menu_notifications_disable) {
 
-        } else if (id == R.id.nav_manage) {
+        } else if (id == R.id.map_hybrid) {
 
-        } else if (id == R.id.nav_share) {
+        } else if (id == R.id.map_default) {
 
-        } else if (id == R.id.nav_send) {
+        } else if (id == R.id.map_satellite) {
 
         }
-
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;

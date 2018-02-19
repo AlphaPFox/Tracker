@@ -2,7 +2,6 @@ package br.gov.dpf.tracker.Firestore;
 
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.media.Image;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -146,7 +145,7 @@ public class TrackerAdapter
 
                     //Define map marker settings
                     MarkerOptions markerOptions = new MarkerOptions().
-                            icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(formatTime((Date) tracker.getLastCoordinate().get("datetime"))))).
+                            icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(formatDateTime((Date) tracker.getLastCoordinate().get("datetime"), true, true)))).
                             position(coordinates).
                             anchor(iconFactory.getAnchorU(), iconFactory.getAnchorV());
 
@@ -175,10 +174,9 @@ public class TrackerAdapter
 
         //Get last configuration and last coordinates
         Map<String, Object> configuration = tracker.getLastConfiguration();
-        Map<String, Object> coordinates = tracker.getLastCoordinate();
 
-        //Check if last tracker configuration occurred less than 30 minutes ago
-        if(configuration != null && (coordinates == null || ((Date)configuration.get("datetime")).getTime() + 300000 > ((Date) coordinates.get("datetime")).getTime()))
+        //Check if last tracker configuration occurred less than 5 minutes ago
+        if(configuration != null && (tracker.getLastCoordinate() == null || ((Date)configuration.get("datetime")).getTime() + 300000 > (new Date()).getTime()))
         {
             //Hide last coordinate panel to show configuration status
             holder.lastCoordinate.setVisibility(View.GONE);
@@ -288,7 +286,7 @@ public class TrackerAdapter
             if(tracker.getLastCoordinate() != null)
             {
                 //Show last coordinate datetime
-                holder.txtLastUpdateValue.setText(formatDateTime((Date) tracker.getLastCoordinate().get("datetime"), false));
+                holder.txtLastUpdateValue.setText(formatDateTime((Date) tracker.getLastCoordinate().get("datetime"), false, false));
             }
             else
             {

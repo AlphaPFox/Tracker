@@ -1,9 +1,12 @@
 package br.gov.dpf.tracker;
 
 import android.app.ActivityOptions;
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -11,11 +14,13 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.transition.Fade;
 import android.util.Pair;
@@ -31,13 +36,15 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 
+import java.util.ArrayList;
+
 import br.gov.dpf.tracker.Components.GridAutoLayoutManager;
 import br.gov.dpf.tracker.Entities.Tracker;
 import br.gov.dpf.tracker.Firestore.TrackerAdapter;
 
 public class MainActivity
         extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, SwipeRefreshLayout.OnRefreshListener {
 
 
     //Load components used on recycler view
@@ -45,6 +52,7 @@ public class MainActivity
     private RecyclerView mRecyclerView;
     private View mEmptyView, mLoadingView;
     private TrackerAdapter mAdapter;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
 
     //Store current Firestore DB instance
     private FirebaseFirestore mFireStoreDB;
@@ -89,12 +97,14 @@ public class MainActivity
         mLoadingView = findViewById(R.id.vwLoadingCardView);
         mEmptyView = findViewById(R.id.vwEmptyCardView);
 
+        //Get swipe refresh layout
+        mSwipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
+        mSwipeRefreshLayout.setColorSchemeResources(R.color.colorPrimaryDark, R.color.colorPrimary, R.color.colorAccent);
+        mSwipeRefreshLayout.setOnRefreshListener(this);
+
         //Initialize db instance
         FirebaseFirestore.setLoggingEnabled(true);
         mFireStoreDB = FirebaseFirestore.getInstance();
-
-        //Disable offline data
-        //mFireStoreDB.setFirestoreSettings(new FirebaseFirestoreSettings.Builder().setPersistenceEnabled(false).build());
 
         // RecyclerView
         mAdapter = new TrackerAdapter(this, mFireStoreDB.collection("Tracker").orderBy("lastUpdate", Query.Direction.DESCENDING))
@@ -112,6 +122,8 @@ public class MainActivity
                 //Hide loading view
                 mLoadingView.setVisibility(View.GONE);
 
+                //Cancel loading animation
+                dismissLoading(1000);
             }
 
             @Override
@@ -359,12 +371,83 @@ public class MainActivity
         popup.show();
     }
 
+    public void dismissLoading(int delay)
+    {
+        mSwipeRefreshLayout.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                //Cancel refreshing image (if present)
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        }, delay);
+    }
+
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
 
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+
+        // Get search view menu
+        SearchView searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
+
+        // If menu available
+        if(searchManager != null)
+        {
+            //Set search manager
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+
+            //Set query hint
+            searchView.setQueryHint(getString(R.string.menu_search_hint));
+
+            //Set search view actions
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    return true;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText)
+                {
+                    //If search is at least 3 chars
+                    if(newText.length() >= 3)
+                    {
+                        //Create filter with fields to be searched
+                        ArrayList<String> filter = new ArrayList<>();
+
+                        //Define fields
+                        filter.add("name");
+                        filter.add("identification");
+                        filter.add("model");
+
+                        //Apply filter
+                        mAdapter.applyFilter(filter, newText);
+                    }
+                    else
+                    {
+                        //No filter with less than 3 chars
+                        mAdapter.removeFilter();
+                    }
+                    return false;
+                }
+            });
+        }
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public void onRefresh()
+    {
+        //Stop current snapshot listener
+        mAdapter.stopListening();
+
+        //Start listening again, but now without cached data
+        mAdapter.startListening();
     }
 
     @Override
@@ -392,12 +475,13 @@ public class MainActivity
 
             case R.id.action_refresh:
 
-                return true;
+                // Signal SwipeRefreshLayout to start the progress indicator
+                mSwipeRefreshLayout.setRefreshing(true);
 
-            case R.id.action_settings:
-                // Open navigation drawer
-                DrawerLayout drawer = findViewById(R.id.drawer_layout);
-                drawer.openDrawer(GravityCompat.START);
+                // Start update process
+                onRefresh();
+
+                //End method
                 return true;
         }
 
@@ -410,17 +494,28 @@ public class MainActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        if (id == R.id.menu_add)
+        {
+            // Create an intent to open Settings activity
+            Intent intent = new Intent(getApplicationContext(), DefaultSettingsActivity.class);
 
-        } else if (id == R.id.nav_slideshow) {
+            // Define request intent to update an existing tracker
+            intent.putExtra("Request", REQUEST_INSERT);
 
-        } else if (id == R.id.nav_manage) {
+            // Start register activity and wait for result
+            startActivity(intent);
 
-        } else if (id == R.id.nav_share) {
+            // End method
+            return true;
+        } else if (id == R.id.menu_notification_vibrate) {
 
-        } else if (id == R.id.nav_send) {
+        } else if (id == R.id.menu_notifications_disable) {
+
+        } else if (id == R.id.map_hybrid) {
+
+        } else if (id == R.id.map_default) {
+
+        } else if (id == R.id.map_satellite) {
 
         }
 

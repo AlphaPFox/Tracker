@@ -317,7 +317,7 @@ public class DefaultSettingsActivity extends AppCompatActivity {
         if(editMode)
         {
             //Add a new option
-            menu.add(Menu.NONE, R.id.action_settings, Menu.NONE, "Alterar modelo do rastreador");
+            menu.add(Menu.NONE, R.id.lblModel, Menu.NONE, "Alterar modelo do rastreador");
             menu.add(Menu.NONE, R.id.action_tracker_settings, Menu.NONE, "Configurações do dispositivo");
             menu.add(Menu.NONE, R.id.action_notification_settings, Menu.NONE, "Opções de notificação");
         }
@@ -345,7 +345,7 @@ public class DefaultSettingsActivity extends AppCompatActivity {
                 //End method
                 return true;
 
-            case R.id.action_settings:
+            case R.id.lblModel:
 
                 //Method called to save data
                 findViewById(R.id.vwModelCardView).setVisibility(View.VISIBLE);

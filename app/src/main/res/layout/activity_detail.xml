@@ -8,236 +8,236 @@
     android:layout_height="match_parent" >
 
         <com.sothree.slidinguppanel.SlidingUpPanelLayout
-        android:id="@+id/sliding_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="bottom"
-        app:umanoOverlay="false"
-        app:umanoFadeColor="@android:color/transparent"
-        app:umanoAnchorPoint="0.5"
-        app:umanoShadowHeight="8dp"
-        app:umanoPanelHeight="@dimen/panel_single_row_height"
-        app:umanoDragView="@+id/dragView"
-        app:umanoScrollableView="@+id/DetailRecycler">
-
-        <!-- MAIN CONTENT -->
-        <FrameLayout
+            android:id="@+id/sliding_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:gravity="bottom"
+            app:umanoOverlay="false"
+            app:umanoFadeColor="@android:color/transparent"
+            app:umanoAnchorPoint="0.5"
+            app:umanoShadowHeight="8dp"
+            app:umanoPanelHeight="@dimen/panel_single_row_height"
+            app:umanoDragView="@+id/dragView"
+            app:umanoScrollableView="@+id/DetailRecycler">
 
-            <fragment
-                android:id="@+id/map"
-                android:name="com.appolica.interactiveinfowindow.fragment.MapInfoWindowFragment"
+            <!-- MAIN CONTENT -->
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:context="br.gov.dpf.tracker.DetailActivity" />
+                android:orientation="vertical">
 
+                <fragment
+                    android:id="@+id/map"
+                    android:name="com.appolica.interactiveinfowindow.fragment.MapInfoWindowFragment"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    tools:context="br.gov.dpf.tracker.DetailActivity" />
+
+                <LinearLayout
+                    android:id="@+id/loadingBackground"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#EEE"
+                    android:gravity="center">
+
+                    <ProgressBar
+                        android:id="@+id/progressBar"
+                        android:layout_width="200dp"
+                        android:layout_height="200dp"
+                        android:background="@drawable/map_icon"
+                        android:indeterminateDrawable="@drawable/loading" />
+
+                    <br.gov.dpf.tracker.Components.CircleProgressBar
+                        android:id="@+id/circleProgressBar"
+                        android:layout_width="200dp"
+                        android:layout_height="200dp"
+                        android:visibility="gone"
+                        android:background="@drawable/map_icon"
+                        app:progress="0"
+                        app:progressBarThickness="5dp"/>
+
+                </LinearLayout>
+
+                <android.support.v7.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    app:cardCornerRadius="8dp">
+
+                    <android.support.v7.widget.Toolbar
+                        android:id="@+id/main_toolbar"
+                        android:layout_width="match_parent"
+                        android:layout_height="?attr/actionBarSize"
+                        app:contentInsetStartWithNavigation="0dp">
+
+                        <RelativeLayout
+                            android:layout_marginStart="0dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+
+                            <de.hdodenhof.circleimageview.CircleImageView
+                                android:id="@+id/imgModel"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:layout_alignParentStart="true"
+                                android:layout_centerVertical="true"
+                                android:layout_marginEnd="5dp"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/ic_image_grey_24dp"
+                                app:civ_fill_color="#ac5959" />
+
+                            <TextView
+                                android:id="@+id/txtToolbarTitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="22dp"
+                                android:layout_alignTop="@+id/imgModel"
+                                android:layout_toEndOf="@+id/imgModel"
+                                android:textColor="#333"
+                                android:textSize="15sp"
+                                tools:text="TextView" />
+
+                            <TextView
+                                android:id="@+id/txtToolbarSubtitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignBottom="@+id/imgModel"
+                                android:layout_toEndOf="@+id/imgModel"
+                                android:textSize="13sp"
+                                tools:text="TextView" />
+
+                        </RelativeLayout>
+
+                    </android.support.v7.widget.Toolbar>
+
+                </android.support.v7.widget.CardView>
+
+
+            </FrameLayout>
+
+            <!-- SLIDING LAYOUT -->
             <LinearLayout
-                android:id="@+id/loadingBackground"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="#EEE"
-                android:gravity="center">
-
-                <ProgressBar
-                    android:id="@+id/progressBar"
-                    android:layout_width="200dp"
-                    android:layout_height="200dp"
-                    android:background="@drawable/map_icon"
-                    android:indeterminateDrawable="@drawable/loading" />
-
-                <br.gov.dpf.tracker.Components.CircleProgressBar
-                    android:id="@+id/circleProgressBar"
-                    android:layout_width="200dp"
-                    android:layout_height="200dp"
-                    android:visibility="gone"
-                    android:background="@drawable/map_icon"
-                    app:progress="0"
-                    app:progressBarThickness="5dp"/>
-
-            </LinearLayout>
-
-            <android.support.v7.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                app:cardCornerRadius="8dp">
+                android:background="#ffffff"
+                android:orientation="vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:id="@+id/dragView">
 
-                <android.support.v7.widget.Toolbar
-                    android:id="@+id/main_toolbar"
+                <LinearLayout
+                    android:layout_width="40dp"
+                    android:layout_height="2dp"
+                    android:layout_margin="3dp"
+                    android:background="#BBB"
+                    android:layout_gravity="center"/>
+
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/vwConfigPanel"
                     android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    app:contentInsetStartWithNavigation="0dp">
+                    android:layout_height="70dp"
+                    android:layout_gravity="bottom"
+                    android:background="#EEE">
 
-                    <RelativeLayout
-                        android:layout_marginStart="0dp"
+                    <ImageView
+                        android:id="@+id/imgStatus"
+                        android:layout_width="65dp"
+                        android:layout_height="50dp"
+                        android:contentDescription="@string/imgLoading"
+                        android:padding="2dp"
+                        android:src="@drawable/ic_settings_grey_40dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/txtConfigDescription"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginTop="16dp"
+                        android:text="@string/txtConfigLoading"
+                        android:textColor="#000"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/imgStatus"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/txtConfigStatus"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_marginEnd="8dp"
+                        android:gravity="top"
+                        android:text="@string/txtConfigStatus"
+                        android:textSize="13sp"
+                        app:layout_constraintBottom_toTopOf="@+id/view"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/imgStatus"
+                        app:layout_constraintTop_toBottomOf="@+id/txtConfigDescription" />
+
+                    <View
+                        android:id="@+id/view"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent">
+                        android:layout_height="1dp"
+                        android:background="#DDD"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+                </android.support.constraint.ConstraintLayout>
 
-                        <de.hdodenhof.circleimageview.CircleImageView
-                            android:id="@+id/imgModel"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:layout_alignParentStart="true"
-                            android:layout_centerVertical="true"
-                            android:layout_marginEnd="5dp"
-                            android:scaleType="centerCrop"
-                            android:src="@drawable/ic_image_grey_24dp"
-                            app:civ_fill_color="#ac5959" />
-
-                        <TextView
-                            android:id="@+id/txtToolbarTitle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="22dp"
-                            android:layout_alignTop="@+id/imgModel"
-                            android:layout_toEndOf="@+id/imgModel"
-                            android:textColor="#333"
-                            android:textSize="15sp"
-                            tools:text="TextView" />
-
-                        <TextView
-                            android:id="@+id/txtToolbarSubtitle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignBottom="@+id/imgModel"
-                            android:layout_toEndOf="@+id/imgModel"
-                            android:textSize="13sp"
-                            tools:text="TextView" />
-
-                    </RelativeLayout>
-
-                </android.support.v7.widget.Toolbar>
-
-            </android.support.v7.widget.CardView>
-
-
-        </FrameLayout>
-
-        <!-- SLIDING LAYOUT -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#ffffff"
-            android:orientation="vertical"
-            android:clickable="true"
-            android:focusable="true"
-            android:id="@+id/dragView">
-
-            <LinearLayout
-                android:layout_width="40dp"
-                android:layout_height="2dp"
-                android:layout_margin="3dp"
-                android:background="#BBB"
-                android:layout_gravity="center"/>
-
-            <android.support.constraint.ConstraintLayout
-                android:id="@+id/vwConfigPanel"
-                android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:layout_gravity="bottom"
-                android:background="#EEE">
-
-                <ImageView
-                    android:id="@+id/imgStatus"
-                    android:layout_width="65dp"
-                    android:layout_height="50dp"
-                    android:contentDescription="@string/imgLoading"
-                    android:padding="2dp"
-                    android:src="@drawable/ic_settings_grey_40dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/txtConfigDescription"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/txtConfigLoading"
-                    android:textColor="#000"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/imgStatus"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/txtConfigStatus"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_marginEnd="8dp"
-                    android:gravity="top"
-                    android:text="@string/txtConfigStatus"
-                    android:textSize="13sp"
-                    app:layout_constraintBottom_toTopOf="@+id/view"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/imgStatus"
-                    app:layout_constraintTop_toBottomOf="@+id/txtConfigDescription" />
-
-                <View
-                    android:id="@+id/view"
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/vwBottomPanel"
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#DDD"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" />
-            </android.support.constraint.ConstraintLayout>
+                    android:layout_height="85dp"
+                    android:visibility="gone"
+                    android:layout_gravity="bottom"
+                    android:background="#EEE">
 
-            <android.support.constraint.ConstraintLayout
-                android:id="@+id/vwBottomPanel"
-                android:layout_width="match_parent"
-                android:layout_height="85dp"
-                android:visibility="gone"
-                android:layout_gravity="bottom"
-                android:background="#EEE">
+                    <ImageView
+                        android:id="@+id/imgLoading"
+                        android:layout_width="70dp"
+                        android:layout_height="0dp"
+                        android:padding="5dp"
+                        android:contentDescription="@string/imgLoading"
+                        android:src="@drawable/ic_phonelink_erase_grey_72dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                <ImageView
-                    android:id="@+id/imgLoading"
-                    android:layout_width="70dp"
-                    android:layout_height="0dp"
-                    android:padding="5dp"
-                    android:contentDescription="@string/imgLoading"
-                    android:src="@drawable/ic_phonelink_erase_grey_72dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    <TextView
+                        android:id="@+id/txtBottomTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="@string/txtWaitingTitle"
+                        android:textColor="#444"
+                        android:textSize="16sp"
+                        app:layout_constraintBottom_toTopOf="@+id/txtBottomSubtitle"
+                        app:layout_constraintStart_toEndOf="@+id/imgLoading"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
-                    android:id="@+id/txtBottomTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:text="@string/txtWaitingTitle"
-                    android:textColor="#444"
-                    android:textSize="16sp"
-                    app:layout_constraintBottom_toTopOf="@+id/txtBottomSubtitle"
-                    app:layout_constraintStart_toEndOf="@+id/imgLoading"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    <TextView
+                        android:id="@+id/txtBottomSubtitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="2dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="4dp"
+                        android:gravity="center_vertical"
+                        android:text="@string/txtWaitingSubtitle"
+                        android:textSize="12sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/imgLoading"
+                        app:layout_constraintTop_toBottomOf="@+id/txtBottomTitle" />
+                </android.support.constraint.ConstraintLayout>
 
-                <TextView
-                    android:id="@+id/txtBottomSubtitle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="2dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginStart="4dp"
-                    android:gravity="center_vertical"
-                    android:text="@string/txtWaitingSubtitle"
-                    android:textSize="12sp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/imgLoading"
-                    app:layout_constraintTop_toBottomOf="@+id/txtBottomTitle" />
-            </android.support.constraint.ConstraintLayout>
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/DetailRecycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+                </android.support.v7.widget.RecyclerView>
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/DetailRecycler"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-            </android.support.v7.widget.RecyclerView>
-
-        </LinearLayout>
+            </LinearLayout>
 
     </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 
@@ -247,7 +247,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
-        app:headerLayout="@layout/nav_header_main"
-        app:menu="@menu/activity_main_drawer" />
+        app:headerLayout="@layout/nav_header_detail"
+        app:menu="@menu/activity_detail_drawer" />
 
 </android.support.v4.widget.DrawerLayout>

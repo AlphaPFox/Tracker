@@ -26,9 +26,6 @@
     <string name="menu_include">Incluir</string>
     <string name="menu_delete">Excluir</string>
 
-
-
-
     <string name="txtLowBattery">Quando o rastreador informar que a bateria está abaixo de 30%, uma notificação será exibida neste aparelho.</string>
     <string name="lblTrackerStatus">Status do rastreador</string>
     <string name="txtTrackerStatus">Mostra uma notificação quando o rastreador informar o percentual de bateria e sinal de GSM.</string>
@@ -40,7 +37,7 @@
     <string name="txtAvailable">Notifica assim que a operadora de telefonia confirmar se foi possível ou não entregar um SMS ao rastreador.</string>
     <string name="lblSMSResponse">Recebimento de SMS</string>
     <string name="txtSMSResponse">Mostra uma notificação toda vez que o servidor receber qualquer comunicação em SMS deste rastreador.</string>
-    <string name="TrackerLabel">Rastreador: %s</string>
+    <string name="TrackerLabel">Rastreador: %1$s</string>
     <string name="txtLoading">Carregando informações&#8230;</string>
     <string name="imgLoading">Carregando&#8230;</string>
     <string name="title_activity_detail">DetailActivity</string>
@@ -146,6 +143,7 @@
     <string name="txtInterval">Intervalo de atualização</string>
     <string name="txtInfoBattery">Bateria:</string>
     <string name="txtInfoSignal">Sinal GSM:</string>
+    <string name="txtModel"><b>Modelo: %s</b></string>
 
     <!-- Filter activity -->
     <string name="txtFilterTitle">Opções de exibição</string>
@@ -165,8 +163,8 @@
     <string name="imgDatetime">Data/hora</string>
     <string name="btnClose">Fechar</string>
     <string name="menu_detail">Visualizar detalhes</string>
-    <string name="menu_default_settings">Configurações básicas</string>
-    <string name="menu_tracker_settings">Configurações do rastreador</string>
+    <string name="menu_default_settings">Opções de exibição</string>
+    <string name="menu_tracker_settings">Configurações do dispositivo</string>
     <string name="menu_notification_settings">Opções de notificação</string>
     <string name="menu_delete_tracker">Excluir rastreador</string>
     <string name="imgEdit">Opções</string>
@@ -175,6 +173,30 @@
     <string name="txtConfigLoading">Carregando informações</string>
     <string name="txtConfigRequest">Realizando solicitação</string>
     <string name="txtConfigStatus">Aguardando resposta do servidor</string>
+    <string name="menu_trackers">Dispositivos rastreadores</string>
+    <string name="menu_add">Adicionar novo</string>
+    <string name="menu_refresh">Atualizar lista</string>
+    <string name="menu_search">Pesquisar por nome</string>
+    <string name="menu_notifications">Opções de notificação</string>
+    <string name="menu_notification_sound">Som de notificação</string>
+    <string name="menu_notification_vibrate">Opções de vibração</string>
+    <string name="menu_notification_disable">Desativar notificações</string>
+    <string name="menu_maps">Tipos de mapa</string>
+    <string name="map_default">Mapa padrão</string>
+    <string name="map_satellite">Satélite</string>
+    <string name="map_terrain">Terreno</string>
+    <string name="map_hybrid">Híbrido</string>
+    <string name="menu_tracker_commands">Comandos do rastreador</string>
+    <string name="menu_request_position">Solicitar localização atual</string>
+    <string name="menu_request_status">Solicitar status do dispositivo</string>
+    <string name="menu_reset">Reiniciar configurações</string>
+    <string name="menu_tracker_config">Configurações do rastreador</string>
+    <string name="menu_map_components">Componentes do mapa</string>
+    <string name="menu_map_path">Caminho entre coordenadas</string>
+    <string name="menu_map_radius">Raio de alcance de torres GSM</string>
+    <string name="menu_my_location">Minha localização</string>
+    <string name="menu_zoom_control">Controles de zoom</string>
+    <string name="menu_search_hint">Nome, modelo ou número</string>
 
     <string-array name="weekdays">
         <item>Domingo</item>
