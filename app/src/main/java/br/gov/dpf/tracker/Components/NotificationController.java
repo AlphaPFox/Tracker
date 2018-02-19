@@ -192,28 +192,6 @@ public class NotificationController
             single_notification.setStyle(new NotificationCompat.BigTextStyle().bigText(notification.getExpandedContent()));
         }
 
-        //If notification has progress indicator
-        if(notification.getTopic().contains("_NotifyUpdate"))
-        {
-            //Set max priority to this progress notification
-            single_notification.setPriority(Notification.PRIORITY_MAX);
-
-            //If update has not started yet
-            if(notification.getProgress() == 0)
-            {
-                //Set progress as indeterminate
-                single_notification.setProgress(0, 0, true);
-            }
-            else
-            {
-                //Show progress value
-                single_notification.setProgress(100, notification.getProgress(), false);
-            }
-
-            //Disable cancel on click feature
-            single_notification.setAutoCancel(false);
-        }
-
         //Set tracker color on notification
         single_notification.setColor(Color.parseColor(notificationGroup.tracker.getBackgroundColor()));
 
@@ -235,10 +213,13 @@ public class NotificationController
         dismissIntent.putExtra("GroupKey", notificationGroup.getGroupKey());
         dismissIntent.putExtra("DismissSingle", notification.getNotificationID());
 
-        //Apply it to notification builder
-        single_notification.setDeleteIntent(PendingIntent.getBroadcast(context, 0, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT));
+        //Build pending intent
+        PendingIntent pendingDeleteIntent = PendingIntent.getBroadcast(context, 0, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        //Create dismiss event intent
+        //Apply it to notification builder
+        single_notification.setDeleteIntent(pendingDeleteIntent);
+
+        //Create click event intent
         Intent clickIntent = new Intent(context, TrackerBroadcastReceiver.class);
 
         //Set intent action with group key
@@ -247,6 +228,60 @@ public class NotificationController
         // Put tracker data on intent
         clickIntent.putExtra("GroupKey", notificationGroup.getGroupKey());
         clickIntent.putExtra("Tracker", notificationGroup.tracker);
+
+        //If notification has progress indicator
+        if(notification.getTopic().contains("_NotifyUpdate"))
+        {
+            //Set max priority to this progress notification
+            single_notification.setPriority(Notification.PRIORITY_MAX);
+
+            //Disable cancel on click feature
+            single_notification.setAutoCancel(false);
+
+            //Create interrupt event intent
+            Intent interruptIntent = new Intent(context, TrackerBroadcastReceiver.class);
+
+            //Set intent action with group key
+            interruptIntent.setAction(notificationGroup.getGroupKey() + "_interrupt_" + notification.getNotificationID());
+
+            // Put tracker data on intent
+            interruptIntent.putExtra("GroupKey", notificationGroup.getGroupKey());
+            interruptIntent.putExtra("CancelConfig", notification.getNotificationID());
+
+            // Create pending intent
+            PendingIntent pendingInterruptIntent = PendingIntent.getBroadcast(context, 0, interruptIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            //If update has not started yet
+            if(notification.getProgress() == 0)
+            {
+                //Set progress as indeterminate
+                single_notification.setProgress(0, 0, true);
+
+                //Cancel update
+                single_notification.addAction(R.drawable.ic_close_white_24dp, "Cancelar processo", pendingInterruptIntent);
+            }
+            else if(notification.getProgress() < 100)
+            {
+                //Show progress value
+                single_notification.setProgress(100, notification.getProgress(), false);
+
+                //Interrupt update
+                single_notification.addAction(R.drawable.ic_close_white_24dp, "Interromper processo", pendingInterruptIntent);
+            }
+            else
+            {
+                //Show progress value
+                single_notification.setProgress(100, notification.getProgress(), false);
+            }
+
+            // Add to progress indicator action
+            single_notification.addAction(R.drawable.ic_settings_grey_40dp, "Ocultar", pendingDeleteIntent);
+        }
+        else
+        {
+            //All notifications, except progress update should be dismissed on click
+            clickIntent.putExtra("DismissGroup", notificationGroup.getGroupKey());
+        }
 
         //Apply it to notification builder
         single_notification.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
@@ -338,6 +373,7 @@ public class NotificationController
         clickIntent.setAction(notificationGroup.getGroupKey() + "_click");
 
         // Put tracker data on intent
+        clickIntent.putExtra("DismissGroup", notificationGroup.getGroupKey());
         clickIntent.putExtra("GroupKey", notificationGroup.getGroupKey());
         clickIntent.putExtra("Tracker", notificationGroup.tracker);
 
@@ -348,7 +384,7 @@ public class NotificationController
         for (NotificationMessage notificationMessage : notificationGroup.notifications)
         {
             //Check if it is a progress notification
-            if(notificationMessage.updater == null)
+            if(notificationMessage.progressNotification == null)
             {
                 //Add to summary
                 inboxStyle.addLine(notificationMessage.getStyledMessage());
@@ -389,6 +425,13 @@ public class NotificationController
 
                 //Dismiss notification
                 notificationManager.cancel(notification.getNotificationID());
+
+                //Check  if it is a progress indicator
+                if (notification.progressNotification != null)
+                {
+                    //Cancel progress indicator
+                    notification.progressNotification.dismissProgress();
+                }
             }
 
             //Dismiss summary
@@ -410,14 +453,49 @@ public class NotificationController
             //Find notification by id
             NotificationMessage notification = notificationGroup.findNotification(notificationID);
 
-            //Remove notification from group
-            notificationGroup.notifications.remove(notification);
-
-            //If there are more notifications
-            if(notificationGroup.notifications.size() > 0)
+            //If notification successfully retrieved
+            if(notification != null)
             {
-                //Rebuild summary
-                notificationManager.notify(notificationGroup.getGroupID(), buildSummary(notificationGroup));
+                //Remove notification from group
+                notificationGroup.notifications.remove(notification);
+
+                //If there are more notifications
+                if (notificationGroup.notifications.size() > 0) {
+                    //Rebuild summary
+                    notificationManager.notify(notificationGroup.getGroupID(), buildSummary(notificationGroup));
+                } else {
+                    //Cancel summary
+                    notificationManager.cancel(notificationGroup.getGroupID());
+                }
+
+                //Check  if it is a progress indicator
+                if (notification.progressNotification != null) {
+                    //Cancel progress indicator
+                    notification.progressNotification.dismissProgress();
+                }
+            }
+        }
+
+        //Dismiss notification
+        notificationManager.cancel(notificationID);
+    }
+
+    void cancelConfiguration(String groupKey, int notificationID)
+    {
+        //Get notification group
+        NotificationGroup notificationGroup = notificationGroups.get(groupKey);
+
+        //If group successfully retrieved
+        if (notificationGroup != null)
+        {
+            //Find notification by id
+            NotificationMessage notification = notificationGroup.findNotification(notificationID);
+
+            //Check if notification is active
+            if(notification != null && notification.progressNotification != null)
+            {
+                //Call method to cancel update
+                notification.progressNotification.cancelConfiguration();
             }
         }
     }

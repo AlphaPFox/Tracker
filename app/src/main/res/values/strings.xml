@@ -130,6 +130,9 @@
     <string name="transition_icon">IconTransition</string>
     <string name="transition_title">TitleTransition</string>
     <string name="transition_subtitle">SubTitleTransition</string>
+    <string name="transition_config_description">ConfigDescTransition</string>
+    <string name="transition_config_status">ConfigStatusTransition</string>
+    <string name="transition_config_image">ConfigImageTransition</string>
     <string name="action_hide">Ocultar Painel</string>
     <string name="action_show">Exibir Painel</string>
     <string name="action_filter">Filtar resultados</string>
@@ -168,6 +171,10 @@
     <string name="menu_delete_tracker">Excluir rastreador</string>
     <string name="imgEdit">Opções</string>
     <string name="txtConfigurating">%1$d%%</string>
+    <string name="btnHide">Ocultar</string>
+    <string name="txtConfigLoading">Carregando informações</string>
+    <string name="txtConfigRequest">Realizando solicitação</string>
+    <string name="txtConfigStatus">Aguardando resposta do servidor</string>
 
     <string-array name="weekdays">
         <item>Domingo</item>

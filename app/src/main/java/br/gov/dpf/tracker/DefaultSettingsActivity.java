@@ -95,6 +95,11 @@ public class DefaultSettingsActivity extends AppCompatActivity {
             //Hide add floating action button
             fab.setVisibility(View.GONE);
         }
+        else
+        {
+            //Activity called to insert a new tracker, initialize object
+            tracker = new Tracker();
+        }
 
         //Handle click events for color options
         loadColors((GridLayout) findViewById(R.id.vwColors));
@@ -150,33 +155,40 @@ public class DefaultSettingsActivity extends AppCompatActivity {
         }
         else
         {
+            //Check if user is changing tracker model
+            final boolean updatingModel = (editMode && !mModel.equals(tracker.getModel()));
+
+            //Save tracker data
+            tracker.setName(trackerName);
+            tracker.setDescription(((EditText) findViewById(R.id.txtTrackerDescription)).getText().toString());
+            tracker.setIdentification(trackerIdentification);
+
+            //Save tracker model
+            tracker.setModel(mModel);
+
+            //Save tracker color
+            tracker.setBackgroundColor(mColor);
+
+            //Save create date
+            tracker.setLastUpdate(new Date());
+
             // Input is validated, set loading indicator on menu
             confirmMenu.setActionView(new ProgressBar(this));
 
             //Check if activity is in edit mode
             if(editMode)
             {
-                //Create an update map
-                Map<String,Object> updates = new HashMap<>();
-
-                //Get fields to be updated
-                updates.put("name", trackerName);
-                updates.put("description", trackerDescription);
-                updates.put("backgroundColor", mColor);
-                updates.put("model", mModel);
-                updates.put("lastUpdate", new Date());
-
                 // Perform update on DB
                 FirebaseFirestore.getInstance()
                         .collection("Tracker")
                         .document(tracker.getIdentification())
-                        .update(updates)
+                        .set(tracker)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
 
                                 //If changing tracker model, add a new step before finish
-                                if(!tracker.getModel().equals(mModel))
+                                if(updatingModel)
                                 {
                                     //Save new tracker model
                                     tracker.setModel(mModel);
@@ -194,15 +206,18 @@ public class DefaultSettingsActivity extends AppCompatActivity {
                                     intent.putExtra("ResetConfig", true);
 
                                     //Start next activity
-                                    startActivityForResult(intent, MainActivity.REQUEST_UPDATE);
+                                    startActivity(intent);
                                 }
                                 else
                                 {
-                                    //Set result editing result - OK
-                                    setResult(MainActivity.RESULT_SUCCESS);
+                                    // Go to the details page for the selected restaurant
+                                    Intent intent = new Intent(DefaultSettingsActivity.this, DetailActivity.class);
 
-                                    //End activity (returns to parent activity -> OnActivityResult)
-                                    finish();
+                                    // Put tracker data on intent
+                                    intent.putExtra("Tracker", tracker);
+
+                                    // Start detail activity
+                                    startActivity(intent);
                                 }
 
                             }
@@ -222,21 +237,6 @@ public class DefaultSettingsActivity extends AppCompatActivity {
             }
             else
             {
-                //Then this is an INSERT operation, create a new tracker
-                tracker = new Tracker();
-
-                //Save tracker data
-                tracker.setName(trackerName);
-                tracker.setDescription(((EditText) findViewById(R.id.txtTrackerDescription)).getText().toString());
-                tracker.setIdentification(trackerIdentification);
-                tracker.setModel(mModel);
-
-                //Save tracker color
-                tracker.setBackgroundColor(mColor);
-
-                //Save create date
-                tracker.setLastUpdate(new Date());
-
                 //Run query to check if there is already a tracker with this identification
                 FirebaseFirestore.getInstance()
                         .collection("Tracker")
@@ -275,11 +275,11 @@ public class DefaultSettingsActivity extends AppCompatActivity {
                             @Override
                             public void onFailure(@NonNull Exception e) {
 
-                                //Set result editing result - OK
-                                setResult(MainActivity.RESULT_ERROR);
+                                // Cancel loading indicator
+                                confirmMenu.setActionView(null);
 
-                                //End activity (returns to parent activity -> OnActivityResult)
-                                finish();
+                                //Alert result editing result - ERROR
+                                Snackbar.make(findViewById(R.id.vwMainScroll), "Error ao cadastrar rastreador: " + e.toString(), Snackbar.LENGTH_LONG).show();
                             }
                         });
             }
@@ -317,7 +317,7 @@ public class DefaultSettingsActivity extends AppCompatActivity {
         if(editMode)
         {
             //Add a new option
-            menu.add(Menu.NONE, R.id.action_default_settings, Menu.NONE, "Alterar modelo do rastreador");
+            menu.add(Menu.NONE, R.id.action_settings, Menu.NONE, "Alterar modelo do rastreador");
             menu.add(Menu.NONE, R.id.action_tracker_settings, Menu.NONE, "Configurações do dispositivo");
             menu.add(Menu.NONE, R.id.action_notification_settings, Menu.NONE, "Opções de notificação");
         }
@@ -331,10 +331,7 @@ public class DefaultSettingsActivity extends AppCompatActivity {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
 
-                //Set result
-                setResult(MainActivity.RESULT_CANCELED);
-
-                //End activity (returns to parent activity -> OnActivityResult)
+                //End activity (returns to parent activity)
                 finish();
 
                 //End method
@@ -348,7 +345,7 @@ public class DefaultSettingsActivity extends AppCompatActivity {
                 //End method
                 return true;
 
-            case R.id.action_default_settings:
+            case R.id.action_settings:
 
                 //Method called to save data
                 findViewById(R.id.vwModelCardView).setVisibility(View.VISIBLE);
@@ -372,7 +369,7 @@ public class DefaultSettingsActivity extends AppCompatActivity {
                 intent.putExtra("Request", MainActivity.REQUEST_UPDATE);
 
                 //Start next activity
-                startActivityForResult(intent, MainActivity.REQUEST_UPDATE);
+                startActivity(intent);
 
                 //End method
                 return true;
@@ -384,10 +381,7 @@ public class DefaultSettingsActivity extends AppCompatActivity {
     @Override
     public void onBackPressed()
     {
-        //Set result
-        setResult(MainActivity.RESULT_CANCELED);
-
-        //End activity (returns to parent activity -> OnActivityResult)
+        //End activity (returns to parent activity)
         finish();
     }
 

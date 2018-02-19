@@ -6,7 +6,7 @@ import android.text.style.StyleSpan;
 
 import java.util.Map;
 
-import br.gov.dpf.tracker.Components.TrackerUpdater;
+import br.gov.dpf.tracker.Components.ProgressNotification;
 
 public class NotificationMessage
 {
@@ -16,7 +16,7 @@ public class NotificationMessage
     private String title, content, expanded, coordinates;
     private Long datetime;
 
-    public TrackerUpdater updater;
+    public ProgressNotification progressNotification;
 
     public NotificationMessage(int notificationID, Map<String, String> data, String topic)
     {

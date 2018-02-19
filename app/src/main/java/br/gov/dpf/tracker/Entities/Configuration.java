@@ -43,7 +43,7 @@ public class Configuration
         mStatus.put("step", "REQUESTED");
         mStatus.put("description", "Status: Aguardando envio...");
         mStatus.put("datetime", new Date());
-        mStatus.put("completed", false);
+        mStatus.put("finished", false);
     }
 
     public String getName() {

@@ -3,8 +3,13 @@ package br.gov.dpf.tracker.Entities;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.firebase.firestore.GeoPoint;
+
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
+
+import br.gov.dpf.tracker.Components.GeoPointParcelable;
 
 @SuppressWarnings("unused")
 public class Tracker implements Parcelable {
@@ -116,6 +121,38 @@ public class Tracker implements Parcelable {
         mBackgroundColor = in.readString();
         long tmpLastUpdate = in.readLong();
         mLastUpdate = tmpLastUpdate != -1 ? new Date(tmpLastUpdate) : null;
+        long tmpLastCoordinate = in.readLong();
+
+        //Check if last coordinate is available
+        if(tmpLastCoordinate != -1)
+        {
+            //Get last coordinate data
+            mLastCoordinate = new HashMap<>();
+            mLastCoordinate.put("datetime", new Date(tmpLastCoordinate));
+            mLastCoordinate.put("type", in.readString());
+            mLastCoordinate.put("location", in.readParcelable(GeoPointParcelable.class.getClassLoader()));
+        }
+        else
+        {
+            //No coordinates available, read from parcel but ignore data
+            in.readString();
+            in.readParcelable(GeoPointParcelable.class.getClassLoader());
+        }
+
+        //Check if last configuration is available
+        String tmpConfigurationStep = in.readString();
+
+        //If configuration data available
+        if(!tmpConfigurationStep.isEmpty())
+        {
+            mLastConfiguration = new HashMap<>();
+            mLastConfiguration.put("step", tmpConfigurationStep);
+            mLastConfiguration.put("pending", in.readInt());
+            mLastConfiguration.put("description", in.readString());
+            mLastConfiguration.put("status", in.readString());
+            mLastConfiguration.put("progress", in.readString());
+            mLastConfiguration.put("datetime", new Date(in.readLong()));
+        }
     }
 
     @Override
@@ -133,6 +170,15 @@ public class Tracker implements Parcelable {
         dest.writeString(mSignalLevel);
         dest.writeString(mBackgroundColor);
         dest.writeLong(mLastUpdate != null ? mLastUpdate.getTime() : -1L);
+        dest.writeLong(mLastCoordinate != null ? ((Date) mLastCoordinate.get("datetime")).getTime() : -1L);
+        dest.writeString(mLastCoordinate != null ? mLastCoordinate.get("type").toString() : "");
+        dest.writeParcelable(mLastCoordinate != null ? new GeoPointParcelable((GeoPoint) mLastCoordinate.get("location")) : null, 0);
+        dest.writeString(mLastConfiguration != null ? mLastConfiguration.get("step").toString() : "");
+        dest.writeInt(mLastConfiguration != null ? Integer.valueOf(mLastConfiguration.get("pending").toString()) : 0);
+        dest.writeString(mLastConfiguration != null ? mLastConfiguration.get("description").toString() : "");
+        dest.writeString(mLastConfiguration != null ? mLastConfiguration.get("status").toString() : "");
+        dest.writeString(mLastConfiguration != null ? mLastConfiguration.get("progress").toString() : "");
+        dest.writeLong(mLastConfiguration != null ? ((Date) mLastConfiguration.get("datetime")).getTime() : -1L);
     }
 
     public static final Parcelable.Creator<Tracker> CREATOR = new Parcelable.Creator<Tracker>() {

@@ -77,11 +77,14 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".TrackerSettingsActivity"
+            android:noHistory="true"
             android:label="@string/title_tracker_tk102b_settings"
+            android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".FilterActivity"
             android:label="@string/action_filter"
+            android:noHistory="true"
             android:parentActivityName=".DetailActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

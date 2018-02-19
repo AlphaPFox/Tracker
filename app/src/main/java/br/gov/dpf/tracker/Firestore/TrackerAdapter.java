@@ -2,6 +2,7 @@ package br.gov.dpf.tracker.Firestore;
 
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.media.Image;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -96,36 +97,6 @@ public class TrackerAdapter
         //Change color to default loading animation
         holder.indeterminateProgress.getIndeterminateDrawable().setColorFilter(holder.imageView.getCircleBackgroundColor(), android.graphics.PorterDuff.Mode.SRC_IN);
 
-        //Set item click listener
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mActivity != null)
-                {
-                    //Disable click to avoid double clicking
-                    holder.itemView.setClickable(false);
-
-                    //Cal interface method on main activity
-                    mActivity.OnTrackerSelected(tracker, holder.itemView);
-                }
-            }
-        });
-
-        //Set edit click listener
-        holder.imgEdit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mActivity != null)
-                {
-                    //Disable click to avoid double clicking
-                    holder.itemView.setClickable(false);
-
-                    //Cal interface method on main activity
-                    mActivity.OnTrackerEdit(tracker, holder.itemView);
-                }
-            }
-        });
-
         //Disable click on map area (opens google map app)
         holder.mapView.setClickable(false);
 
@@ -202,14 +173,12 @@ public class TrackerAdapter
             });
         }
 
-        //Get last configuration
+        //Get last configuration and last coordinates
         Map<String, Object> configuration = tracker.getLastConfiguration();
-
-        //Get current date
-        Date now = new Date();
+        Map<String, Object> coordinates = tracker.getLastCoordinate();
 
         //Check if last tracker configuration occurred less than 30 minutes ago
-        if(configuration != null && now.getTime() - ((Date)configuration.get("datetime")).getTime() < 30*60*1000)
+        if(configuration != null && (coordinates == null || ((Date)configuration.get("datetime")).getTime() + 300000 > ((Date) coordinates.get("datetime")).getTime()))
         {
             //Hide last coordinate panel to show configuration status
             holder.lastCoordinate.setVisibility(View.GONE);
@@ -281,6 +250,12 @@ public class TrackerAdapter
                     holder.imgStatus.clearAnimation();
                     break;
 
+                case "CANCELED":
+                    //Configuration success
+                    holder.imgStatus.setImageResource(R.drawable.status_warning);
+                    holder.imgStatus.clearAnimation();
+                    break;
+
                 default:
                     //Configuration in progress, create loading animation
                     RotateAnimation rotate = new RotateAnimation(
@@ -321,6 +296,34 @@ public class TrackerAdapter
                 holder.txtLastUpdateValue.setText(mActivity.getResources().getString(R.string.txtWaitingTitle));
             }
         }
+
+
+        //Set item click listener
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mActivity != null)
+                {
+                    //Disable click to avoid double clicking
+                    holder.itemView.setClickable(false);
+
+                    //Cal interface method on main activity
+                    mActivity.OnTrackerSelected(tracker, holder);
+                }
+            }
+        });
+
+        //Set edit click listener
+        holder.imgEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mActivity != null)
+                {
+                    //Cal interface method on main activity
+                    mActivity.OnTrackerEdit(tracker, holder);
+                }
+            }
+        });
     }
 
     //Recycling GoogleMap for list item
@@ -343,17 +346,22 @@ public class TrackerAdapter
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    static class ViewHolder
+    public static class ViewHolder
             extends RecyclerView.ViewHolder {
 
         // each data item is just a string in this case
-        TextView txtTrackerName, txtTrackerModel, txtLastUpdateValue, txtBatteryLevel, txtSignalLevel, txtStatus, txtProgress, txtConfigDescription;
-        View lastCoordinate, lastConfiguration;
-        ImageView imgEdit, imgStatus;
-        CircleImageView imageView;
+        View lastCoordinate;
+        TextView txtLastUpdateValue, txtBatteryLevel, txtSignalLevel, txtProgress;
+
         CircleProgressBar circleProgressBar;
         ProgressBar indeterminateProgress;
         MapView mapView;
+
+        //Public layout components (used on detail activity transition)
+        public View lastConfiguration;
+        public TextView txtTrackerName, txtTrackerModel, txtConfigDescription, txtStatus;
+        public CircleImageView imageView;
+        public ImageView imgEdit, imgStatus;
 
         //Google maps object
         GoogleMap googleMap;

@@ -7,8 +7,9 @@ import com.google.firebase.firestore.GeoPoint;
 
 public class GeoPointParcelable extends GeoPoint implements Parcelable
 {
-    public GeoPointParcelable(double v, double v1) {
-        super(v, v1);
+    public GeoPointParcelable(GeoPoint coordinates)
+    {
+        super(coordinates.getLatitude(), coordinates.getLongitude());
     }
 
     protected GeoPointParcelable(Parcel in) {

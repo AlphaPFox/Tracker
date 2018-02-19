@@ -1,5 +1,6 @@
 package br.gov.dpf.tracker;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -33,13 +34,14 @@ import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.xw.repo.BubbleSeekBar;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import br.gov.dpf.tracker.Components.TrackerUpdater;
+import br.gov.dpf.tracker.Components.ProgressNotification;
 import br.gov.dpf.tracker.Entities.Configuration;
 import br.gov.dpf.tracker.Entities.Tracker;
 
@@ -282,7 +284,7 @@ public class TrackerSettingsActivity extends AppCompatActivity
                     if(loading)
                     {
                         //Show alert to user
-                        Snackbar.make(findViewById(android.R.id.content), "Carregando, por favor aguarde...", Snackbar.LENGTH_LONG);
+                        Snackbar.make(findViewById(android.R.id.content), "Carregando, por favor aguarde...", Snackbar.LENGTH_LONG).show();
                     }
                     else
                     {
@@ -600,7 +602,7 @@ public class TrackerSettingsActivity extends AppCompatActivity
                 if(loading)
                 {
                     //Show alert to user
-                    Snackbar.make(findViewById(android.R.id.content), "Carregando, por favor aguarde...", Snackbar.LENGTH_LONG);
+                    Snackbar.make(findViewById(android.R.id.content), "Carregando, por favor aguarde...", Snackbar.LENGTH_LONG).show();
                 }
                 else
                 {
@@ -651,7 +653,7 @@ public class TrackerSettingsActivity extends AppCompatActivity
         WriteBatch transaction = firestoreDB.batch();
 
         //Get configuration collection
-        CollectionReference configCollection = firestoreDB.collection("Tracker/" + tracker.getIdentification() + "/Configurations");
+        final CollectionReference configCollection = firestoreDB.collection("Tracker/" + tracker.getIdentification() + "/Configurations");
 
         //If activity is inserting a new tracker
         if (!editMode)
@@ -778,26 +780,38 @@ public class TrackerSettingsActivity extends AppCompatActivity
                         //Commit changes on shared preferences
                         editor.apply();
 
+                        // Go to the details page for the selected restaurant
+                        Intent intent = new Intent(TrackerSettingsActivity.this, DetailActivity.class);
+
                         //If it is a new tracker, or updated configuration an existing tracker
                         if(!editMode || configChanged || resetConfig)
                         {
-                            //Initialize updater
-                            TrackerUpdater updateIndicator = new TrackerUpdater(TrackerSettingsActivity.this, tracker);
+                            //Initialize progressNotification
+                            ProgressNotification updateIndicator = new ProgressNotification(TrackerSettingsActivity.this, tracker);
 
                             //Request configuration update
                             updateIndicator.initialize();
 
-                            //Set activity result
-                            setResult(MainActivity.RESULT_SUCCESS, getIntent());
-                        }
-                        else
-                        {
-                            //No changes made by user
-                            setResult(MainActivity.RESULT_CANCELED, getIntent());
+                            //Create a configuration array
+                            Map<String, Object> configuration = new HashMap<>();
+
+                            //Set pending configuration status
+                            configuration.put("step", "PENDING");
+                            configuration.put("status", "Aguardando resposta do servidor");
+                            configuration.put("description", "Iniciando configuração do dispositivo");
+                            configuration.put("pending", 1);
+                            configuration.put("progress", 0);
+                            configuration.put("datetime", new Date());
+
+                            //Update tracker
+                            tracker.setLastConfiguration(configuration);
                         }
 
-                        //Finish activity
-                        finish();
+                        // Put tracker data on intent
+                        intent.putExtra("Tracker", tracker);
+
+                        //Start Detail activity
+                        startActivity(intent);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -871,10 +885,15 @@ public class TrackerSettingsActivity extends AppCompatActivity
                     //Load error icon
                     ((ImageView) view).setImageResource(R.drawable.status_error);
                 }
+                else if (config.getStatus().get("step").equals("CANCELED"))
+                {
+                    //Load error icon
+                    ((ImageView) view).setImageResource(R.drawable.status_warning);
+                }
                 else
                 {
                     //Load info icon
-                    ((ImageView) view).setImageResource(R.drawable.status_warning);
+                    ((ImageView) view).setImageResource(R.drawable.ic_settings_grey_40dp);
                 }
 
                 //Show image view

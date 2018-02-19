@@ -6,13 +6,11 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -29,15 +27,9 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.Query;
-
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Map;
 
 import br.gov.dpf.tracker.Components.GridAutoLayoutManager;
 import br.gov.dpf.tracker.Entities.Tracker;
@@ -98,6 +90,7 @@ public class MainActivity
         mEmptyView = findViewById(R.id.vwEmptyCardView);
 
         //Initialize db instance
+        FirebaseFirestore.setLoggingEnabled(true);
         mFireStoreDB = FirebaseFirestore.getInstance();
 
         //Disable offline data
@@ -154,8 +147,7 @@ public class MainActivity
             intent.putExtra("Request", REQUEST_INSERT);
 
             //Start settings activity and wait for the return
-            startActivityForResult(intent, REQUEST_INSERT);
-
+            startActivity(intent);
             }
         });
     }
@@ -179,7 +171,7 @@ public class MainActivity
         }
     }
 
-    public void OnTrackerSelected(Tracker tracker, View viewRoot) {
+    public void OnTrackerSelected(Tracker tracker, TrackerAdapter.ViewHolder holder) {
 
         // Go to the details page for the selected restaurant
         final Intent intent = new Intent(this, DetailActivity.class);
@@ -187,50 +179,58 @@ public class MainActivity
         // Put tracker data on intent
         intent.putExtra("Tracker", tracker);
 
-        // Check if tracker is currently on configuration process
-        Map<String, Object> configuration = tracker.getLastConfiguration();
-
-        // Get configuration status
-        if(configuration != null && configuration.get("step").equals("PENDING"))
-        {
-            //If pending, flag this to next activity
-            intent.putExtra("ConfigPending", true);
-        }
-
         //If device supports shared element transition
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().setEnterTransition(new Fade(Fade.IN));
             getWindow().setEnterTransition(new Fade(Fade.OUT));
 
             //Check if loading animation is still visible
-            int transitionID = (viewRoot.findViewById(R.id.loadingBackground).getAlpha() == 0 ? R.id.googleMap : R.id.loadingBackground);
+            int transitionID = (holder.itemView.findViewById(R.id.loadingBackground).getAlpha() == 0 ? R.id.googleMap : R.id.loadingBackground);
 
             //Save transition ID on intent
             intent.putExtra("DetailActivity_BackgroundTransition", transitionID);
 
             //Define shared elements to perform transition
-            final ActivityOptions options = ActivityOptions
-                    .makeSceneTransitionAnimation(this,
-                            new Pair<>(viewRoot.findViewById(transitionID),
-                                    getString(R.string.transition_drawable)),
-                            new Pair<>(viewRoot.findViewById(R.id.imgTracker),
-                                    getString(R.string.transition_icon)),
-                            new Pair<>(viewRoot.findViewById(R.id.lblTrackerName),
-                                    getString(R.string.transition_title)),
-                            new Pair<>(viewRoot.findViewById(R.id.txtTrackerModel),
-                                    getString(R.string.transition_subtitle)));
+            final ActivityOptions options;
 
-            //Wait for loading animation to show
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run()
-                {
+            // Get configuration status
+            if(holder.lastConfiguration.getVisibility() == View.VISIBLE)
+            {
+                //Perform transition with configuration layout elements
+                options = ActivityOptions
+                        .makeSceneTransitionAnimation(this,
+                                new Pair<>(holder.itemView.findViewById(transitionID),
+                                        getString(R.string.transition_drawable)),
+                                new Pair<>((View) holder.imageView,
+                                        getString(R.string.transition_icon)),
+                                new Pair<>((View) holder.txtTrackerName,
+                                        getString(R.string.transition_title)),
+                                new Pair<>((View) holder.txtTrackerModel,
+                                        getString(R.string.transition_subtitle)),
+                                new Pair<>((View) holder.txtConfigDescription,
+                                        getString(R.string.transition_config_description)),
+                                new Pair<>((View) holder.txtStatus,
+                                        getString(R.string.transition_config_status)),
+                                new Pair<>((View) holder.imgStatus,
+                                        getString(R.string.transition_config_image)));
+            }
+            else
+            {
+                //Perform transition without configuration components
+                options = ActivityOptions
+                        .makeSceneTransitionAnimation(this,
+                                new Pair<>(holder.itemView.findViewById(transitionID),
+                                        getString(R.string.transition_drawable)),
+                                new Pair<>((View) holder.imageView,
+                                        getString(R.string.transition_icon)),
+                                new Pair<>((View) holder.txtTrackerName,
+                                        getString(R.string.transition_title)),
+                                new Pair<>((View) holder.txtTrackerModel,
+                                        getString(R.string.transition_subtitle)));
+            }
 
-                    //Start activity after 500ms
-                    startActivity(intent, options.toBundle());
-                }
-            }, 500);
-
+            //Start activity with transition elements
+            startActivity(intent, options.toBundle());
         }
         else
         {
@@ -280,10 +280,10 @@ public class MainActivity
             .show();
     }
 
-    public void OnTrackerEdit(final Tracker tracker, final View viewRoot)
+    public void OnTrackerEdit(final Tracker tracker, final TrackerAdapter.ViewHolder holder)
     {
         //Create a new popup menu
-        PopupMenu popup = new PopupMenu(this, viewRoot.findViewById(R.id.imgEdit));
+        PopupMenu popup = new PopupMenu(this, holder.imgEdit);
 
         //Get layout inflater
         popup.getMenuInflater().inflate(R.menu.tracker, popup.getMenu());
@@ -311,7 +311,7 @@ public class MainActivity
                     case R.id.action_detail:
 
                         //Call method to open detail activity
-                        OnTrackerSelected(tracker, viewRoot);
+                        OnTrackerSelected(tracker, holder);
 
                         //End method
                         return true;
@@ -322,10 +322,15 @@ public class MainActivity
                         intent.setClass(MainActivity.this, DefaultSettingsActivity.class);
 
                         //Start edit activity
-                        startActivityForResult(intent, REQUEST_UPDATE);
+                        startActivity(intent);
 
                         //End method
                         return true;
+
+                    case R.id.action_notification_settings:
+
+                        //Define request intent to update an existing tracker
+                        intent.putExtra("UpdateNotifications", true);
 
                     case R.id.action_tracker_settings:
 
@@ -333,22 +338,7 @@ public class MainActivity
                         intent.setClass(MainActivity.this, TrackerSettingsActivity.class);
 
                         //Start edit activity
-                        startActivityForResult(intent, REQUEST_UPDATE);
-
-                        //End method
-                        return true;
-
-
-                    case R.id.action_notification_settings:
-
-                        //Set intent to open DefaultSettingsActivity
-                        intent.setClass(MainActivity.this, TrackerSettingsActivity.class);
-
-                        //Define request intent to update an existing tracker
-                        intent.putExtra("UpdateNotifications", true);
-
-                        //Start edit activity
-                        startActivityForResult(intent, REQUEST_UPDATE);
+                        startActivity(intent);
 
                         //End method
                         return true;
@@ -395,7 +385,7 @@ public class MainActivity
                 intent.putExtra("Request", REQUEST_INSERT);
 
                 // Start register activity and wait for result
-                startActivityForResult(intent, REQUEST_INSERT);
+                startActivity(intent);
 
                 // End method
                 return true;

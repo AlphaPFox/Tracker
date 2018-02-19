@@ -9,7 +9,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.NavUtils;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
@@ -54,7 +59,6 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.WriteBatch;
 import com.google.maps.android.ui.IconGenerator;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
-import com.sothree.slidinguppanel.SlidingUpPanelLayout.PanelState;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -66,7 +70,7 @@ import java.util.Map;
 
 import br.gov.dpf.tracker.Components.CircleProgressBar;
 import br.gov.dpf.tracker.Components.InfoFragment;
-import br.gov.dpf.tracker.Components.TrackerUpdater;
+import br.gov.dpf.tracker.Components.ProgressNotification;
 import br.gov.dpf.tracker.Entities.Configuration;
 import br.gov.dpf.tracker.Entities.Coordinates;
 import br.gov.dpf.tracker.Entities.Tracker;
@@ -77,7 +81,7 @@ import static br.gov.dpf.tracker.MainActivity.REQUEST_UPDATE;
 
 public class DetailActivity
         extends AppCompatActivity
-        implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, EventListener<DocumentSnapshot> {
+        implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, EventListener<DocumentSnapshot>, NavigationView.OnNavigationItemSelectedListener {
 
     //Activities request types (RegisterActivity or FilterActivity)
     static int REQUEST_EDIT = 0;
@@ -92,12 +96,13 @@ public class DetailActivity
     private LinearLayout mLoadingBackground;
     private RecyclerView mRecyclerView;
     private CircleProgressBar circleProgressBar;
+    private ProgressBar indeterminateProgressBar;
     private DisplayMetrics mMetrics;
 
     //Bottom panel layout components
-    private TextView txtBottomTitle, txtBottomSubtitle;
-    private View vwBottomPanel;
-    private ImageView imgBottom;
+    private TextView txtConfigDescription, txtConfigStatus;
+    private View vwEmptyPanel, vwConfigPanel;
+    private ImageView imgConfigStatus;
 
     //Database components
     private FirebaseFirestore mFireStoreDB;
@@ -149,8 +154,12 @@ public class DetailActivity
         //Get tracker data from intent
         tracker = intent.getParcelableExtra("Tracker");
 
-        //Get config pending flag (indicate if tracker has pending configurations)
-        configPending = intent.getBooleanExtra("ConfigPending", false);
+        //Get last configuration and last coordinate data from this tracker
+        Map<String, Object> configuration = tracker.getLastConfiguration();
+        Map<String, Object> coordinates = tracker.getLastCoordinate();
+
+        //Check if last configuration update is more recent than last coordinate available
+        configPending = configuration != null && (coordinates == null || ((Date)configuration.get("datetime")).getTime() + 300000 > ((Date) coordinates.get("datetime")).getTime());
 
         // Load layout elements using tracker data
         loadLayout(intent);
@@ -165,8 +174,14 @@ public class DetailActivity
         // Initialize info window manager
         infoWindowManager = mapFragment.infoWindowManager();
         infoWindowManager.setHideOnFling(true);
-    }
 
+        //If tracker has any configuration pending
+        if(configPending && configuration != null)
+        {
+            //Call method to show update progress
+            monitorConfiguration(configuration.get("step").toString(), configuration.get("description").toString(), configuration.get("status").toString());
+        }
+    }
 
     public void loadLayout(Intent intent)
     {
@@ -184,6 +199,18 @@ public class DetailActivity
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
+        //Set drawer layout components
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, drawer, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+
+        //Set drawer toggle
+        drawer.addDrawerListener(mDrawerToggle);
+        mDrawerToggle.syncState();
+
+        //Initialize navigation view
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
         //Define db search query
         buildQuery(intent);
 
@@ -191,13 +218,17 @@ public class DetailActivity
         CircleImageView imgToolbarIcon = mToolbar.findViewById(R.id.imgModel);
         TextView txtToolbarTitle = mToolbar.findViewById(R.id.txtToolbarTitle);
         TextView txtToolbarSubtitle = mToolbar.findViewById(R.id.txtToolbarSubtitle);
-        ProgressBar progressBar = findViewById(R.id.progressBar);
+        indeterminateProgressBar = findViewById(R.id.progressBar);
         mLoadingBackground = findViewById(R.id.loadingBackground);
         circleProgressBar = findViewById(R.id.circleProgressBar);
-        txtBottomTitle = findViewById(R.id.txtBottomTitle);
-        txtBottomSubtitle = findViewById(R.id.txtBottomSubtitle);
-        vwBottomPanel = findViewById(R.id.vwBottomPanel);
-        imgBottom = findViewById(R.id.imgLoading);
+        txtConfigDescription = findViewById(R.id.txtConfigDescription);
+        txtConfigStatus = findViewById(R.id.txtConfigStatus);
+        imgConfigStatus = findViewById(R.id.imgStatus);
+        vwEmptyPanel = findViewById(R.id.vwBottomPanel);
+        vwConfigPanel = findViewById(R.id.vwConfigPanel);
+
+        // Lookup the recycler view in activity layout
+        mRecyclerView = findViewById(R.id.DetailRecycler);
 
         //Set circle image background color
         imgToolbarIcon.setCircleBackgroundColor(Color.parseColor(tracker.getBackgroundColor()));
@@ -206,7 +237,7 @@ public class DetailActivity
         imgToolbarIcon.setImageDrawable(getResources().getDrawable(getResources().getIdentifier("model_" + tracker.getModel().toLowerCase(), "drawable", getPackageName())));
 
         //Change loading color
-        progressBar.getIndeterminateDrawable().setColorFilter(imgToolbarIcon.getCircleBackgroundColor(), android.graphics.PorterDuff.Mode.SRC_IN);
+        indeterminateProgressBar.getIndeterminateDrawable().setColorFilter(imgToolbarIcon.getCircleBackgroundColor(), android.graphics.PorterDuff.Mode.SRC_IN);
         circleProgressBar.setColor(imgToolbarIcon.getCircleBackgroundColor());
 
         //Set toolbar texts
@@ -231,49 +262,68 @@ public class DetailActivity
                 findViewById(R.id.map).setTransitionName(getString(R.string.transition_drawable));
             }
 
+            //If configuration pending on this tracker
+            if(configPending)
+            {
+                //Set transition for configuration layout components
+                txtConfigDescription.setTransitionName(getString(R.string.transition_config_description));
+                txtConfigStatus.setTransitionName(getString(R.string.transition_config_status));
+                imgConfigStatus.setTransitionName(getString(R.string.transition_config_image));
+            }
+
             //Components in toolbar for transition
             imgToolbarIcon.setTransitionName(getString(R.string.transition_icon));
             txtToolbarTitle.setTransitionName(getString(R.string.transition_title));
             txtToolbarSubtitle.setTransitionName(getString(R.string.transition_subtitle));
         }
-
-        //If tracker has any configuration pending
-        if(configPending)
-        {
-            //Call method to show update progress
-            monitorConfiguration();
-        }
     }
 
-    public void monitorConfiguration()
+    public void monitorConfiguration(String step, String description, String status)
     {
         //Get tracker document reference
         DocumentReference trackerRef = FirebaseFirestore.getInstance().document("Tracker/" + tracker.getIdentification());
 
-        //Listen for changes on tracker document
-        listener = trackerRef.addSnapshotListener(this);
-
-        //Show panel with configuration fields
-        findViewById(R.id.vwBottomPanel).setVisibility(View.VISIBLE);
-
         //Update message
-        txtBottomTitle.setText("Configurações pendentes");
-        txtBottomSubtitle.setText("Aguarde enquanto o processo de configuração é iniciado");
+        txtConfigDescription.setText(description);
+        txtConfigStatus.setText(status);
 
-        //Configuration in progress, create loading animation
-        RotateAnimation rotate = new RotateAnimation(
-                0, 360,
-                Animation.RELATIVE_TO_SELF, 0.5f,
-                Animation.RELATIVE_TO_SELF, 0.5f
-        );
+        //Check configuration progress
+        switch (step)
+        {
+            case "ERROR":
+                //Configuration error
+                imgConfigStatus.setImageResource(R.drawable.status_error);
+                imgConfigStatus.clearAnimation();
+                break;
 
-        //Define animation settings
-        rotate.setDuration(3000);
-        rotate.setRepeatCount(Animation.INFINITE);
-        imgBottom.startAnimation(rotate);
+            case "SUCCESS":
+                //Configuration success
+                imgConfigStatus.setImageResource(R.drawable.status_ok);
+                imgConfigStatus.clearAnimation();
+                break;
 
-        //Set loading image
-        imgBottom.setImageResource(R.drawable.ic_settings_grey_40dp);
+            default:
+
+                //Listen for changes on tracker document
+                listener = trackerRef.addSnapshotListener(this);
+
+                //Configuration in progress, create loading animation
+                RotateAnimation rotate = new RotateAnimation(
+                        0, 360,
+                        Animation.RELATIVE_TO_SELF, 0.5f,
+                        Animation.RELATIVE_TO_SELF, 0.5f
+                );
+
+                //Define animation settings
+                rotate.setDuration(3000);
+                rotate.setRepeatCount(Animation.INFINITE);
+                imgConfigStatus.startAnimation(rotate);
+                //imgConfigStatus.setColorFilter(Color.parseColor(tracker.getBackgroundColor()), android.graphics.PorterDuff.Mode.SRC_IN);
+
+                //Set loading image
+                imgConfigStatus.setImageResource(R.drawable.ic_settings_grey_40dp);
+                break;
+        }
     }
 
     @Override
@@ -291,14 +341,37 @@ public class DetailActivity
             //Check if configuration has not started yet
             if (configuration != null)
             {
-                //Set configuration progress
-                circleProgressBar.setProgress(Integer.parseInt(configuration.get("progress").toString()));
+                int progress = Integer.parseInt(configuration.get("progress").toString());
 
-                //Set notification title
-                txtBottomTitle.setText(String.format("%s (%s%%)", configuration.get("description").toString(), configuration.get("progress").toString()));
+                //Check if progress started
+                if(progress > 0 && progress < 100)
+                {
+                    //Hide indeterminate progress bar
+                    indeterminateProgressBar.setVisibility(View.GONE);
+
+                    //Show circle progress bar
+                    circleProgressBar.setVisibility(View.VISIBLE);
+
+                    //Set configuration progress
+                    circleProgressBar.setProgressWithAnimation(progress, 5000);
+
+                    //Set notification title
+                    txtConfigDescription.setText(String.format(Locale.getDefault(),"%s (%d%%)", configuration.get("description").toString(), progress));
+                }
+                else
+                {
+                    //Show indeterminate progress bar
+                    indeterminateProgressBar.setVisibility(View.VISIBLE);
+
+                    //Hide circle progress bar
+                    circleProgressBar.setVisibility(View.GONE);
+
+                    //Set notification title
+                    txtConfigDescription.setText(configuration.get("description").toString());
+                }
 
                 //Set description
-                txtBottomSubtitle.setText(configuration.get("status").toString());
+                txtConfigStatus.setText(configuration.get("status").toString());
 
                 //If configuration finished (no longer pending)
                 if (!configuration.get("step").equals("PENDING"))
@@ -311,14 +384,20 @@ public class DetailActivity
                     {
                         case "ERROR":
                             //Configuration error
-                            imgBottom.setImageResource(R.drawable.status_error);
-                            imgBottom.clearAnimation();
+                            imgConfigStatus.setImageResource(R.drawable.status_error);
+                            imgConfigStatus.clearAnimation();
                             break;
 
                         case "SUCCESS":
                             //Configuration success
-                            imgBottom.setImageResource(R.drawable.status_ok);
-                            imgBottom.clearAnimation();
+                            imgConfigStatus.setImageResource(R.drawable.status_ok);
+                            imgConfigStatus.clearAnimation();
+                            break;
+
+                        case "CANCELED":
+                            //Configuration success
+                            imgConfigStatus.setImageResource(R.drawable.status_warning);
+                            imgConfigStatus.clearAnimation();
                             break;
                     }
                 }
@@ -335,38 +414,15 @@ public class DetailActivity
             @Override
             protected void onDataChanged()
             {
-                //Get how many items in recycler view
-                if(getItemCount() == 0)
+                //Get how many coordinates are currently available
+                int coordinatesCount = getItemCount();
+
+                //Load bottom panel layout
+                loadBottomPanel(coordinatesCount);
+
+                //If any coordinates available
+                if(coordinatesCount > 0)
                 {
-                    //No items to display, hide recycler view
-                    mRecyclerView.setVisibility(View.GONE);
-
-                    //Show bottom panel layout
-                    vwBottomPanel.setVisibility(View.VISIBLE);
-
-                    //Set corresponding panel height
-                    mLayout.setPanelHeight(getResources().getDimensionPixelSize(R.dimen.panel_empty_height));
-                }
-                else
-                {
-                    //Items available to display, show recycler view
-                    mRecyclerView.setVisibility(View.VISIBLE);
-
-                    //Hide bottom panel layout if tracker has no pending configurations
-                    vwBottomPanel.setVisibility((configPending ? View.VISIBLE : View.GONE));
-
-                    //Check if only one item or if screen is small
-                    if(getItemCount() == 1 || mMetrics.heightPixels / mMetrics.density < 530)
-                    {
-                        //If only one item, set panel height to show it
-                        mLayout.setPanelHeight(getResources().getDimensionPixelSize(R.dimen.panel_single_row_height));
-                    }
-                    else
-                    {
-                        //Else, show the first two items
-                        mLayout.setPanelHeight(getResources().getDimensionPixelSize(R.dimen.panel_multiple_row_height));
-                    }
-
                     //Load map data
                     loadMapComponents(mSnapshots);
                 }
@@ -381,9 +437,6 @@ public class DetailActivity
             }
         };
 
-        // Lookup the recycler view in activity layout
-        mRecyclerView = findViewById(R.id.DetailRecycler);
-
         // Attach the adapter to the recycler view to populate items
         mRecyclerView.setAdapter(mCoordinatesAdapter);
 
@@ -395,6 +448,59 @@ public class DetailActivity
 
         // Set item divider settings
         mRecyclerView.addItemDecoration(new DividerItemDecoration(mRecyclerView.getContext(), layoutManager.getOrientation()));
+    }
+
+    public void loadBottomPanel(int coordinatesCount)
+    {
+        //If no coordinates available
+        if(coordinatesCount == 0)
+        {
+            //No items to display, hide recycler view
+            mRecyclerView.setVisibility(View.GONE);
+
+            //Check if tracker have pending configurations
+            if(configPending)
+            {
+                //Show config panel, hide empty message panel
+                vwConfigPanel.setVisibility(View.VISIBLE);
+                vwEmptyPanel.setVisibility(View.GONE);
+
+                //Set corresponding panel height
+                mLayout.setPanelHeight(getResources().getDimensionPixelSize(R.dimen.panel_single_row_height));
+            }
+            else
+            {
+                //Else, show empty message panel
+                vwEmptyPanel.setVisibility(View.VISIBLE);
+                vwConfigPanel.setVisibility(View.GONE);
+
+                //Set corresponding panel height
+                mLayout.setPanelHeight(getResources().getDimensionPixelSize(R.dimen.panel_empty_height));
+            }
+        }
+        else
+        {
+            //Items available to display, show recycler view
+            mRecyclerView.setVisibility(View.VISIBLE);
+
+            //Hide bottom panel layout if tracker has no pending configurations
+            vwEmptyPanel.setVisibility(View.GONE);
+
+            //Check if only one item available to display (and no pending configuration) or if screen is small
+            if(coordinatesCount == 1 || configPending || mMetrics.heightPixels / mMetrics.density < 530)
+            {
+                //Set panel height to show only one item
+                mLayout.setPanelHeight(getResources().getDimensionPixelSize(R.dimen.panel_single_row_height));
+            }
+            else
+            {
+                //Else, show the first two items
+                mLayout.setPanelHeight(getResources().getDimensionPixelSize(R.dimen.panel_multiple_row_height));
+            }
+
+            //Show config panel
+            vwConfigPanel.setVisibility(configPending ? View.VISIBLE : View.GONE);
+        }
     }
 
     //Load map markers, lines and other components based on coordinates available
@@ -526,9 +632,11 @@ public class DetailActivity
 
             //Define map loaded callback
             mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+
                 @Override
                 public void onMapLoaded()
                 {
+
                     //Hide loading animation
                     mLoadingBackground.animate().setDuration(500).alpha(0f);
                 }
@@ -646,25 +754,13 @@ public class DetailActivity
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.detail, menu);
 
-        switch (tracker.getModel())
-        {
-            case "tk102b":
-                menu.findItem(R.id.action_request_position).setVisible(true);
-                menu.findItem(R.id.action_request_status).setVisible(true);
-                break;
-
-            case "st940":
-                menu.findItem(R.id.action_request_position).setVisible(true);
-                menu.findItem(R.id.action_turn_off).setVisible(true);
-                break;
-        }
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
-            case R.id.action_edit:
+            case R.id.action_settings:
             {
                 // Create intent to go to edit page
                 Intent intent = new Intent(this, DefaultSettingsActivity.class);
@@ -696,7 +792,7 @@ public class DetailActivity
                 return true;
 
             }
-            case R.id.action_request_status:
+            case R.id.action_apply:
             {
                 //Create configuration to request location
                 Configuration location  = new Configuration("StatusCheck", "Solicitando atualização de status", null, true, Configuration.PRIORITY_DEFAULT);
@@ -716,13 +812,20 @@ public class DetailActivity
                     @Override
                     public void onSuccess(Void aVoid)
                     {
-                        //Initialize updater
-                        TrackerUpdater updateIndicator = new TrackerUpdater(DetailActivity.this, tracker);
+                        //Initialize progressNotification
+                        ProgressNotification updateIndicator = new ProgressNotification(DetailActivity.this, tracker);
 
                         //Request configuration update
                         updateIndicator.initialize();
-                        //Success message
-                        Snackbar.make(findViewById(android.R.id.content), "Solicitação enviada com sucesso", Snackbar.LENGTH_LONG);
+
+                        //Flag to this activity that this tracker has a pending configuration
+                        configPending = true;
+
+                        //Call method to show configuration process
+                        DetailActivity.this.monitorConfiguration("PENDING", "Enviando requisição de configuração", "Aguardando resposta do servidor");
+
+                        //Update bottom panel layout
+                        loadBottomPanel(mCoordinatesAdapter.getItemCount());
                     }
                 }).addOnFailureListener(new OnFailureListener()
                 {
@@ -736,7 +839,7 @@ public class DetailActivity
 
                 break;
             }
-            case R.id.action_request_position:
+            case R.id.action_add:
             {
                 //Create configuration to request location
                 Configuration location  = new Configuration("Location", "Solicitando localização atual", null, true, Configuration.PRIORITY_DEFAULT);
@@ -750,19 +853,31 @@ public class DetailActivity
                 //Request new update to this tracker
                 transaction.update(mFireStoreDB.document("Tracker/" + tracker.getIdentification()), "lastConfiguration", null);
 
+                //Create message to give user a feedback
+                txtConfigDescription.setText(getString(R.string.txtConfigRequest));
+                txtConfigStatus.setText(getString(R.string.txtConfigStatus));
+                imgConfigStatus.setImageResource(R.drawable.ic_settings_grey_40dp);
+
+                //Flag pending configuration
+                configPending = true;
+
+                //Load config panel
+                loadBottomPanel(mCoordinatesAdapter.getItemCount());
+
                 //Commit transaction
                 transaction.commit().addOnSuccessListener(new OnSuccessListener<Void>()
                 {
                     @Override
                     public void onSuccess(Void aVoid)
                     {
-                        //Initialize updater
-                        TrackerUpdater updateIndicator = new TrackerUpdater(DetailActivity.this, tracker);
+                        //Initialize progressNotification
+                        ProgressNotification updateIndicator = new ProgressNotification(DetailActivity.this, tracker);
 
                         //Request configuration update
                         updateIndicator.initialize();
-                        //Success message
-                        Snackbar.make(findViewById(android.R.id.content), "Solicitação enviada com sucesso", Snackbar.LENGTH_LONG);
+
+                        //Call method to show configuration process
+                        DetailActivity.this.monitorConfiguration("PENDING", "Solicitação enviada com sucesso", "Aguardando resposta do servidor");
                     }
                 }).addOnFailureListener(new OnFailureListener()
                 {
@@ -770,13 +885,13 @@ public class DetailActivity
                     public void onFailure(@NonNull Exception e)
                     {
                         //Error message
-                        Snackbar.make(findViewById(android.R.id.content), "Erro: Não foi possível concluir solicitação", Snackbar.LENGTH_LONG);
+                        Snackbar.make(findViewById(android.R.id.content), "Erro: Não foi possível concluir solicitação", Snackbar.LENGTH_LONG).show();
                     }
                 });
 
                 break;
             }
-            case R.id.action_reset_config:
+            case R.id.action_delete:
             {
                 //Create confirmation dialog
                 new AlertDialog.Builder(this, R.style.Theme_AppCompat_Light_Dialog_Alert)
@@ -822,14 +937,35 @@ public class DetailActivity
     }
 
     @Override
-    public void onBackPressed() {
-        if (mLayout != null &&
-                (mLayout.getPanelState() == PanelState.EXPANDED)) {
-            mLayout.setPanelState(PanelState.COLLAPSED);
-        } else {
-            setResult(RESULT_OK, getIntent());
-            finish();
+    public void onBackPressed()
+    {
+        //Go back to main activity
+        NavUtils.navigateUpFromSameTask(this);
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_camera) {
+            // Handle the camera action
+        } else if (id == R.id.nav_gallery) {
+
+        } else if (id == R.id.nav_slideshow) {
+
+        } else if (id == R.id.nav_manage) {
+
+        } else if (id == R.id.nav_share) {
+
+        } else if (id == R.id.nav_send) {
+
         }
+
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 
     public void buildQuery(Intent intent)
