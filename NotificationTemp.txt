@@ -1,0 +1,25 @@
+SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        Uri soundURI = Uri.parse(sharedPreferences.getString("Notification_Sound", RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION).toString()));
+
+        //Create a list of
+        Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_NOTIFICATION);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Defina o toque");
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, soundURI);
+
+        this.startActivityForResult(intent, 5);
+        
+        
+        @Override
+    protected void onActivityResult(final int requestCode, final int resultCode, final Intent intent) {
+        if (resultCode == Activity.RESULT_OK && requestCode == 5) {
+            Uri uri = intent.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+
+            if (uri != null) {
+                //Get GCM registration data
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+                sharedPreferences.edit().putString("Notification_Sound", uri.toString()).apply();
+            }
+        }
+    }
