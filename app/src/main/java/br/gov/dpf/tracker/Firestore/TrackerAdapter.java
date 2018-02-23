@@ -1,8 +1,6 @@
 package br.gov.dpf.tracker.Firestore;
 
-import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,13 +17,17 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.Query;
 import com.google.maps.android.ui.IconGenerator;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 
@@ -35,21 +37,17 @@ import br.gov.dpf.tracker.MainActivity;
 import br.gov.dpf.tracker.R;
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class TrackerAdapter
-        extends BaseAdapter<TrackerAdapter.ViewHolder>  {
+public class TrackerAdapter extends BaseAdapter<TrackerAdapter.ViewHolder>  {
 
     //Linked activity
     private MainActivity mActivity;
-
-    //Get shared preferences
-    private SharedPreferences sharedPreferences;
+    private ArrayList<Integer> indexes = new ArrayList<>();
 
     //Constructor
     protected TrackerAdapter(MainActivity activity, Query query) {
         super(activity, query);
 
         mActivity = activity;
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
     }
 
     // Create new views (invoked by the layout manager)
@@ -83,6 +81,10 @@ public class TrackerAdapter
         //Get tracker using index position
         final Tracker tracker = getSnapshot(position).toObject(Tracker.class);
 
+        //Get last configuration and last coordinates
+        final Map<String, Object> configuration = tracker.getLastConfiguration();
+        final Map<String, Object> coordinates = tracker.getLastCoordinate();
+
         // - replace the contents of the view with that element
         holder.txtTrackerName.setText(tracker.formatName());
         holder.txtTrackerModel.setText(tracker.formatTrackerModel());
@@ -100,21 +102,23 @@ public class TrackerAdapter
         holder.mapView.setClickable(false);
 
         //If tracker has coordinates available
-        if (tracker.getLastCoordinate() != null)
+        if (coordinates != null)
         {
             //Load map
             holder.mapView.onCreate(null);
             holder.mapView.onResume();
-            holder.mapView.getMapAsync(new OnMapReadyCallback() {
+            holder.mapView.getMapAsync(new OnMapReadyCallback()
+            {
                 @Override
                 public void onMapReady(final GoogleMap googleMap) {
 
                     //Get coordinates
-                    GeoPoint dbCoordinates = (GeoPoint) tracker.getLastCoordinate().get("location");
+                    GeoPoint dbCoordinates = (GeoPoint) coordinates.get("location");
 
                     //Initialize map
                     MapsInitializer.initialize(mActivity);
                     holder.googleMap = googleMap;
+                    holder.googleMap.setMapType(mActivity.sharedPreferences.getInt("UserMapType", GoogleMap.MAP_TYPE_NORMAL));
                     holder.googleMap.getUiSettings().setMapToolbarEnabled(false);
 
                     //Define icon settings
@@ -123,21 +127,45 @@ public class TrackerAdapter
                     iconFactory.setTextAppearance(R.style.Marker);
 
                     //Get central coordinates
-                    LatLng coordinates = new LatLng(dbCoordinates.getLatitude(), dbCoordinates.getLongitude());
+                    LatLng location = new LatLng(dbCoordinates.getLatitude(), dbCoordinates.getLongitude());
 
                     //Set camera position
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinates, 14));
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 14));
 
                     //If coordinates come from a GSM tower cell
-                    if(tracker.getLastCoordinate().get("type") == "GSM" && sharedPreferences.getBoolean("ShowCircle", true))
+                    if(coordinates.get("type").equals("GSM") && mActivity.sharedPreferences.getInt("Map_Radius", 3) > 0)
                     {
-                        //Add circle representing cell tower signal coverage
-                        googleMap.addCircle(new CircleOptions()
-                                .center(coordinates)
-                                .radius(500)
+                        //Create radius to represent gsm tower range
+                        Circle gsmTower = googleMap.addCircle(new CircleOptions()
+                                .center(location)
                                 .strokeWidth(mActivity.getResources().getDimensionPixelSize(R.dimen.map_circle_width))
                                 .strokeColor(Color.parseColor("#88" + tracker.getBackgroundColor().substring(3)))
                                 .fillColor(Color.parseColor("#55" + tracker.getBackgroundColor().substring(3))));
+
+                        //Get user option
+                        switch (mActivity.sharedPreferences.getInt("Map_Radius", 3))
+                        {
+                            case 1:
+                                //Preference: 200m
+                                gsmTower.setRadius(200);
+                                break;
+                            case 2:
+                                //Preference: 500m
+                                gsmTower.setRadius(500);
+                                break;
+                            case 3:
+                                //Preference: 1km
+                                gsmTower.setRadius(1000);
+                                break;
+                            case 4:
+                                //Preference: 2km
+                                gsmTower.setRadius(2000);
+                                break;
+                            case 5:
+                                //Preference: 5km
+                                gsmTower.setRadius(5000);
+                                break;
+                        }
 
                         //Change marker color to be not transparent
                         iconFactory.setColor(Color.parseColor("#" + tracker.getBackgroundColor().substring(3)));
@@ -145,15 +173,12 @@ public class TrackerAdapter
 
                     //Define map marker settings
                     MarkerOptions markerOptions = new MarkerOptions().
-                            icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(formatDateTime((Date) tracker.getLastCoordinate().get("datetime"), true, true)))).
-                            position(coordinates).
+                            icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(formatDateTime((Date) coordinates.get("datetime"), true, true)))).
+                            position(location).
                             anchor(iconFactory.getAnchorU(), iconFactory.getAnchorV());
 
                     //Add marker on map
                     googleMap.addMarker(markerOptions);
-
-                    //Set map style
-                    holder.googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
                     //Define method to call after map is loaded
                     holder.googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
@@ -161,7 +186,7 @@ public class TrackerAdapter
                         public void onMapLoaded() {
 
                             //If coordinates is available
-                            if (googleMap.getMapType() != GoogleMap.MAP_TYPE_NONE && tracker.getLastCoordinate() != null)
+                            if (googleMap.getMapType() != GoogleMap.MAP_TYPE_NONE)
                             {
                                 //Hide loading animation
                                 ((View) holder.indeterminateProgress.getParent()).animate().setDuration(500).alpha(0f);
@@ -172,11 +197,8 @@ public class TrackerAdapter
             });
         }
 
-        //Get last configuration and last coordinates
-        Map<String, Object> configuration = tracker.getLastConfiguration();
-
-        //Check if last tracker configuration occurred less than 5 minutes ago
-        if(configuration != null && (tracker.getLastCoordinate() == null || ((Date)configuration.get("datetime")).getTime() + 300000 > (new Date()).getTime()))
+        //Check if should display on bottom panel last configuration result or last coordinate from this tracker (whichever is more recent)
+        if(configuration != null && (coordinates == null || ((Date)configuration.get("datetime")).getTime() > ((Date)coordinates.get("datetime")).getTime() + 5000))
         {
             //Hide last coordinate panel to show configuration status
             holder.lastCoordinate.setVisibility(View.GONE);
@@ -283,10 +305,10 @@ public class TrackerAdapter
             holder.txtSignalLevel.setText(tracker.getSignalLevel());
 
             //If tracker has an coordinate available
-            if(tracker.getLastCoordinate() != null)
+            if(coordinates != null)
             {
                 //Show last coordinate datetime
-                holder.txtLastUpdateValue.setText(formatDateTime((Date) tracker.getLastCoordinate().get("datetime"), false, false));
+                holder.txtLastUpdateValue.setText(formatDateTime((Date) coordinates.get("datetime"), false, false));
             }
             else
             {
@@ -295,6 +317,29 @@ public class TrackerAdapter
             }
         }
 
+        //Check if user wants to display this tracker at top
+        if(mActivity.sharedPreferences.getBoolean("Favorite_" + tracker.getIdentification(), false))
+        {
+            //Change image resource and tag
+            holder.imgFavorite.setImageResource(R.drawable.ic_star_grey_24dp);
+        }
+        else
+        {
+            //Change image resource and tag
+            holder.imgFavorite.setImageResource(R.drawable.ic_star_border_grey_24dp);
+        }
+
+        //Set item click listener
+        holder.imgFavorite.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mActivity != null)
+                {
+                    //Cal interface method on main activity
+                    mActivity.OnTrackerFavorite(tracker);
+                }
+            }
+        });
 
         //Set item click listener
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -322,6 +367,58 @@ public class TrackerAdapter
                 }
             }
         });
+    }
+
+    @Override
+    public void startListening() {
+        super.startListening();
+        indexes.clear();
+    }
+
+    @Override
+    protected void onDocumentAdded(DocumentChange change) {
+        super.onDocumentAdded(change);
+
+        if(mActivity.sharedPreferences.getBoolean("Favorite_" + change.getDocument().getId(), false))
+        {
+            indexes.add(0, change.getNewIndex());
+        }
+        else
+        {
+            indexes.add(change.getNewIndex());
+        }
+    }
+
+    @Override
+    protected void onDocumentModified(DocumentChange change) {
+        if (change.getOldIndex() == change.getNewIndex()) {
+            // Item changed but remained in same position
+            mSnapshots.set(change.getOldIndex(), change.getDocument());
+            notifyItemChanged(indexes.indexOf(change.getOldIndex()));
+        } else {
+            // Item changed and changed position
+            mSnapshots.remove(change.getOldIndex());
+            onDocumentAdded(change);
+            notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    protected void onDocumentRemoved(DocumentChange change) {
+        int index = indexes.indexOf(change.getOldIndex());
+
+        mSnapshots.remove(change.getOldIndex());
+        indexes.remove(index);
+        notifyItemRemoved(index);
+
+        for(int i = 0; i < indexes.size(); i++)
+            if(indexes.get(i) >= index)
+                indexes.set(i, indexes.get(i) - 1);
+    }
+
+    @Override
+    DocumentSnapshot getSnapshot(int index) {
+        return super.getSnapshot(indexes.get(index));
     }
 
     //Recycling GoogleMap for list item
@@ -359,7 +456,7 @@ public class TrackerAdapter
         public View lastConfiguration;
         public TextView txtTrackerName, txtTrackerModel, txtConfigDescription, txtStatus;
         public CircleImageView imageView;
-        public ImageView imgEdit, imgStatus;
+        public ImageView imgEdit, imgStatus, imgFavorite;
 
         //Google maps object
         GoogleMap googleMap;
@@ -381,6 +478,7 @@ public class TrackerAdapter
 
             //Image views
             imageView = itemView.findViewById(R.id.imgTracker);
+            imgFavorite = itemView.findViewById(R.id.imgFavorite);
             imgStatus = itemView.findViewById(R.id.imgStatus);
             imgEdit = itemView.findViewById(R.id.imgEdit);
 

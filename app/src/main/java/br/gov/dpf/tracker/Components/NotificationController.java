@@ -9,6 +9,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
@@ -16,6 +18,8 @@ import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.util.Log;
+
+import com.google.android.gms.maps.GoogleMap;
 
 import java.io.File;
 import java.io.InputStream;
@@ -59,56 +63,56 @@ public class NotificationController
     //Show notification to user (groups notification from the same tracker)
     public NotificationMessage showNotification(Map<String, String> notificationData, String topic)
     {
-        //Notification group object
-        NotificationGroup notificationGroup;
-
-        //Create notification object
-        NotificationMessage notification = new NotificationMessage(getNotificationId(), notificationData, topic);
-
-        //If this group already exists (created on a previous notification)
-        if(notificationGroups.containsKey(notification.getGroupKey()))
+        //First, check user preference to display notifications from this app (enabled by default)
+        if(sharedPreferences.getBoolean("Notification_Enabled", true))
         {
-            //Get notification group corresponding to this tracker
-            notificationGroup = notificationGroups.get(notification.getGroupKey());
+            //Notification group object
+            NotificationGroup notificationGroup;
+
+            //Create notification object
+            NotificationMessage notification = new NotificationMessage(getNotificationId(), notificationData, topic);
+
+            //If this group already exists (created on a previous notification)
+            if (notificationGroups.containsKey(notification.getGroupKey())) {
+                //Get notification group corresponding to this tracker
+                notificationGroup = notificationGroups.get(notification.getGroupKey());
+            } else {
+                //Create a notification group
+                notificationGroup = new NotificationGroup(notificationGroups.size(), notification.getGroupKey());
+
+                //Add group on notification list
+                notificationGroups.put(notification.getGroupKey(), notificationGroup);
+            }
+
+            //Add notification to group
+            notificationGroup.addNotification(notification, this);
+
+            //Check if tracker was successfully retrieved from FireStore DB
+            if (notificationGroup.tracker != null) {
+                //Check how many notifications are available and device android version (pré-Nougat devices do not support bundled notifications)
+                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    //Build single notification
+                    notificationManager.notify(notification.getNotificationID(), buildNotification(notification, notificationGroup));
+
+                    //Build notification summary
+                    notificationManager.notify(notificationGroup.getGroupID(), buildSummary(notificationGroup));
+                } else if (notificationGroup.notifications.size() == 1) {
+                    //Build single notification
+                    notificationManager.notify(notification.getNotificationID(), buildNotification(notification, notificationGroup));
+                } else {
+                    //Build notification summary
+                    notificationManager.notify(notificationGroup.getGroupID(), buildSummary(notificationGroup));
+                }
+            }
+
+            //Return created notification
+            return notification;
         }
         else
         {
-            //Create a notification group
-            notificationGroup = new NotificationGroup(notificationGroups.size(), notification.getGroupKey());
-
-            //Add group on notification list
-            notificationGroups.put(notification.getGroupKey(), notificationGroup);
+            //User disabled notifications, return null
+            return null;
         }
-
-        //Add notification to group
-        notificationGroup.addNotification(notification, notificationManager);
-
-        //Check if tracker was successfully retrieved from FireStore DB
-        if(notificationGroup.tracker != null)
-        {
-            //Check how many notifications are available and device android version (pré-Nougat devices do not support bundled notifications)
-            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-            {
-                //Build single notification
-                notificationManager.notify(notification.getNotificationID(), buildNotification(notification, notificationGroup));
-
-                //Build notification summary
-                notificationManager.notify(notificationGroup.getGroupID(), buildSummary(notificationGroup));
-            }
-            else if(notificationGroup.notifications.size() == 1)
-            {
-                //Build single notification
-                notificationManager.notify(notification.getNotificationID(), buildNotification(notification, notificationGroup));
-            }
-            else
-            {
-                //Build notification summary
-                notificationManager.notify(notificationGroup.getGroupID(), buildSummary(notificationGroup));
-            }
-        }
-
-        //Return created notification
-        return notification;
     }
 
     void updateNotification(NotificationMessage notification)
@@ -128,7 +132,6 @@ public class NotificationController
         // If android version is 7.0 or superior
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
         {
-
             //Build notification using new features (bundle notifications)
             single_notification = new NotificationCompat.Builder(context, "CHANEL")
                     .setSmallIcon(R.drawable.ic_tracker_notification_24dp)
@@ -153,6 +156,7 @@ public class NotificationController
                     .setShowWhen(true);
         }
 
+
         //Check if notification has coordinates available
         if(notification.getCoordinates() != null)
         {
@@ -167,7 +171,7 @@ public class NotificationController
                         "&zoom=14" +
                         "&size=512x512" +
                         "&scale=2" +
-                        "&maptype=roadmap" +
+                        "&maptype=" + getMapType() +
                         "&markers=color:0x" + notificationGroup.tracker.getBackgroundColor().substring(3)+ "%7C" + notification.getCoordinates() +
                         "&key=" + context.getResources().getString(R.string.google_maps_static_key);
 
@@ -281,6 +285,33 @@ public class NotificationController
         {
             //All notifications, except progress update should be dismissed on click
             clickIntent.putExtra("DismissGroup", notificationGroup.getGroupKey());
+
+            //Recover sound notification selected by user (or default if not selected yet)
+            Uri soundURI = Uri.parse(sharedPreferences.getString("Notification_Sound", RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION).toString()));
+
+            //Check if notification sound is available
+            if(soundURI != null)
+            {
+                //Define notification sound
+                single_notification.setSound(soundURI);
+            }
+
+            //Check user preference to vibrate on notification
+            switch (sharedPreferences.getInt("Notification_Vibrate", 0))
+            {
+                case 1:
+                    //Default vibration
+                    single_notification.setVibrate(new long[] { 500, 1000});
+                    break;
+                case 2:
+                    //Short vibration
+                    single_notification.setVibrate(new long[] { 500, 500});
+                    break;
+                case 3:
+                    //Long vibration
+                    single_notification.setVibrate(new long[] { 500, 1000, 500, 1000, 500});
+                    break;
+            }
         }
 
         //Apply it to notification builder
@@ -442,7 +473,7 @@ public class NotificationController
         }
     }
 
-    void dismissNotification(String groupKey, int notificationID)
+    public void dismissNotification(String groupKey, int notificationID)
     {
         //Get notification group
         NotificationGroup notificationGroup = notificationGroups.get(groupKey);
@@ -497,6 +528,23 @@ public class NotificationController
                 //Call method to cancel update
                 notification.progressNotification.cancelConfiguration();
             }
+        }
+    }
+
+    private String getMapType()
+    {
+        switch (sharedPreferences.getInt("UserMapType", GoogleMap.MAP_TYPE_NORMAL))
+        {
+            case GoogleMap.MAP_TYPE_NORMAL:
+                return "roadmap";
+            case GoogleMap.MAP_TYPE_HYBRID:
+                return "hybrid";
+            case GoogleMap.MAP_TYPE_SATELLITE:
+                return "satellite";
+            case GoogleMap.MAP_TYPE_TERRAIN:
+                return "terrain";
+            default:
+                return "roadmap";
         }
     }
 

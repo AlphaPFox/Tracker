@@ -70,14 +70,18 @@ public class ProgressNotification implements EventListener<DocumentSnapshot>, Ru
         //Build notification
         notification = notificationController.showNotification(notificationData, "/topics/" + mTracker.getIdentification() +"_NotifyUpdate");
 
-        //Save progressNotification (to allow dismiss)
-        notification.progressNotification = ProgressNotification.this;
+        //Check if notification is created (user can disable all notifications as preference)
+        if(notification != null)
+        {
+            //Save progressNotification (to allow dismiss)
+            notification.progressNotification = ProgressNotification.this;
 
-        //Get tracker document reference
-        DocumentReference trackerRef = mFireStoreDB.document("Tracker/" + mTracker.getIdentification());
+            //Get tracker document reference
+            DocumentReference trackerRef = mFireStoreDB.document("Tracker/" + mTracker.getIdentification());
 
-        //Listen for changes on tracker document
-        listener = trackerRef.addSnapshotListener(ProgressNotification.this);
+            //Listen for changes on tracker document
+            listener = trackerRef.addSnapshotListener(ProgressNotification.this);
+        }
     }
 
     @Override
@@ -135,7 +139,7 @@ public class ProgressNotification implements EventListener<DocumentSnapshot>, Ru
 
         //Set pending configuration status
         configuration.put("step", "CANCELED");
-        configuration.put("status", "Procedimento cancelado às " + new SimpleDateFormat("hh:mm - dd/MM", Locale.getDefault()).format(new Date()));
+        configuration.put("status", "Procedimento cancelado às " + new SimpleDateFormat("HH:mm - dd/MM", Locale.getDefault()).format(new Date()));
         configuration.put("description", "Solicitação cancelada com sucesso");
         configuration.put("pending", 0);
         configuration.put("progress", 100);

@@ -4,49 +4,62 @@
     tools:showIn="navigation_view">
 
 
-    <item android:title="@string/menu_tracker_commands">
+    <item android:id="@+id/menu_tracker_commands" android:title="@string/menu_tracker_commands">
         <menu>
-            <item
-                android:id="@+id/menu_request_position"
-                android:icon="@drawable/ic_location_on_black_24dp"
-                android:title="@string/menu_request_position" />
-            <item
-                android:id="@+id/menu_request_status"
-                android:icon="@drawable/ic_battery_unknown_black_24dp"
-                android:title="@string/menu_request_status" />
+            <group android:id="@+id/tracker_commands">
+                <item
+                    android:id="@+id/menu_request_position"
+                    android:visible="false"
+                    android:icon="@drawable/ic_location_on_black_24dp"
+                    android:title="@string/menu_request_position" />
 
-            <item
-                android:id="@+id/menu_reset"
-                android:icon="@drawable/ic_restore_black_24dp"
-                android:title="@string/menu_reset" />
+                <item
+                    android:id="@+id/menu_request_status"
+                    android:visible="false"
+                    android:icon="@drawable/ic_battery_unknown_black_24dp"
+                    android:title="@string/menu_request_status" />
+
+                <item
+                    android:id="@+id/menu_turn_off"
+                    android:visible="false"
+                    android:icon="@drawable/ic_gps_off_black_24dp"
+                    android:title="@string/menu_turn_off" />
+
+                <item
+                    android:id="@+id/menu_reset"
+                    android:orderInCategory="1"
+                    android:icon="@drawable/ic_restore_black_24dp"
+                    android:title="@string/menu_reset" />
+            </group>
         </menu>
     </item>
 
     <item android:title="@string/menu_tracker_config">
         <menu>
-            <item
-                android:id="@+id/menu_default_settings"
-                android:icon="@drawable/ic_color_lens_black_24dp"
-                android:title="@string/menu_default_settings" />
+            <group android:id="@+id/edit_tracker">
+                <item
+                    android:id="@+id/menu_default_settings"
+                    android:icon="@drawable/ic_color_lens_black_24dp"
+                    android:title="@string/menu_default_settings" />
 
-            <item
-                android:id="@+id/menu_tracker_settings"
-                android:icon="@drawable/ic_settings_grey_40dp"
-                android:title="@string/menu_tracker_settings" />
+                <item
+                    android:id="@+id/menu_tracker_settings"
+                    android:icon="@drawable/ic_settings_grey_40dp"
+                    android:title="@string/menu_tracker_settings" />
 
-            <item
-                android:id="@+id/menu_notifications"
-                android:icon="@drawable/ic_notifications_black_24dp"
-                android:title="@string/menu_notification_settings" />
+                <item
+                    android:id="@+id/menu_notification_settings"
+                    android:icon="@drawable/ic_notifications_black_24dp"
+                    android:title="@string/menu_notification_settings" />
+            </group>
         </menu>
     </item>
 
     <item android:title="@string/menu_maps">
         <menu>
-            <group android:checkableBehavior="single">
+            <group android:id="@+id/menu_map_layers" android:checkableBehavior="single">
                 <item
                     android:id="@+id/map_default"
-                    android:checked="true"
                     android:icon="@drawable/ic_menu_gallery"
                     android:title="@string/map_default" />
                 <item
@@ -67,29 +80,29 @@
 
     <item android:title="@string/menu_map_components">
         <menu>
-            <item
-                android:id="@+id/menu_map_path"
-                android:checkable="true"
-                android:icon="@drawable/ic_timeline_black_24dp"
-                android:title="@string/menu_map_path" />
+            <group android:id="@+id/menu_map_components" android:checkableBehavior="single">
+                <item
+                    android:id="@+id/menu_map_path"
+                    android:checkable="true"
+                    android:icon="@drawable/ic_timeline_black_24dp"
+                    android:title="@string/menu_map_path" />
+                <item
+                    android:id="@+id/menu_map_gsm"
+                    android:checkable="true"
+                    android:icon="@drawable/ic_radio_button_unchecked_black_24dp"
+                    android:title="@string/menu_map_radius" />
 
-            <item
-                android:id="@+id/menu_map_gsm"
-                android:checkable="true"
-                android:icon="@drawable/ic_radio_button_unchecked_black_24dp"
-                android:title="@string/menu_map_radius" />
-
-            <item
-                android:id="@+id/menu_map_location"
-                android:checkable="true"
-                android:icon="@drawable/ic_my_location_black_24dp"
-                android:title="@string/menu_my_location" />
-
-            <item
-                android:id="@+id/menu_map_zoom"
-                android:checkable="true"
-                android:icon="@drawable/ic_zoom_in_black_24dp"
-                android:title="@string/menu_zoom_control" />
+                <item
+                    android:id="@+id/menu_map_location"
+                    android:checkable="true"
+                    android:icon="@drawable/ic_my_location_black_24dp"
+                    android:title="@string/menu_my_location" />
+                <item
+                    android:id="@+id/menu_map_zoom"
+                    android:checkable="true"
+                    android:icon="@drawable/ic_zoom_in_black_24dp"
+                    android:title="@string/menu_zoom_control" />
+            </group>
         </menu>
     </item>
 

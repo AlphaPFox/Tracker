@@ -1,14 +1,18 @@
 package br.gov.dpf.tracker;
 
+import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.Color;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -30,6 +34,7 @@ import android.view.View;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -46,23 +51,27 @@ public class MainActivity
         extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, SwipeRefreshLayout.OnRefreshListener {
 
-
-    //Load components used on recycler view
+    //Components used on recycler view
     public GridAutoLayoutManager mRecyclerLayoutManager;
     private RecyclerView mRecyclerView;
     private View mEmptyView, mLoadingView;
     private TrackerAdapter mAdapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
+    //Left navigation menu component
+    private NavigationView navigationView;
+
+    //Search view action bar menu
+    private SearchView searchView;
+
     //Store current Firestore DB instance
     private FirebaseFirestore mFireStoreDB;
 
-    //Save current activity scroll position
-    private int scrollPosition = 0;
+    //Get shared preferences
+    public SharedPreferences sharedPreferences;
 
     //Define possible result operations
     public static int RESULT_ERROR = -1;
-    public static int RESULT_SUCCESS = 0;
     public static int RESULT_CANCELED = 1;
 
     //Define possible request operations
@@ -89,9 +98,15 @@ public class MainActivity
         drawer.addDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
 
+        //Initialize shared preferences
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
         //Initialize navigation view
-        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        //Select on menu item representing user preferred map type
+        updateNavigationMenu();
 
         //Get views to replace recycler view while loading or if empty
         mLoadingView = findViewById(R.id.vwLoadingCardView);
@@ -123,7 +138,7 @@ public class MainActivity
                 mLoadingView.setVisibility(View.GONE);
 
                 //Cancel loading animation
-                dismissLoading(1000);
+                dismissLoading();
             }
 
             @Override
@@ -164,22 +179,39 @@ public class MainActivity
         });
     }
 
+    private void dismissLoading()
+    {
+        //Wait 500 ms before hiding loading indicator
+        mSwipeRefreshLayout.postDelayed(new Runnable() {
+            @Override
+            public void run()
+            {
+                //Hide loading
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        }, 500);
+    }
+
     @Override
-    protected void onActivityResult (int requestCode, int resultCode, final Intent intent) {
-
-        // Collect data from the intent and use it
-        if(resultCode == RESULT_SUCCESS)
+    protected void onActivityResult (int requestCode, int resultCode, final Intent intent)
+    {
+        //Check if it is an activity to select notification sound
+        if(requestCode == RingtoneManager.TYPE_NOTIFICATION && resultCode == Activity.RESULT_OK)
         {
-            // Show success message
-            Snackbar.make(findViewById(android.R.id.content), "Rastreador " + (requestCode == REQUEST_INSERT ? "cadastrado" : "atualizado") + " com sucesso.", Snackbar.LENGTH_LONG).show();
+            //Get user selection
+            Uri uri = intent.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
 
-            //Scroll to previously saved position
-            mRecyclerLayoutManager.scrollToPosition(scrollPosition);
+            //If valid selection
+            if (uri != null)
+            {
+                //Save user preferences
+                sharedPreferences.edit().putString("Notification_Sound", uri.toString()).apply();
+            }
         }
         else if (resultCode == RESULT_ERROR)
         {
             // Show error message
-            Snackbar.make(findViewById(android.R.id.content), "Erro ao executar operação de " + (requestCode == REQUEST_INSERT ? "cadastro." : "atualização."), Snackbar.LENGTH_LONG).show();
+            Snackbar.make(findViewById(android.R.id.content), "Erro ao executar operação", Snackbar.LENGTH_LONG).show();
         }
     }
 
@@ -315,9 +347,6 @@ public class MainActivity
                 // Put tracker data on intent
                 intent.putExtra("Tracker", tracker);
 
-                // Save current position
-                scrollPosition = mRecyclerView.getScrollState();
-
                 switch (item.getItemId())
                 {
                     case R.id.action_detail:
@@ -371,16 +400,48 @@ public class MainActivity
         popup.show();
     }
 
-    public void dismissLoading(int delay)
+    public void OnTrackerFavorite(final Tracker tracker)
     {
-        mSwipeRefreshLayout.postDelayed(new Runnable() {
-            @Override
-            public void run() {
+        //Get opposite of current preference from user to fix this tracker on top of list
+        final boolean favorite = !sharedPreferences.getBoolean("Favorite_" + tracker.getIdentification(), false);
 
-                //Cancel refreshing image (if present)
-                mSwipeRefreshLayout.setRefreshing(false);
-            }
-        }, delay);
+        //Create confirmation dialog
+        new AlertDialog.Builder(this, R.style.Theme_AppCompat_Light_Dialog_Alert)
+                .setIcon((favorite ? R.drawable.ic_star_grey_24dp : R.drawable.ic_star_border_grey_24dp))
+                .setTitle((favorite ? "Adicionar aos favoritos" : "Remover dos favoritos"))
+                .setMessage((favorite ? "Deseja fixar este rastreador sempre no topo da lista?" : "Deseja retirar este rastreador do topo da lista?"))
+                .setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        //Get shared preferences editor
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+
+                        //On star image click, update user preference
+                        editor.putBoolean("Favorite_" + tracker.getIdentification(), favorite);
+
+                        //Save preferences change
+                        editor.apply();
+
+                        //If tracker is now a favorite
+                        if(favorite)
+                        {
+                            //Scroll back to top
+                            mRecyclerView.scrollToPosition(0);
+                        }
+
+                        //Update tracker list
+                        onRefresh();
+                    }
+                })
+                .setNegativeButton("Não", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+        .show();
     }
 
     @Override
@@ -393,7 +454,7 @@ public class MainActivity
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
 
         // Get search view menu
-        SearchView searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
+        searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
 
         // If menu available
         if(searchManager != null)
@@ -443,8 +504,14 @@ public class MainActivity
     @Override
     public void onRefresh()
     {
+        // Signal SwipeRefreshLayout to start the progress indicator
+        mSwipeRefreshLayout.setRefreshing(true);
+
         //Stop current snapshot listener
         mAdapter.stopListening();
+
+        //Disable local cache results
+        mAdapter.disablePersistence();
 
         //Start listening again, but now without cached data
         mAdapter.startListening();
@@ -475,9 +542,6 @@ public class MainActivity
 
             case R.id.action_refresh:
 
-                // Signal SwipeRefreshLayout to start the progress indicator
-                mSwipeRefreshLayout.setRefreshing(true);
-
                 // Start update process
                 onRefresh();
 
@@ -488,36 +552,184 @@ public class MainActivity
         return super.onOptionsItemSelected(item);
     }
 
+    private void updateNavigationMenu()
+    {
+        //Select user preferred map type
+        switch (sharedPreferences.getInt("UserMapType", GoogleMap.MAP_TYPE_NORMAL))
+        {
+            case GoogleMap.MAP_TYPE_NORMAL:
+                navigationView.setCheckedItem(R.id.map_default);
+                break;
+            case GoogleMap.MAP_TYPE_SATELLITE:
+                navigationView.setCheckedItem(R.id.map_satellite);
+                break;
+            case GoogleMap.MAP_TYPE_TERRAIN:
+                navigationView.setCheckedItem(R.id.map_terrain);
+                break;
+            case GoogleMap.MAP_TYPE_HYBRID:
+                navigationView.setCheckedItem(R.id.map_hybrid);
+                break;
+        }
+
+        //Get user preference on notification
+        boolean notificationEnabled = sharedPreferences.getBoolean("Notification_Enabled", true);
+
+        //Set corresponding menu item
+        navigationView.getMenu().findItem(R.id.menu_notifications_disable)
+                .setTitle(notificationEnabled ? "Desativar notificações" : "Reativar notificações")
+                .setIcon(notificationEnabled ? R.drawable.ic_notifications_off_black_24dp : R.drawable.ic_notifications_black_24dp);
+    }
+
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
 
-        if (id == R.id.menu_add)
+        if(item.getGroupId() == R.id.menu_map_layers)
         {
-            // Create an intent to open Settings activity
-            Intent intent = new Intent(getApplicationContext(), DefaultSettingsActivity.class);
+            //Get shared preferences
+            SharedPreferences.Editor editor = sharedPreferences.edit();
 
-            // Define request intent to update an existing tracker
-            intent.putExtra("Request", REQUEST_INSERT);
+            //Get selected map type
+            switch (item.getItemId())
+            {
+                case R.id.map_default:
+                    editor.putInt("UserMapType", GoogleMap.MAP_TYPE_NORMAL);
+                    break;
+                case R.id.map_satellite:
+                    editor.putInt("UserMapType", GoogleMap.MAP_TYPE_SATELLITE);
+                    break;
+                case R.id.map_terrain:
+                    editor.putInt("UserMapType", GoogleMap.MAP_TYPE_TERRAIN);
+                    break;
+                case R.id.map_hybrid:
+                    editor.putInt("UserMapType", GoogleMap.MAP_TYPE_HYBRID);
+                    break;
+            }
 
-            // Start register activity and wait for result
-            startActivity(intent);
+            //Save user setting
+            editor.apply();
 
-            // End method
-            return true;
-        } else if (id == R.id.menu_notification_vibrate) {
-
-        } else if (id == R.id.menu_notifications_disable) {
-
-        } else if (id == R.id.map_hybrid) {
-
-        } else if (id == R.id.map_default) {
-
-        } else if (id == R.id.map_satellite) {
-
+            //Update map type on trackers currently displayed
+            mAdapter.notifyDataSetChanged();
         }
+        else if(item.getGroupId() == R.id.menu_notifications)
+        {
+            //Get selected map type
+            switch (item.getItemId())
+            {
+                case R.id.menu_notification_sound:
+
+                    //Get notification sound
+                    Uri soundURI = Uri.parse(sharedPreferences.getString("Notification_Sound", RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION).toString()));
+
+                    //Create a list of sound options
+                    Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+                    intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_NOTIFICATION);
+                    intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Escolha o som da notificação");
+                    intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, soundURI);
+
+                    //Start external activity to user select notification sound
+                    this.startActivityForResult(intent, RingtoneManager.TYPE_NOTIFICATION);
+                    break;
+
+                case R.id.menu_notification_vibrate:
+
+                    //Vibrate options
+                    final String[] items = {"Desligado","Padrão","Curto","Longo"};
+
+                    //Create alert with options
+                    new AlertDialog.Builder(this, R.style.Theme_AppCompat_Light_Dialog_Alert)
+                            .setTitle("Opções de vibração")
+                            .setSingleChoiceItems(items, sharedPreferences.getInt("Notification_Vibrate", 0), null)
+                            .setPositiveButton("Confirmar", new DialogInterface.OnClickListener()
+                            {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i)
+                                {
+                                    //Get user option
+                                    int option = ((AlertDialog)dialogInterface).getListView().getCheckedItemPosition();
+
+                                    //Save on shared preferences
+                                    sharedPreferences.edit().putInt("Notification_Vibrate", option).apply();
+                                }
+                            })
+                            .setNegativeButton("Cancelar", new DialogInterface.OnClickListener()
+                            {
+                                @Override
+                                public void onClick(DialogInterface dialog, int id)
+                                {
+                                    //Close dialog
+                                    dialog.dismiss();
+                                }
+                            }).create()
+                    .show();
+                    break;
+                case R.id.menu_notifications_disable:
+
+                    //Get current user preference
+                    final boolean enabled = sharedPreferences.getBoolean("Notification_Enabled", true);
+
+                    //Create alert with options
+                    new AlertDialog.Builder(this, R.style.Theme_AppCompat_Light_Dialog_Alert)
+                            .setTitle((enabled ? "Desativar notificações" : "Reativar notificações"))
+                            .setIcon((enabled ? R.drawable.ic_notifications_off_black_24dp : R.drawable.ic_notifications_black_24dp))
+                            .setMessage((enabled ? "Deseja desativar todas as notificações deste aplicativo?" : "Deseja reativar as notificações deste aplicativo?"))
+                            .setPositiveButton((enabled ? "Desativar" : "Reativar"), new DialogInterface.OnClickListener()
+                            {
+                                @Override
+                                public void onClick(DialogInterface dialog, int id)
+                                {
+                                    //Save user preference
+                                    sharedPreferences.edit().putBoolean("Notification_Enabled", !enabled).apply();
+
+                                    //Update navigation menu
+                                    updateNavigationMenu();
+                                }
+                            })
+                            .setNegativeButton("Cancelar", new DialogInterface.OnClickListener()
+                            {
+                                @Override
+                                public void onClick(DialogInterface dialog, int id)
+                                {
+                                    //Close dialog
+                                    dialog.dismiss();
+                                }
+                            }).create()
+                    .show();
+                    break;
+            }
+        }
+        else
+        {
+            // Handle navigation view item clicks here.
+            switch (item.getItemId())
+            {
+                case R.id.menu_add:
+
+                    // Create an intent to open Settings activity
+                    Intent intent = new Intent(getApplicationContext(), DefaultSettingsActivity.class);
+
+                    // Define request intent to update an existing tracker
+                    intent.putExtra("Request", REQUEST_INSERT);
+
+                    // Start register activity and wait for result
+                    startActivity(intent);
+                    break;
+
+                case R.id.menu_refresh:
+
+                    // Start update process
+                    onRefresh();
+                    break;
+
+                case R.id.menu_search:
+
+                    // Request search from this activity
+                    searchView.setIconified(false);
+                    break;
+            }
+        }
+
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -532,21 +744,23 @@ public class MainActivity
     }
 
     @Override
-    protected void onPause()
-    {
-        //Save current scroll position
-        scrollPosition = mRecyclerLayoutManager.findFirstCompletelyVisibleItemPosition();
-        super.onPause();
-    }
-
-    @Override
     protected void onResume()
     {
-        //Scroll to previously saved position
-        mRecyclerLayoutManager.scrollToPosition(scrollPosition);
+        //If search view on action bar was previously open
+        if(searchView != null)
+        {
+            //Return to original state
+            searchView.setQuery("", false);
+            searchView.setIconified(true);
+        }
 
-        //Clear variable
-        scrollPosition = 0;
+        //If navigation menu is already loaded
+        if(navigationView != null)
+        {
+            //Update user preference on map type
+            updateNavigationMenu();
+        }
+
         super.onResume();
     }
 

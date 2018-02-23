@@ -35,7 +35,6 @@ public class InfoFragment extends Fragment {
 
         //Get layout elements
         RelativeLayout vwTitleBar =  view.findViewById(R.id.vwTitlebar);
-        CircleImageView imgModel = view.findViewById(R.id.imgModel);
         TextView txtMarkerID = view.findViewById(R.id.txtMarkerID);
         TextView txtTrackerName = view.findViewById(R.id.txtTrackerName);
         TextView txtAddress = view.findViewById(R.id.txtAddress);
@@ -57,21 +56,18 @@ public class InfoFragment extends Fragment {
         txtBatteryLevel.setText(arguments.getString("BatteryLevel"));
         txtSignalLevel.setText(arguments.getString("SignalLevel"));
 
-        //Set circle image background color
-        imgModel.setCircleBackgroundColor(Color.parseColor(arguments.getString("TrackerColor")));
-
-        //Set model item image
-        imgModel.setImageDrawable(getResources().getDrawable(getResources().getIdentifier("model_" + arguments.getString("TrackerModel"), "drawable", getActivity().getPackageName())));
+        //Get tracker color
+        int tracker_color = Color.parseColor(arguments.getString("TrackerColor"));
 
         //Set title bar background color
-        vwTitleBar.setBackgroundColor(imgModel.getCircleBackgroundColor());
-        txtMarkerID.setTextColor(imgModel.getCircleBackgroundColor());
+        vwTitleBar.setBackgroundColor(tracker_color);
+        txtMarkerID.setTextColor(tracker_color);
 
         //Set color on image icons
-        imgAddress.getDrawable().setColorFilter(imgModel.getCircleBackgroundColor(), android.graphics.PorterDuff.Mode.SRC_IN);
-        imgDatetime.getDrawable().setColorFilter(imgModel.getCircleBackgroundColor(), android.graphics.PorterDuff.Mode.SRC_IN);
-        imgSignal.getDrawable().setColorFilter(imgModel.getCircleBackgroundColor(), android.graphics.PorterDuff.Mode.SRC_IN);
-        imgBattery.getDrawable().setColorFilter(imgModel.getCircleBackgroundColor(), android.graphics.PorterDuff.Mode.SRC_IN);
+        imgAddress.getDrawable().setColorFilter(tracker_color, android.graphics.PorterDuff.Mode.SRC_IN);
+        imgDatetime.getDrawable().setColorFilter(tracker_color, android.graphics.PorterDuff.Mode.SRC_IN);
+        imgSignal.getDrawable().setColorFilter(tracker_color, android.graphics.PorterDuff.Mode.SRC_IN);
+        imgBattery.getDrawable().setColorFilter(tracker_color, android.graphics.PorterDuff.Mode.SRC_IN);
 
         //Check if it is the first item
         if(arguments.getInt("ID") == 1)

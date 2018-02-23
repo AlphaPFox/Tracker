@@ -23,6 +23,8 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    //Google libraries
     implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'com.google.maps.android:android-maps-utils:0.5'
     implementation 'com.google.android.gms:play-services-maps:11.8.0'
@@ -34,12 +36,12 @@ dependencies {
     implementation 'com.android.support:recyclerview-v7:26.1.0'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
 
-
     //External Libraries
     implementation 'com.xw.repo:bubbleseekbar:3.13-lite'
     implementation 'com.appolica:interactive-info-window:v1.0.6'
     implementation 'de.hdodenhof:circleimageview:2.2.0'
     implementation 'com.sothree.slidinguppanel:library:3.4.0'
+    implementation 'com.akexorcist:googledirectionlibrary:1.1.1'
 }
 
 

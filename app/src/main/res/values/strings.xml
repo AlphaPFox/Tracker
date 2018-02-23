@@ -142,7 +142,7 @@
     <string name="txtFilterResultSubtitle">Não foram encontradas coordenadas com os filtros selecionados. Altere as opções de filtros para exibir mais resultados.</string>
     <string name="txtInterval">Intervalo de atualização</string>
     <string name="txtInfoBattery">Bateria:</string>
-    <string name="txtInfoSignal">Sinal GSM:</string>
+    <string name="txtInfoSignal">Sinal:</string>
     <string name="txtModel"><b>Modelo: %s</b></string>
 
     <!-- Filter activity -->
@@ -197,6 +197,8 @@
     <string name="menu_my_location">Minha localização</string>
     <string name="menu_zoom_control">Controles de zoom</string>
     <string name="menu_search_hint">Nome, modelo ou número</string>
+    <string name="menu_turn_off">Desligar temporariamente</string>
+    <string name="imgStar">Fixar no topo</string>
 
     <string-array name="weekdays">
         <item>Domingo</item>

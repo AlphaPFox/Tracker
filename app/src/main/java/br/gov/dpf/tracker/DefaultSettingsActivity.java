@@ -160,7 +160,7 @@ public class DefaultSettingsActivity extends AppCompatActivity {
 
             //Save tracker data
             tracker.setName(trackerName);
-            tracker.setDescription(((EditText) findViewById(R.id.txtTrackerDescription)).getText().toString());
+            tracker.setDescription(trackerDescription);
             tracker.setIdentification(trackerIdentification);
 
             //Save tracker model
@@ -168,9 +168,6 @@ public class DefaultSettingsActivity extends AppCompatActivity {
 
             //Save tracker color
             tracker.setBackgroundColor(mColor);
-
-            //Save create date
-            tracker.setLastUpdate(new Date());
 
             // Input is validated, set loading indicator on menu
             confirmMenu.setActionView(new ProgressBar(this));
@@ -259,6 +256,9 @@ public class DefaultSettingsActivity extends AppCompatActivity {
                                 {
                                     //Create intent to call next activity (Tracker Configurations)
                                     Intent intent = new Intent(DefaultSettingsActivity.this, TrackerSettingsActivity.class);
+
+                                    //Save create date
+                                    tracker.setLastUpdate(new Date());
 
                                     //Put tracker data on intent
                                     intent.putExtra("Tracker", tracker);

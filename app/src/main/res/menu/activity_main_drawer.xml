@@ -23,7 +23,7 @@
 
     <item android:title="@string/menu_notifications">
         <menu>
-            <group>
+            <group android:id="@+id/menu_notifications">
                 <item
                     android:id="@+id/menu_notification_sound"
                     android:icon="@drawable/ic_music_note_black_24dp"
@@ -40,12 +40,11 @@
         </menu>
     </item>
 
-    <item android:title="@string/menu_maps">
+    <item android:title="@string/menu_maps" android:checkableBehavior="single">
         <menu>
-            <group android:checkableBehavior="single">
+            <group android:id="@+id/menu_map_layers" android:checkableBehavior="single">
                 <item
                     android:id="@+id/map_default"
-                    android:checked="true"
                     android:icon="@drawable/ic_menu_gallery"
                     android:title="@string/map_default" />
                 <item

@@ -73,8 +73,8 @@ public class FilterActivity extends AppCompatActivity implements View.OnClickLis
         txtCoordinatesNumber.setText(getResources().getString(R.string.txtCoordinatesNumber, coordinatesNumber));
 
         //Set show preferences
-        swShowPolyline.setChecked(sharedPreferences.getBoolean("ShowPolyline", true));
-        swShowCircle.setChecked(sharedPreferences.getBoolean("ShowCircle", true));
+        swShowPolyline.setChecked(sharedPreferences.getInt("Map_Path", 0) > 0);
+        swShowCircle.setChecked(sharedPreferences.getInt("Map_Radius", 2) > 0);
 
         //Set progress and listener
         seekBar.setProgress(coordinatesNumber);
@@ -121,9 +121,31 @@ public class FilterActivity extends AppCompatActivity implements View.OnClickLis
         //Open shared preferences editor
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
+        //If user selected to show path and previous preference was to hide
+        if(swShowPolyline.isChecked() &&  sharedPreferences.getInt("Map_Path", 2) == 0)
+        {
+            //Save preference to show default option
+            editor.putInt("Map_Path", 2);
+        }
+        else if(!swShowPolyline.isChecked())
+        {
+            //Save preference to hide map path
+            editor.putInt("Map_Path", 0);
+        }
+
+        //If user selected to show radius and previous preference was to hide
+        if(swShowCircle.isChecked() &&  sharedPreferences.getInt("Map_Radius", 3) == 0)
+        {
+            //Save preference to show default option
+            editor.putInt("Map_Radius", 3);
+        }
+        else if(!swShowCircle.isChecked())
+        {
+            //Save preference to hide map radius
+            editor.putInt("Map_Radius", 0);
+        }
+
         //Save user selected settings
-        editor.putBoolean("ShowPolyline", swShowPolyline.isChecked());
-        editor.putBoolean("ShowCircle", swShowCircle.isChecked());
         editor.putInt("CoordinatesNumber", seekBar.getProgress());
 
         //Save date settings

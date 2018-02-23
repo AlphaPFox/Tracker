@@ -1,6 +1,7 @@
 package br.gov.dpf.tracker.Firestore;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -11,6 +12,7 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryListenOptions;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.SimpleDateFormat;
@@ -30,10 +32,11 @@ public abstract class BaseAdapter<VH extends RecyclerView.ViewHolder>
 
     private Activity mActivity;
     private Query mQuery;
+    private boolean mIgnoreCache;
     private ListenerRegistration mRegistration;
 
     public ArrayList<DocumentSnapshot> mSnapshots = new ArrayList<>();
-    private ArrayList<DocumentSnapshot> mSnapshotsFilter;
+    public ArrayList<DocumentSnapshot> mSnapshotsFilter;
 
     BaseAdapter(Activity activity, Query query)
     {
@@ -43,14 +46,13 @@ public abstract class BaseAdapter<VH extends RecyclerView.ViewHolder>
 
     @Override
     public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
-        if (e != null) {
+        if (e != null)
+        {
             Log.w(TAG, "onEvent:error", e);
             onError(e);
             return;
         }
 
-        // Dispatch the event
-        Log.d(TAG, "onEvent:numChanges:" + documentSnapshots.getDocumentChanges().size());
         for (DocumentChange change : documentSnapshots.getDocumentChanges()) {
             switch (change.getType()) {
                 case ADDED:
@@ -64,15 +66,35 @@ public abstract class BaseAdapter<VH extends RecyclerView.ViewHolder>
                     break;
             }
         }
-        onDataChanged();
+
+        //Check if user wants to confirm data from server
+        if(mIgnoreCache && documentSnapshots.getMetadata().isFromCache())
+        {
+            //User expecting results from server, received from cache
+            Log.w(TAG, "Received results from cache: ignoring");
+        }
+        else
+        {
+            // Dispatch the event
+            Log.d(TAG, "onEvent:numChanges:" + documentSnapshots.getDocumentChanges().size() + " / From: " + (documentSnapshots.getMetadata().isFromCache() ? "CACHE" : "SERVER"));
+
+            // Notify to recycler view updates
+            onDataChanged();
+        }
     }
 
     public void startListening()
     {
         if (mQuery != null && mRegistration == null)
         {
-            mRegistration = mQuery.addSnapshotListener(mActivity, this);
+            mRegistration = mQuery.addSnapshotListener(new QueryListenOptions().includeQueryMetadataChanges(), this);
         }
+    }
+
+    public void disablePersistence()
+    {
+        //Flag to disable local cache results from query
+        mIgnoreCache = true;
     }
 
     public void stopListening() {
@@ -86,7 +108,8 @@ public abstract class BaseAdapter<VH extends RecyclerView.ViewHolder>
         mSnapshots.clear();
     }
 
-    public void setQuery(Query query) {
+    public void setQuery(Query query)
+    {
         // Stop listening
         stopListening();
 
@@ -149,13 +172,13 @@ public abstract class BaseAdapter<VH extends RecyclerView.ViewHolder>
         }
     }
 
-    private void onDocumentAdded(DocumentChange change)
+    protected void onDocumentAdded(DocumentChange change)
     {
         mSnapshots.add(change.getNewIndex(), change.getDocument());
         notifyDataSetChanged();
     }
 
-    private void onDocumentModified(DocumentChange change) {
+    protected void onDocumentModified(DocumentChange change) {
         if (change.getOldIndex() == change.getNewIndex()) {
             // Item changed but remained in same position
             mSnapshots.set(change.getOldIndex(), change.getDocument());
@@ -168,7 +191,7 @@ public abstract class BaseAdapter<VH extends RecyclerView.ViewHolder>
         }
     }
 
-    private void onDocumentRemoved(DocumentChange change) {
+    protected void onDocumentRemoved(DocumentChange change) {
         mSnapshots.remove(change.getOldIndex());
         notifyDataSetChanged();
     }
@@ -177,7 +200,7 @@ public abstract class BaseAdapter<VH extends RecyclerView.ViewHolder>
 
     protected void onDataChanged() {}
 
-    String formatDateTime(Date datetime, boolean short_weekdays, boolean short_format)
+    public String formatDateTime(Date datetime, boolean short_weekdays, boolean short_format)
     {
         //Check if received any update yet
         if(datetime == null)
@@ -237,7 +260,7 @@ public abstract class BaseAdapter<VH extends RecyclerView.ViewHolder>
         }
     }
 
-    String formatDateTime(Date datetime1, Date datetime2)
+    public String formatDateTime(Date datetime1, Date datetime2)
     {
         //Check if received any update yet
         if(datetime1 == null || datetime2 == null)

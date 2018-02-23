@@ -1,7 +1,5 @@
 package br.gov.dpf.tracker.Entities;
 
-import android.app.NotificationManager;
-import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
 import com.google.android.gms.tasks.Tasks;
@@ -9,6 +7,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+
+import br.gov.dpf.tracker.Components.NotificationController;
 
 //Class representing a group of notifications
 public class NotificationGroup {
@@ -51,7 +51,7 @@ public class NotificationGroup {
     }
 
     //Add notification to topic
-    public void addNotification(NotificationMessage newNotification, NotificationManagerCompat notificationManager)
+    public void addNotification(NotificationMessage newNotification, NotificationController notificationController)
     {
         //For each existing notification on this group
         for(int i = 0; i < notifications.size(); i++)
@@ -62,11 +62,11 @@ public class NotificationGroup {
             //If it is from the same topic
             if(notification.getTopic().equals((newNotification.getTopic())))
             {
+                //Cancel old notification
+                notificationController.dismissNotification(this.getGroupKey(), notification.getNotificationID());
+
                 //Replace old notification
                 notifications.add(i, newNotification);
-
-                //Cancel old notification
-                notificationManager.cancel(notification.getNotificationID());
 
                 //Notification replaced, end method
                 return;

@@ -15,6 +15,7 @@
     <dimen name='map_polyline_width'>3dp</dimen>
     <dimen name='map_polyline_gap'>3dp</dimen>
     <dimen name='map_polyline_dash'>6dp</dimen>
+    <dimen name="map_top_padding">60dp</dimen>
     <dimen name="marker_offset_x">5dp</dimen>
     <dimen name="marker_offset_y">39dp</dimen>
 
