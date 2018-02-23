@@ -23,3 +23,7 @@ SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferen
             }
         }
     }
+    
+    
+            //Recover sound notification selected by user (or default if not selected yet)
+            Uri soundURI = Uri.parse(sharedPreferences.getString("Notification_Sound", RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION).toString()));
