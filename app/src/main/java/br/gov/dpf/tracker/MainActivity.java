@@ -673,7 +673,7 @@ public class MainActivity
                     new AlertDialog.Builder(this, R.style.Theme_AppCompat_Light_Dialog_Alert)
                             .setTitle((enabled ? "Desativar notificações" : "Reativar notificações"))
                             .setIcon((enabled ? R.drawable.ic_notifications_off_black_24dp : R.drawable.ic_notifications_black_24dp))
-                            .setMessage((enabled ? "Deseja desativar todas as notificações deste aplicativo?" : "Deseja reativar as notificações deste aplicativo?"))
+                            .setMessage((enabled ? "Deseja desativar todas as notificações deste aplicativo?" : "Deseja reativar notificações deste aplicativo?"))
                             .setPositiveButton((enabled ? "Desativar" : "Reativar"), new DialogInterface.OnClickListener()
                             {
                                 @Override
