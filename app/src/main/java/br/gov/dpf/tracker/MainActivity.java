@@ -72,7 +72,7 @@ public class MainActivity
 
     //Define possible result operations
     public static int RESULT_ERROR = -1;
-    public static int RESULT_CANCELED = 1;
+    public static int RESULT_CANCELED = 0;
 
     //Define possible request operations
     public static int REQUEST_INSERT = 2;
@@ -475,8 +475,8 @@ public class MainActivity
                 @Override
                 public boolean onQueryTextChange(String newText)
                 {
-                    //If search is at least 3 chars
-                    if(newText.length() >= 3)
+                    //If search text is available
+                    if(newText.length() > 0)
                     {
                         //Create filter with fields to be searched
                         ArrayList<String> filter = new ArrayList<>();

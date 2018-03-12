@@ -136,6 +136,7 @@ public class NotificationController
             single_notification = new NotificationCompat.Builder(context, "CHANEL")
                     .setSmallIcon(R.drawable.ic_tracker_notification_24dp)
                     .setGroup(notificationGroup.getGroupKey())
+
                     .setContentTitle(notification.getTitle())
                     .setContentInfo(notificationGroup.tracker.getName() + " (" + notificationGroup.tracker.formatTrackerModel() + ")")
                     .setSubText(notificationGroup.tracker.getName() + " (" + notificationGroup.tracker.formatTrackerModel() + ")")

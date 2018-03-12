@@ -1,27 +1,32 @@
 package br.gov.dpf.tracker;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -44,6 +49,8 @@ import java.util.Map;
 import br.gov.dpf.tracker.Components.ProgressNotification;
 import br.gov.dpf.tracker.Entities.Configuration;
 import br.gov.dpf.tracker.Entities.Tracker;
+
+import static java.lang.String.*;
 
 public class TrackerSettingsActivity extends AppCompatActivity
 {
@@ -108,6 +115,11 @@ public class TrackerSettingsActivity extends AppCompatActivity
                 case "tk102b":
                     //Define TK 102B tracker model layout
                     loadTK102B();
+                    break;
+
+                case "tk1102":
+                    //Define TK 102B tracker model layout
+                    loadTK1102();
                     break;
 
                 case "spot":
@@ -434,6 +446,185 @@ public class TrackerSettingsActivity extends AppCompatActivity
         changeLayoutVisibility(R.id.swNotifications, R.id.vwNotificationOptions, -1, -1);
     }
 
+    private void loadTK1102()
+    {
+        //Load specific layout to this model
+        setContentView(R.layout.activity_tracker_tk1102);
+
+        //Load toolbar
+        loadToolbar(getResources().getString(R.string.title_tracker_tk102b_settings));
+
+        //Set support text
+        ((TextView) findViewById(R.id.lblUpdateInterval)).setText(getResources().getText(R.string.lblUpdateInterval));
+
+        final BubbleSeekBar seekBarTime = findViewById(R.id.seekBarTime);
+        final BubbleSeekBar seekBarDistance = findViewById(R.id.seekBarDistance);
+        final BubbleSeekBar seekBarSpeed = findViewById(R.id.sbSpeed);
+
+        //Set speed seek bar sections
+        seekBarSpeed.setCustomSectionTextArray(new BubbleSeekBar.CustomSectionTextArray() {
+            @NonNull
+            @Override
+            public SparseArray<String> onCustomize(int sectionCount, @NonNull SparseArray<String> array) {
+                array.clear();
+
+                //Update interval options
+                array.put(0, "50 km/h");
+                array.put(1, "100 km/h");
+                array.put(2, "150 km/h");
+                array.put(3, "200 km/h");
+
+                return array;
+            }
+        });
+
+
+        //Set seek bar sections
+        seekBarDistance.setCustomSectionTextArray(new BubbleSeekBar.CustomSectionTextArray() {
+            @NonNull
+            @Override
+            public SparseArray<String> onCustomize(int sectionCount, @NonNull SparseArray<String> array) {
+                array.clear();
+
+                //Update interval options
+                array.put(0, "Desativado");
+                array.put(1, "500 metros");
+                array.put(2, "1km");
+
+                return array;
+            }
+        });
+
+        //Set seek bar sections
+        seekBarTime.setCustomSectionTextArray(new BubbleSeekBar.CustomSectionTextArray() {
+            @NonNull
+            @Override
+            public SparseArray<String> onCustomize(int sectionCount, @NonNull SparseArray<String> array) {
+                array.clear();
+
+                //Update interval options
+                array.put(0, "Desativado");
+                array.put(1, "12 horas");
+                array.put(2, "1 dia");
+
+                return array;
+            }
+        });
+
+        (findViewById(R.id.vwMainScroll)).getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
+            @Override
+            public void onScrollChanged() {
+
+                // call this method to correct offsets
+                seekBarTime.correctOffsetWhenContainerOnScrolling();
+                seekBarSpeed.correctOffsetWhenContainerOnScrolling();
+                seekBarDistance.correctOffsetWhenContainerOnScrolling();
+            }
+        });
+
+        //Set visibility events for specific switches
+        changeLayoutVisibility(R.id.swGPSAlert, -1, R.id.cbGPSLow, R.id.imgGPSAlert);
+        changeLayoutVisibility(R.id.swShockAlert, -1, R.id.cbShockAlert, R.id.imgShockAlert);
+        changeLayoutVisibility(R.id.swMoveoutAlert, -1, R.id.cbMoveout, R.id.imgMoveOut);
+        changeLayoutVisibility(R.id.swSpeedAlert, R.id.sbSpeed, R.id.cbSpeedLimit, R.id.imgSpeedLimit);
+        changeLayoutVisibility(R.id.swPeriodicUpdate, R.id.vwPeriodicUpdate, -1, R.id.imgPeriodicUpdate);
+        changeLayoutVisibility(R.id.swNotifications, R.id.vwNotificationOptions, -1, -1);
+
+        //Get sleep mode switches
+        final SwitchCompat swSleep = findViewById(R.id.swSleep);
+        final SwitchCompat swDeepSleep = findViewById(R.id.swDeepSleep);
+
+        //Manage check on Sleep Switch
+        swSleep.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, final boolean enabled) {
+
+                //Sleep modes
+                final String[] options = {"Ao não detectar mais vibração", "Após 5 minutos sem mensagens"};
+
+                //Show sleep options to user
+                setSleepMode(R.id.txtSleep, "Entrar em modo de economia: ", options, enabled);
+
+                //Disable other sleep mode
+                findViewById(R.id.swDeepSleep).setEnabled(!enabled);
+            }
+        });
+
+        swDeepSleep.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, final boolean enabled) {
+
+                //Sleep modes
+                final String[] options = {"Quando detectar vibração", "A cada 30 minutos", "A cada 1 hora", "A cada 6 horas", "A cada 12 horas", "Uma vez por dia"};
+
+                //Show sleep options to user
+                setSleepMode(R.id.txtDeepSleep, "Permanecer ativo somente: ", options, enabled);
+
+                //Disable other sleep mode
+                findViewById(R.id.swSleep).setEnabled(!enabled);
+            }
+        });
+    }
+
+    private void setSleepMode(int txtLabelID, final String title, final String[] options, boolean enabled) {
+
+        //Get text label
+        final TextView txtLabel = findViewById(txtLabelID);
+        final View sbSpeed = findViewById(R.id.sbSpeed);
+        final View vwPeriodicUpdate = findViewById(R.id.vwPeriodicUpdate);
+
+        //If option enabled
+        if(enabled)
+        {
+            //Show options to user
+            showOptions(title, options, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i)
+                {
+                    //Get user option
+                    int option = ((AlertDialog) dialogInterface).getListView().getCheckedItemPosition();
+
+                    //Set text option
+                    txtLabel.setText(Html.fromHtml("<b>" + title + "</b><br>- " + options[option]));
+                    txtLabel.setVisibility(View.VISIBLE);
+                    txtLabel.setTag(option);
+                }
+            });
+
+            //Hide other configuration panels
+            sbSpeed.setVisibility(View.GONE);
+            vwPeriodicUpdate.setVisibility(View.GONE);
+        }
+        else
+        {
+            //Option disabled, hide label
+            txtLabel.setVisibility(View.GONE);
+
+            //Show other configuration panels (if configuration checked)
+            sbSpeed.setVisibility(((SwitchCompat) findViewById(R.id.swSpeedAlert)).isChecked() ? View.VISIBLE : View.GONE);
+            vwPeriodicUpdate.setVisibility(((SwitchCompat) findViewById(R.id.swPeriodicUpdate)).isChecked() ? View.VISIBLE : View.GONE);
+        }
+
+        //Change other controls
+        findViewById(R.id.swGPSAlert).setEnabled(!enabled);
+        findViewById(R.id.swShockAlert).setEnabled(!enabled);
+        findViewById(R.id.swMoveoutAlert).setEnabled(!enabled);
+        findViewById(R.id.swSpeedAlert).setEnabled(!enabled);
+        findViewById(R.id.swPeriodicUpdate).setEnabled(!enabled);
+    }
+
+
+    public void showOptions(String alertTitle, String[] options, DialogInterface.OnClickListener positiveResult)
+    {
+        //Create single choice selection dialog
+        new AlertDialog.Builder(this, R.style.Theme_AppCompat_Light_Dialog_Alert)
+                .setTitle(alertTitle)
+                .setSingleChoiceItems(options, 0, null)
+                .setPositiveButton("Confirmar", positiveResult)
+                .setCancelable(false)
+                .show();
+    }
+
     //Change view visibility according to switch compat option (checked = visible)
     private void changeLayoutVisibility(int switchCompatID, final int viewID, final int checkBoxID, final int imageViewID)
     {
@@ -709,7 +900,7 @@ public class TrackerSettingsActivity extends AppCompatActivity
                 //Update device configuration
                 updateConfiguration("Shock",  "Configurando: Alerta de vibração", Configuration.PRIORITY_LOW, swShockAlert.isChecked(), null, configCollection, transaction);
                 updateConfiguration("MoveOut",  "Configurando: Alerta de evasão", Configuration.PRIORITY_LOW, swMoveOutAlert.isChecked(), null, configCollection, transaction);
-                updateConfiguration("OverSpeed",  "Configurando: Alerta de velocidade", Configuration.PRIORITY_LOW, swSpeedAlert.isChecked(), String.format(Locale.getDefault(), "%03d", sbSpeedAlert.getProgress()), configCollection, transaction);
+                updateConfiguration("OverSpeed",  "Configurando: Alerta de velocidade", Configuration.PRIORITY_LOW, swSpeedAlert.isChecked(), format(Locale.getDefault(), "%03d", sbSpeedAlert.getProgress()), configCollection, transaction);
                 updateConfiguration("StatusCheck",  "Configurando: Atualização de status", Configuration.PRIORITY_LOW, swStatusCheck.isChecked(), null, configCollection, transaction);
                 updateConfiguration("PeriodicUpdate", "Configurando: Localização periódica", Configuration.PRIORITY_DEFAULT, swPeriodicUpdate.isChecked(), getUpdateIntervalBySection(sbPeriodicUpdate.getProgress()), configCollection, transaction);
 
@@ -740,8 +931,8 @@ public class TrackerSettingsActivity extends AppCompatActivity
                 updateConfiguration("ShockEmergency", "Alerta de vibração", Configuration.PRIORITY_DEFAULT, swEmergency.isChecked(), null, configCollection, transaction);
                 updateConfiguration("TurnOff", "Opção de desligamento", Configuration.PRIORITY_DEFAULT, swTurnOff.isChecked(), null, configCollection, transaction);
                 updateConfiguration("Magnet", "Alerta de magnetismo", Configuration.PRIORITY_DEFAULT, swMagnetAlert.isChecked(), null, configCollection, transaction);
-                updateConfiguration("UpdateIdle", "Localização: ratreador parado", Configuration.PRIORITY_DEFAULT, swInterval.isChecked(), (swInterval.isChecked() ? String.valueOf(Math.max(sbIdle.getProgress(), 1)) : "0"), configCollection, transaction);
-                updateConfiguration("UpdateActive", "Localização, rastreador em movimento", Configuration.PRIORITY_DEFAULT, swInterval.isChecked(), (swInterval.isChecked() ? String.valueOf(Math.max(sbActive.getProgress(), 1)) : "0"), configCollection, transaction);
+                updateConfiguration("UpdateIdle", "Localização: ratreador parado", Configuration.PRIORITY_DEFAULT, swInterval.isChecked(), (swInterval.isChecked() ? valueOf(Math.max(sbIdle.getProgress(), 1)) : "0"), configCollection, transaction);
+                updateConfiguration("UpdateActive", "Localização, rastreador em movimento", Configuration.PRIORITY_DEFAULT, swInterval.isChecked(), (swInterval.isChecked() ? valueOf(Math.max(sbActive.getProgress(), 1)) : "0"), configCollection, transaction);
 
                 //Update user notification preferences
                 updateNotificationOption(R.id.cbMovement, showNotifications, editor);
@@ -1005,17 +1196,19 @@ public class TrackerSettingsActivity extends AppCompatActivity
     //Set all switches inside a layout enabled or disabled
     private void enableControls(ViewGroup root, boolean enabled)
     {
-        //For each children
-        for (int i = 0; i < root.getChildCount(); i++)
+        //Check if root view exists
+        if(root != null)
         {
-            //If it is a switch control
-            if (root.getChildAt(i) instanceof SwitchCompat)
-            {
-                //Change enabled status
-                root.getChildAt(i).setEnabled(enabled);
+            //For each children
+            for (int i = 0; i < root.getChildCount(); i++) {
+                //If it is a switch control
+                if (root.getChildAt(i) instanceof SwitchCompat) {
+                    //Change enabled status
+                    root.getChildAt(i).setEnabled(enabled);
 
-                //Change check status
-                ((SwitchCompat) root.getChildAt(i)).setChecked(false);
+                    //Change check status
+                    ((SwitchCompat) root.getChildAt(i)).setChecked(false);
+                }
             }
         }
     }

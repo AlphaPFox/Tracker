@@ -87,13 +87,13 @@
                     android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/splitter"
-                    tools:text="Nome do rastreador:" />
+                    tools:text="Nome de identificação:" />
 
                 <TextView
                     android:id="@+id/lblDescription"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginBottom="18dp"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="24dp"
                     android:fontFamily="serif"
@@ -102,8 +102,7 @@
                     android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/lblTrackerName"
-                    tools:text="Descrição (opcional):" />
+                    app:layout_constraintTop_toBottomOf="@+id/lblTrackerName" />
 
                 <EditText
                     android:id="@+id/txtTrackerName"
@@ -111,11 +110,10 @@
                     android:layout_height="38dp"
                     android:layout_marginEnd="16dp"
                     android:layout_marginStart="16dp"
-                    android:layout_marginTop="2dp"
+                    android:layout_marginTop="4dp"
                     android:ems="10"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
-                    android:hint="@string/txtTrackerName"
                     android:inputType="textPersonName"
                     android:singleLine="true"
                     android:textAlignment="viewStart"
@@ -129,9 +127,9 @@
                     android:id="@+id/txtTrackerDescription"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
                     android:layout_marginEnd="16dp"
                     android:ems="10"
+                    android:hint="@string/txtTrackerDescriptionHint"
                     android:inputType="text"
                     android:textColor="#999"
                     android:textSize="14sp"
@@ -181,28 +179,32 @@
                         android:id="@+id/vwModelScroll"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
                         android:layout_gravity="center_horizontal"
                         android:fadeScrollbars="false"
-                        android:scrollbarSize="4dp">
+                        android:scrollbarSize="2dp">
 
                         <LinearLayout
                             android:id="@+id/vwModels"
                             android:layout_width="wrap_content"
-                            android:layout_height="165dp"
-                            android:orientation="horizontal">
+                            android:layout_height="170dp"
+                            android:orientation="horizontal"
+                            android:paddingTop="4dp"
+                            android:paddingBottom="8dp">
 
                             <LinearLayout
                                 android:layout_width="100dp"
                                 android:layout_height="match_parent"
-                                android:layout_margin="8dp"
+                                android:layout_margin="4dp"
                                 android:orientation="vertical"
-                                android:padding="4dp"
                                 android:tag="tk102b">
 
                                 <ImageView
                                     android:layout_width="match_parent"
                                     android:layout_height="0dp"
-                                    android:layout_weight="0.8"
+                                    android:layout_weight="0.7"
+                                    android:background="@drawable/border"
                                     android:contentDescription="@string/lblModel"
                                     android:padding="6dp"
                                     android:src="@drawable/model_tk102b" />
@@ -211,8 +213,11 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="0dp"
                                     android:layout_gravity="bottom"
-                                    android:layout_weight="0.2"
+                                    android:layout_weight="0.3"
+                                    android:background="@drawable/border"
                                     android:gravity="center"
+                                    android:paddingEnd="8dp"
+                                    android:paddingStart="8dp"
                                     android:text="@string/model_tk102b"
                                     android:textStyle="bold" />
                             </LinearLayout>
@@ -220,15 +225,44 @@
                             <LinearLayout
                                 android:layout_width="100dp"
                                 android:layout_height="match_parent"
-                                android:layout_margin="8dp"
+                                android:layout_margin="4dp"
                                 android:orientation="vertical"
-                                android:padding="4dp"
+                                android:tag="tk1102">
+
+                                <ImageView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="0dp"
+                                    android:layout_weight="0.7"
+                                    android:background="@drawable/border"
+                                    android:contentDescription="@string/lblModel"
+                                    android:padding="6dp"
+                                    android:src="@drawable/model_tk1102" />
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="0dp"
+                                    android:layout_gravity="bottom"
+                                    android:layout_weight="0.3"
+                                    android:background="@drawable/border"
+                                    android:gravity="center"
+                                    android:paddingEnd="8dp"
+                                    android:paddingStart="8dp"
+                                    android:text="@string/model_tk1102"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="100dp"
+                                android:layout_height="match_parent"
+                                android:layout_margin="4dp"
+                                android:orientation="vertical"
                                 android:tag="st940">
 
                                 <ImageView
                                     android:layout_width="match_parent"
                                     android:layout_height="0dp"
-                                    android:layout_weight="0.8"
+                                    android:layout_weight="0.7"
+                                    android:background="@drawable/border"
                                     android:contentDescription="@string/lblModel"
                                     android:padding="6dp"
                                     android:src="@drawable/model_st940" />
@@ -237,8 +271,11 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="0dp"
                                     android:layout_gravity="bottom"
-                                    android:layout_weight="0.2"
+                                    android:layout_weight="0.3"
+                                    android:background="@drawable/border"
                                     android:gravity="center"
+                                    android:paddingEnd="8dp"
+                                    android:paddingStart="8dp"
                                     android:text="@string/model_st940"
                                     android:textStyle="bold" />
                             </LinearLayout>
@@ -246,15 +283,15 @@
                             <LinearLayout
                                 android:layout_width="100dp"
                                 android:layout_height="match_parent"
-                                android:layout_margin="8dp"
+                                android:layout_margin="4dp"
                                 android:orientation="vertical"
-                                android:padding="4dp"
                                 android:tag="spot">
 
                                 <ImageView
                                     android:layout_width="match_parent"
                                     android:layout_height="0dp"
-                                    android:layout_weight="0.8"
+                                    android:layout_weight="0.7"
+                                    android:background="@drawable/border"
                                     android:contentDescription="@string/lblModel"
                                     android:padding="6dp"
                                     android:src="@drawable/model_spot" />
@@ -263,8 +300,11 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="0dp"
                                     android:layout_gravity="bottom"
-                                    android:layout_weight="0.2"
+                                    android:layout_weight="0.3"
+                                    android:background="@drawable/border"
                                     android:gravity="center"
+                                    android:paddingEnd="12dp"
+                                    android:paddingStart="12dp"
                                     android:text="@string/model_spot"
                                     android:textStyle="bold" />
                             </LinearLayout>
@@ -272,15 +312,44 @@
                             <LinearLayout
                                 android:layout_width="100dp"
                                 android:layout_height="match_parent"
-                                android:layout_margin="8dp"
+                                android:layout_margin="4dp"
                                 android:orientation="vertical"
-                                android:padding="4dp"
+                                android:tag="tk306">
+
+                                <ImageView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="0dp"
+                                    android:layout_weight="0.7"
+                                    android:background="@drawable/border"
+                                    android:contentDescription="@string/lblModel"
+                                    android:padding="6dp"
+                                    android:src="@drawable/model_tk306" />
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="0dp"
+                                    android:layout_gravity="bottom"
+                                    android:layout_weight="0.3"
+                                    android:background="@drawable/border"
+                                    android:gravity="center"
+                                    android:paddingEnd="8dp"
+                                    android:paddingStart="8dp"
+                                    android:text="@string/model_tk306"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="100dp"
+                                android:layout_height="match_parent"
+                                android:layout_margin="4dp"
+                                android:orientation="vertical"
                                 android:tag="pt39">
 
                                 <ImageView
                                     android:layout_width="match_parent"
                                     android:layout_height="0dp"
-                                    android:layout_weight="0.8"
+                                    android:layout_weight="0.7"
+                                    android:background="@drawable/border"
                                     android:contentDescription="@string/lblModel"
                                     android:padding="6dp"
                                     android:src="@drawable/model_pt39" />
@@ -289,8 +358,11 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="0dp"
                                     android:layout_gravity="bottom"
-                                    android:layout_weight="0.2"
+                                    android:layout_weight="0.3"
+                                    android:background="@drawable/border"
                                     android:gravity="center"
+                                    android:paddingEnd="8dp"
+                                    android:paddingStart="8dp"
                                     android:text="@string/model_pt39"
                                     android:textStyle="bold" />
                             </LinearLayout>
@@ -298,15 +370,15 @@
                             <LinearLayout
                                 android:layout_width="100dp"
                                 android:layout_height="match_parent"
-                                android:layout_margin="8dp"
+                                android:layout_margin="4dp"
                                 android:orientation="vertical"
-                                android:padding="4dp"
-                                android:tag="GT-02">
+                                android:tag="gt02">
 
                                 <ImageView
                                     android:layout_width="match_parent"
                                     android:layout_height="0dp"
-                                    android:layout_weight="0.8"
+                                    android:layout_weight="0.7"
+                                    android:background="@drawable/border"
                                     android:contentDescription="@string/lblModel"
                                     android:padding="6dp"
                                     android:src="@drawable/model_gt02" />
@@ -315,8 +387,11 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="0dp"
                                     android:layout_gravity="bottom"
-                                    android:layout_weight="0.2"
+                                    android:layout_weight="0.3"
+                                    android:background="@drawable/border"
                                     android:gravity="center"
+                                    android:paddingEnd="12dp"
+                                    android:paddingStart="12dp"
                                     android:text="@string/model_gt02"
                                     android:textStyle="bold" />
                             </LinearLayout>
@@ -358,32 +433,52 @@
                     android:layout_marginTop="8dp"
                     android:background="#644286f5" />
 
-                <LinearLayout
+                <android.support.constraint.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="8dp"
-                    android:orientation="horizontal">
+                    android:padding="16dp"
+                    android:layout_height="wrap_content">
 
                     <TextView
                         android:id="@+id/lblTrackerIdentification"
-                        android:layout_width="170dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="10dp"
                         android:fontFamily="serif"
-                        android:labelFor="@id/txtTrackerIdentification"
+                        android:labelFor="@+id/txtTrackerIdentification"
                         android:text="@string/lblPhoneNumber"
                         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/lblTrackerName" />
+                        app:layout_constraintTop_toTopOf="@+id/txtTrackerIdentification" />
+
+                    <TextView
+                        android:id="@+id/lblTrackerIMEI"
+                        android:layout_width="wrap_content"
+                        android:layout_height="17dp"
+                        android:layout_marginTop="10dp"
+                        android:fontFamily="serif"
+                        android:labelFor="@id/txtTrackerIMEI"
+                        android:text="@string/lblTrackerIMEI"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@+id/txtTrackerIMEI" />
+
+                    <TextView
+                        android:id="@+id/lblTrackerPassword"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:fontFamily="serif"
+                        android:labelFor="@id/txtTrackerPassword"
+                        android:text="@string/lblPassword"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@+id/txtTrackerPassword" />
 
                     <EditText
                         android:id="@+id/txtTrackerIdentification"
-                        style="@style/Widget.AppCompat.EditText"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
+                        android:layout_marginStart="24dp"
                         android:ems="10"
                         android:focusable="true"
                         android:focusableInTouchMode="true"
@@ -394,20 +489,47 @@
                         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                         android:textSize="14sp"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/lblTrackerName"
-                        app:layout_constraintTop_toBottomOf="@+id/splitter" />
+                        app:layout_constraintStart_toEndOf="@+id/lblTrackerIdentification"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                </LinearLayout>
+                    <EditText
+                        android:id="@+id/txtTrackerIMEI"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:ems="10"
+                        android:hint="@string/txtTrackerIMEIHint"
+                        android:inputType="number"
+                        android:textSize="14sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@+id/txtTrackerIdentification"
+                        app:layout_constraintTop_toBottomOf="@+id/txtTrackerIdentification" />
 
-                <TextView
-                    android:id="@+id/lblTrackerIdentificationSubtitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:text="@string/lblPhoneNumberSubtitle"
-                    android:textSize="12sp" />
+                    <EditText
+                        android:id="@+id/txtTrackerPassword"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:ems="10"
+                        android:hint="@string/txtPasswordHint"
+                        android:inputType="numberPassword"
+                        android:textSize="14sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@+id/txtTrackerIdentification"
+                        app:layout_constraintTop_toBottomOf="@+id/txtTrackerIMEI" />
+
+
+                    <TextView
+                        android:id="@+id/lblTrackerIdentificationSubtitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/lblPhoneNumberSubtitle"
+                        android:textSize="12sp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/txtTrackerPassword" />
+
+                </android.support.constraint.ConstraintLayout>
             </LinearLayout>
         </android.support.v7.widget.CardView>
 

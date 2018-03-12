@@ -1,0 +1,799 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="br.gov.dpf.tracker.TrackerSettingsActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.NoActionBar.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.NoActionBar.PopupOverlay" />
+
+    </android.support.design.widget.AppBarLayout>
+
+    <ScrollView
+        android:id="@+id/vwMainScroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="?attr/actionBarSize">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="16dp"
+                        android:fontFamily="serif"
+                        android:text="@string/lblTrackerConfig"
+                        android:textAllCaps="true"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                        android:textSize="14sp"
+                        android:typeface="monospace" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="2dp"
+                        android:layout_margin="8dp"
+                        android:background="#644286f5" />
+
+                    <LinearLayout
+                        android:id="@+id/vwConfigurations"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:animateLayoutChanges="true"
+                        android:orientation="vertical"
+                        android:paddingBottom="8dp">
+
+                        <android.support.v7.widget.SwitchCompat
+                            android:id="@+id/swGPRS"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginStart="16dp"
+                            android:checked="true"
+                            android:tag="Config_GPRS"
+                            android:text="@string/swProtocol" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginStart="16dp"
+                            android:orientation="horizontal"
+                            android:layout_gravity="center">
+
+                            <ImageView
+                                android:id="@+id/imgGPRS"
+                                android:tag="Config_GPRS"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:layout_gravity="top"
+                                android:layout_marginBottom="8dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_marginTop="8dp"
+                                android:src="@drawable/status_ok"
+                                android:visibility="gone" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:tag="Config_GPRS"
+                                android:text="@string/lblProtocol"
+                                android:textSize="12sp" />
+
+
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:background="#DDD" />
+
+                        <android.support.v7.widget.SwitchCompat
+                            android:id="@+id/swSleep"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginStart="16dp"
+                            android:checked="false"
+                            android:tag="Config_Sleep"
+                            android:text="@string/swSleep" />
+
+                        <TextView
+                            android:id="@+id/txtSleep"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="24dp"
+                            android:layout_marginEnd="16dp"
+                            android:paddingTop="2dp"
+                            android:visibility="gone"
+                            android:paddingBottom="4dp"/>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:orientation="horizontal"
+                            android:layout_gravity="bottom">
+
+                            <ImageView
+                                android:id="@+id/imgSleep"
+                                android:tag="Config_Sleep"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:layout_gravity="top"
+                                android:layout_marginBottom="8dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_marginTop="8dp"
+                                android:visibility="gone" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_weight="1"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:tag="Config_Sleep"
+                                android:text="@string/lblSleep"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:background="#DDD" />
+
+                        <android.support.v7.widget.SwitchCompat
+                            android:id="@+id/swDeepSleep"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginStart="16dp"
+                            android:checked="false"
+                            android:tag="Config_DeepSleep"
+                            android:text="@string/swDeepSleep" />
+
+                        <TextView
+                            android:id="@+id/txtDeepSleep"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="24dp"
+                            android:layout_marginEnd="16dp"
+                            android:paddingTop="2dp"
+                            android:visibility="gone"
+                            android:paddingBottom="4dp"/>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:orientation="horizontal"
+                            android:layout_gravity="bottom">
+
+                            <ImageView
+                                android:id="@+id/imgDeepSleep"
+                                android:tag="Config_DeepSleep"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:layout_gravity="top"
+                                android:layout_marginBottom="8dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_marginTop="8dp"
+                                android:visibility="gone" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_weight="1"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:tag="Config_DeepSleep"
+                                android:text="@string/lblDeepSleep"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:background="#DDD" />
+                        <android.support.v7.widget.SwitchCompat
+                            android:id="@+id/swGPSAlert"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginStart="16dp"
+                            android:checked="false"
+                            android:tag="Config_GPSLow"
+                            android:text="@string/swGPSAlert" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:orientation="horizontal"
+                            android:layout_gravity="bottom">
+
+                            <ImageView
+                                android:id="@+id/imgGPSAlert"
+                                android:tag="Config_GPSLow"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:layout_gravity="top"
+                                android:layout_marginBottom="8dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_marginTop="8dp"
+                                android:visibility="gone" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_weight="1"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:tag="Config_GPSLow"
+                                android:text="@string/lblGPSAlert"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:background="#DDD" />
+
+                        <android.support.v7.widget.SwitchCompat
+                            android:tag="Config_Shock"
+                            android:id="@+id/swShockAlert"
+                            android:layout_width="match_parent"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_height="wrap_content"
+                            android:checked="false"
+                            android:text="@string/swShockAlert" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:orientation="horizontal"
+                            android:layout_gravity="bottom">
+
+                            <ImageView
+                                android:id="@+id/imgShockAlert"
+                                android:tag="Config_Shock"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:layout_gravity="top"
+                                android:layout_marginBottom="8dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_marginTop="8dp"
+                                android:visibility="gone" />
+
+                            <TextView
+                                android:tag="Config_Shock"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:layout_gravity="center"
+                                android:layout_weight="1"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:text="@string/lblShockAlert"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:background="#DDD" />
+
+                        <android.support.v7.widget.SwitchCompat
+                            android:tag="Config_MoveOut"
+                            android:id="@+id/swMoveoutAlert"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:checked="false"
+                            android:text="@string/swMoveoutAlert" />
+
+                        <LinearLayout
+                            android:id="@+id/vwMoveoutAlert"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginStart="16dp"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:id="@+id/imgMoveOut"
+                                android:tag="Config_MoveOut"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:layout_gravity="top"
+                                android:layout_marginBottom="8dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_marginTop="8dp"
+                                android:visibility="gone" />
+
+                            <TextView
+                                android:tag="Config_MoveOut"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/lblMoveoutAlert"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:background="#DDD" />
+
+                        <android.support.v7.widget.SwitchCompat
+                            android:tag="Config_OverSpeed"
+                            android:id="@+id/swSpeedAlert"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:checked="false"
+                            android:text="@string/swSpeedAlert" />
+
+                        <LinearLayout
+                            android:id="@+id/vwSpeedLimit"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginStart="16dp"
+                            android:orientation="horizontal"
+                            android:visibility="visible">
+
+                            <ImageView
+                                android:id="@+id/imgSpeedLimit"
+                                android:tag="Config_OverSpeed"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:layout_gravity="top"
+                                android:layout_marginBottom="8dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_marginTop="8dp"
+                                android:visibility="gone" />
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+
+                                <com.xw.repo.BubbleSeekBar
+                                    android:id="@+id/sbSpeed"
+                                    android:tag="Config_OverSpeed"
+                                    android:visibility="gone"
+                                    android:layout_marginTop="8dp"
+                                    android:layout_marginBottom="8dp"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:focusable="true"
+                                    android:focusableInTouchMode="true"
+                                    app:bsb_bubble_color="@color/colorAccent"
+                                    app:bsb_bubble_text_color="#FFF"
+                                    app:bsb_hide_bubble="false"
+                                    app:bsb_max="200"
+                                    app:bsb_min="50"
+                                    app:bsb_progress="80"
+                                    app:bsb_second_track_color="@color/colorAccent"
+                                    app:bsb_section_count="3"
+                                    app:bsb_section_text_position="below_section_mark"
+                                    app:bsb_show_section_mark="true"
+                                    app:bsb_show_section_text="true"
+                                    app:bsb_touch_to_seek="true"
+                                    app:bsb_track_color="#888" />
+
+                                <TextView
+                                    android:tag="Config_OverSpeed"
+                                    android:clickable="true"
+                                    android:focusable="true"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/lblSpeedAlert"
+                                    android:textSize="12sp" />
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:background="#DDD" />
+
+                        <android.support.v7.widget.SwitchCompat
+                            android:tag="Config_PeriodicUpdate"
+                            android:id="@+id/swPeriodicUpdate"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:checked="false"
+                            android:text="@string/swUpdateInterval" />
+
+                        <LinearLayout
+                            android:id="@+id/vwPeriodicUpdate"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical"
+                            android:visibility="gone">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+
+                                <ImageView
+                                    android:id="@+id/imgUpdateTime"
+                                    android:tag="Config_UpdateTime"
+                                    android:layout_width="32dp"
+                                    android:layout_height="32dp"
+                                    android:layout_gravity="center"
+                                    android:layout_marginBottom="8dp"
+                                    android:layout_marginEnd="8dp"
+                                    android:layout_marginTop="8dp"
+                                    android:clickable="true"
+                                    android:focusable="true"
+                                    android:visibility="gone"/>
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginTop="8dp"
+                                        android:text="@string/lblUpdateTime"
+                                        android:textStyle="bold" />
+
+                                    <com.xw.repo.BubbleSeekBar
+                                        android:id="@+id/seekBarTime"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginBottom="8dp"
+                                        android:layout_marginTop="4dp"
+                                        android:tag="Config_UpdateTime"
+                                        app:bsb_bubble_color="@color/colorAccent"
+                                        app:bsb_bubble_text_color="#FFF"
+                                        app:bsb_is_float_type="false"
+                                        app:bsb_max="24"
+                                        app:bsb_min="0"
+                                        app:bsb_progress="12"
+                                        app:bsb_second_track_color="@color/colorAccent"
+                                        app:bsb_section_count="2"
+                                        app:bsb_section_text_position="below_section_mark"
+                                        app:bsb_show_section_mark="false"
+                                        app:bsb_show_section_text="true"
+                                        app:bsb_touch_to_seek="true"
+                                        app:bsb_track_color="#888" />
+
+                                </LinearLayout>
+
+                            </LinearLayout>
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:layout_marginBottom="8dp"
+                                android:layout_marginTop="8dp"
+                                android:background="#DDD" />
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+
+                                <ImageView
+                                    android:id="@+id/imgUpdateDistance"
+                                    android:tag="Config_UpdateDistance"
+                                    android:layout_width="32dp"
+                                    android:layout_height="32dp"
+                                    android:layout_gravity="center"
+                                    android:layout_marginBottom="8dp"
+                                    android:layout_marginEnd="8dp"
+                                    android:layout_marginTop="8dp"
+                                    android:clickable="true"
+                                    android:focusable="true"
+                                    android:visibility="gone" />
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginTop="8dp"
+                                        android:text="@string/lblUpdateDistance"
+                                        android:textStyle="bold" />
+
+                                    <com.xw.repo.BubbleSeekBar
+                                        android:id="@+id/seekBarDistance"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginBottom="8dp"
+                                        android:layout_marginTop="4dp"
+                                        android:focusable="true"
+                                        android:focusableInTouchMode="true"
+                                        android:tag="Config_UpdateDistance"
+                                        app:bsb_bubble_color="@color/colorAccent"
+                                        app:bsb_bubble_text_color="#FFF"
+                                        app:bsb_max="1000"
+                                        app:bsb_min="0"
+                                        app:bsb_progress="500"
+                                        app:bsb_second_track_color="@color/colorAccent"
+                                        app:bsb_section_count="2"
+                                        app:bsb_section_text_position="below_section_mark"
+                                        app:bsb_show_section_mark="true"
+                                        app:bsb_show_section_text="true"
+                                        app:bsb_touch_to_seek="true"
+                                        app:bsb_track_color="#888" />
+
+                                </LinearLayout>
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:tag="Config_PeriodicUpdate"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_width="match_parent"
+                            android:id="@+id/lblUpdateInterval"
+                            android:layout_height="wrap_content"
+                            android:text="@string/lblUpdateInterval"
+                            android:textSize="12sp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/vwNotificationsCardView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="16dp"
+                        android:fontFamily="serif"
+                        android:text="@string/lblNotificationTitle"
+                        android:textAllCaps="true"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                        android:textSize="14sp"
+                        android:typeface="monospace" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="2dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:background="#644286f5" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:animateLayoutChanges="true"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <android.support.v7.widget.SwitchCompat
+                            android:id="@+id/swNotifications"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:text="@string/swNotifications" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/lblNotifications"
+                            android:textSize="12sp" />
+
+                        <LinearLayout
+                            android:id="@+id/vwNotificationOptions"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <CheckBox
+                                android:id="@+id/cbStatusCheck"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:checked="true"
+                                android:tag="Notify_StatusCheck"
+                                android:text="@string/cbStatusCheck" />
+
+                            <CheckBox
+                                android:id="@+id/cbLowBattery"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:checked="true"
+                                android:tag="Notify_LowBattery"
+                                android:text="@string/cbLowBattery" />
+
+                            <CheckBox
+                                android:id="@+id/cbMovement"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:checked="true"
+                                android:tag="Notify_Movement"
+                                android:text="@string/cbMovement" />
+
+                            <CheckBox
+                                android:id="@+id/cbStopped"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:checked="false"
+                                android:tag="Notify_Stopped"
+                                android:text="@string/cbStopped" />
+
+                            <CheckBox
+                                android:id="@+id/cbGPSLow"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:checked="false"
+                                android:enabled="false"
+                                android:tag="Notify_Shock"
+                                android:text="@string/cbGPSLow" />
+
+                            <CheckBox
+                                android:id="@+id/cbShockAlert"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:checked="false"
+                                android:enabled="false"
+                                android:tag="Notify_Shock"
+                                android:text="@string/cbShockAlert" />
+
+                            <CheckBox
+                                android:id="@+id/cbMoveout"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:enabled="false"
+                                android:tag="Notify_MoveOut"
+                                android:text="@string/cbMoveout" />
+
+                            <CheckBox
+                                android:id="@+id/cbSpeedLimit"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:enabled="false"
+                                android:tag="Notify_OverSpeed"
+                                android:text="@string/cbSpeedLimit" />
+
+                            <CheckBox
+                                android:id="@+id/cbAvailable"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:tag="Notify_Available"
+                                android:text="@string/cbAvailable" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="16dp"
+                                android:layout_marginStart="8dp"
+                                android:text="@string/lblAvailableDescription"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </LinearLayout>
+            </android.support.v7.widget.CardView>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@drawable/ic_add_black_24dp" />
+</android.support.design.widget.CoordinatorLayout>

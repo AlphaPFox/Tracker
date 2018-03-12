@@ -20,6 +20,10 @@ public class Tracker implements Parcelable {
 
     private String mIdentification;
 
+    private String mPassword;
+
+    private String mIMEI;
+
     private String mModel;
 
     private String mBatteryLevel;
@@ -60,6 +64,22 @@ public class Tracker implements Parcelable {
     }
 
     public void setIdentification(String mIdentification) { this.mIdentification = mIdentification;  }
+
+    public String getPassword() {
+        return mPassword;
+    }
+
+    public void setPassword(String mPassword) {
+        this.mPassword = mPassword;
+    }
+
+    public String getIMEI() {
+        return mIMEI;
+    }
+
+    public void setIMEI(String mIMEI) {
+        this.mIMEI = mIMEI;
+    }
 
     public String getModel() {
         return mModel;
@@ -115,6 +135,8 @@ public class Tracker implements Parcelable {
         mName = in.readString();
         mDescription = in.readString();
         mIdentification = in.readString();
+        mPassword = in.readString();
+        mIMEI = in.readString();
         mModel = in.readString();
         mBatteryLevel = in.readString();
         mSignalLevel = in.readString();
@@ -165,6 +187,8 @@ public class Tracker implements Parcelable {
         dest.writeString(mName);
         dest.writeString(mDescription);
         dest.writeString(mIdentification);
+        dest.writeString(mPassword);
+        dest.writeString(mIMEI);
         dest.writeString(mModel);
         dest.writeString(mBatteryLevel);
         dest.writeString(mSignalLevel);

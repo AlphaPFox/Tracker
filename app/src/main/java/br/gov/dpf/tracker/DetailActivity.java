@@ -42,11 +42,8 @@ import com.akexorcist.googledirection.GoogleDirection;
 import com.akexorcist.googledirection.config.GoogleDirectionConfiguration;
 import com.akexorcist.googledirection.constant.TransportMode;
 import com.akexorcist.googledirection.model.Direction;
-import com.akexorcist.googledirection.model.Leg;
 import com.akexorcist.googledirection.model.Route;
 import com.akexorcist.googledirection.model.Step;
-import com.akexorcist.googledirection.request.DirectionOriginRequest;
-import com.akexorcist.googledirection.request.DirectionRequest;
 import com.akexorcist.googledirection.util.DirectionConverter;
 import com.appolica.interactiveinfowindow.InfoWindow;
 import com.appolica.interactiveinfowindow.InfoWindowManager;
@@ -1067,15 +1064,52 @@ public class DetailActivity
 
                 case R.id.menu_turn_off:
 
-                    //Define request position command
-                    command.setName("TempOff");
-                    command.setDescription("Solicitando desligamento temporário");
-                    command.setValue("10");
+                    showOptions("Solicitar desligamento por", new String[]{"5 minutos", "30 minutos", "1 hora", "6 horas", "12 horas","1 dia"}, 0, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i)
+                        {
+                            //Get user option
+                            int option = ((AlertDialog) dialogInterface).getListView().getCheckedItemPosition();
 
-                    //Define alert strings
-                    alertTitle = "Solicitar o desligamento temporário";
-                    alertDescription = "Deseja solicitar o desligamento temporário deste dispositivo?";
-                    break;
+                            //Define temporary off command
+                            command.setName("TempOff");
+
+                            switch (option)
+                            {
+                                case 0:
+                                    //Define command settings
+                                    command.setDescription("Solicitando desligamento por 5 minutos");
+                                    command.setValue("5");
+                                    break;
+                                case 1:
+                                    //Define command settings
+                                    command.setDescription("Solicitando desligamento por 30 minutos");
+                                    command.setValue("5");
+                                    break;
+                                case 2:
+                                    //Define command settings
+                                    command.setDescription("Solicitando desligamento por 1 hora");
+                                    command.setValue("60");
+                                    break;
+                                case 3:
+                                    //Define command settings
+                                    command.setDescription("Solicitando desligamento por 12 horas");
+                                    command.setValue("720");
+                                    break;
+                                case 4:
+                                    //Define command settings
+                                    command.setDescription("Solicitando desligamento por 1 dia");
+                                    command.setValue("1440");
+                                    break;
+                            }
+
+                            //Send command to tracker
+                            sendCommand(command);
+                        }
+                    });
+
+                    //End method
+                    return true;
             }
 
             //Show alert to request confirmation from user

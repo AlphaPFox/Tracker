@@ -1,11 +1,17 @@
 package br.gov.dpf.tracker;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.Toolbar;
@@ -23,11 +29,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.SetOptions;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import br.gov.dpf.tracker.Entities.Tracker;
 
@@ -48,6 +51,21 @@ public class DefaultSettingsActivity extends AppCompatActivity {
     //Flag indicating whether this activity is in edit mode
     private boolean editMode;
 
+    //Layout text fields
+    private EditText txtTrackerName;
+    private EditText txtTrackerDescription;
+    private EditText txtTrackerID;
+    private EditText txtTrackerIMEI;
+    private EditText txtTrackerPassword;
+    private TextView lblTrackerID;
+    private TextView lblTrackerIMEI;
+    private TextView lblTrackerPassword;
+    private TextView lblTrackerSubtitle;
+
+    //Static fields
+    static final int REQUEST_PERMISSION = 1;
+    static final int REQUEST_CONTACTS = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -62,6 +80,17 @@ public class DefaultSettingsActivity extends AppCompatActivity {
 
         //Load Floating Action Button
         FloatingActionButton fab = findViewById(R.id.fab);
+
+        //Get text fields from layout
+        txtTrackerID = findViewById(R.id.txtTrackerIdentification);
+        txtTrackerIMEI = findViewById(R.id.txtTrackerIMEI);
+        txtTrackerPassword = findViewById(R.id.txtTrackerPassword);
+        txtTrackerName = findViewById(R.id.txtTrackerName);
+        txtTrackerDescription = findViewById(R.id.txtTrackerDescription);
+        lblTrackerID = findViewById(R.id.lblTrackerIdentification);
+        lblTrackerIMEI = findViewById(R.id.lblTrackerIMEI);
+        lblTrackerPassword = findViewById(R.id.lblTrackerPassword);
+        lblTrackerSubtitle = findViewById(R.id.lblTrackerIdentificationSubtitle);
 
         //Set click event
         fab.setOnClickListener(new View.OnClickListener() {
@@ -112,16 +141,18 @@ public class DefaultSettingsActivity extends AppCompatActivity {
     //Called when editing an existing tracker
     public void loadData()
     {
-        //Load tracker data on text views
-        ((EditText) findViewById(R.id.txtTrackerName)).setText(tracker.getName());
-        ((EditText) findViewById(R.id.txtTrackerDescription)).setText(tracker.getDescription());
-        ((EditText) findViewById(R.id.txtTrackerIdentification)).setText(tracker.getIdentification());
+        //Load tracker settings
+        txtTrackerName.setText(tracker.getName());
+        txtTrackerPassword.setText(tracker.getPassword());
+        txtTrackerIMEI.setText(tracker.getIMEI());
+        txtTrackerID.setText(tracker.getIdentification());
+        txtTrackerDescription.setText(tracker.getDescription());
 
         //Change subtitle to alert that tracker identification cannot change
         ((TextView) findViewById(R.id.lblTrackerIdentificationSubtitle)).setText(getResources().getText(R.string.lblEditIDSubtitle));
 
         //Disable update of tracker unique ID
-        findViewById(R.id.txtTrackerIdentification).setEnabled(false);
+        txtTrackerID.setEnabled(false);
 
         //Hide model selected
         findViewById(R.id.vwModelCardView).setVisibility(View.GONE);
@@ -132,15 +163,20 @@ public class DefaultSettingsActivity extends AppCompatActivity {
             //Change activity title
             getSupportActionBar().setTitle(tracker.getName());
         }
+
+        //Update layout according to tracker model
+        changeLabels(tracker.getModel());
     }
 
     //Called when editing or inserting a new tracker
     public void onSettingsConfirmed()
     {
         //Get tracker name and identification
-        String trackerName = ((EditText) findViewById(R.id.txtTrackerName)).getText().toString();
-        String trackerIdentification = ((EditText) findViewById(R.id.txtTrackerIdentification)).getText().toString();
-        String trackerDescription = ((EditText) findViewById(R.id.txtTrackerDescription)).getText().toString();
+        String trackerName = txtTrackerName.getText().toString();
+        String trackerIdentification = txtTrackerID.getText().toString().replaceAll("[^0-9]", "");
+        String trackerIMEI = txtTrackerIMEI.getText().toString();
+        String trackerPassword = txtTrackerPassword.getText().toString();
+        String trackerDescription = txtTrackerDescription.getText().toString();
 
         //Check user input
         if(trackerName.isEmpty() || trackerIdentification.isEmpty())
@@ -162,6 +198,8 @@ public class DefaultSettingsActivity extends AppCompatActivity {
             tracker.setName(trackerName);
             tracker.setDescription(trackerDescription);
             tracker.setIdentification(trackerIdentification);
+            tracker.setIMEI(trackerIMEI);
+            tracker.setPassword(trackerPassword);
 
             //Save tracker model
             tracker.setModel(mModel);
@@ -287,10 +325,71 @@ public class DefaultSettingsActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults)
+    {
+        //Check if permission granted
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+        {
+            //Build contacts intent
+            Intent contacts = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+
+            //Start android activity
+            startActivityForResult(contacts, REQUEST_CONTACTS);
+        }
+    }
+
+    @Override
     protected void onActivityResult (int requestCode, int resultCode, final Intent intent)
     {
-        // Check TrackerSettingsActivity result
-        if(resultCode == MainActivity.RESULT_CANCELED)
+        //Check if this is a request contact activity result
+        if (requestCode == REQUEST_CONTACTS && resultCode == RESULT_OK)
+        {
+            //Cursors and strings used to query data
+            Cursor cursor1, cursor2;
+            String contactName, contactNumber, contactID, query_result;
+
+            //Get data from intent
+            Uri data = intent.getData();
+
+            //Check if data is valid
+            if(data != null)
+            {
+                //Perform first query on result
+                cursor1 = getContentResolver().query(data, null, null, null, null);
+
+                //If valid result
+                if (cursor1 != null && cursor1.moveToFirst()) {
+                    //Get contact data
+                    contactName = cursor1.getString(cursor1.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+                    contactID = cursor1.getString(cursor1.getColumnIndex(ContactsContract.Contacts._ID));
+                    query_result = cursor1.getString(cursor1.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER));
+
+                    //Open second query
+                    cursor2 = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + contactID, null, null);
+
+                    //Check if phone number is available
+                    if (query_result.equals("1") && cursor2 != null) {
+
+                        //For each available phone number
+                        while (cursor2.moveToNext()) {
+                            //Get phone number
+                            contactNumber = cursor2.getString(cursor2.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+
+                            //Update text fields
+                            txtTrackerName.setText(contactName);
+                            txtTrackerID.setText(contactNumber.replaceAll("[^0-9]", ""));
+                        }
+
+                        //Close second cursor
+                        cursor2.close();
+                    }
+
+                    //Close first cursor
+                    cursor1.close();
+                }
+            }
+        }
+        else if(resultCode == MainActivity.RESULT_CANCELED)
         {
             // User canceled (back pressed), hide loading
             confirmMenu.setActionView(null);
@@ -320,6 +419,11 @@ public class DefaultSettingsActivity extends AppCompatActivity {
             menu.add(Menu.NONE, R.id.lblModel, Menu.NONE, "Alterar modelo do rastreador");
             menu.add(Menu.NONE, R.id.action_tracker_settings, Menu.NONE, "Configurações do dispositivo");
             menu.add(Menu.NONE, R.id.action_notification_settings, Menu.NONE, "Opções de notificação");
+        }
+        else
+        {
+            //Show contacts option menu if inserting new tracker
+            menu.findItem(R.id.action_contacts).setVisible(true);
         }
 
         return super.onCreateOptionsMenu(menu);
@@ -374,6 +478,25 @@ public class DefaultSettingsActivity extends AppCompatActivity {
                 //End method
                 return true;
 
+            case R.id.action_contacts:
+
+                //Check if permission is granted to this app already
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED)
+                {
+                    //Build contacts intent
+                    Intent contacts = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+
+                    //Start android activity
+                    startActivityForResult(contacts, REQUEST_CONTACTS);
+                }
+                else
+                {
+                    //If no permission yet, request from user
+                    ActivityCompat.requestPermissions(this,new String[]{ android.Manifest.permission.READ_CONTACTS}, REQUEST_PERMISSION);
+                }
+
+                //End method
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -387,11 +510,6 @@ public class DefaultSettingsActivity extends AppCompatActivity {
 
     public void changeLabels(String model)
     {
-        //Get text fields from layout
-        TextView lblTrackerID = findViewById(R.id.lblTrackerIdentification);
-        TextView lblTrackerSubtitle = findViewById(R.id.lblTrackerIdentificationSubtitle);
-        EditText txtTrackerID = findViewById(R.id.txtTrackerIdentification);
-
         //Get resources manager
         Resources resources = getResources();
 
@@ -405,7 +523,14 @@ public class DefaultSettingsActivity extends AppCompatActivity {
 
                 //Change input type to allow text
                 txtTrackerID.setInputType(InputType.TYPE_CLASS_TEXT);
+
+                //Set password visibility
+                txtTrackerPassword.setVisibility(View.VISIBLE);
+                lblTrackerPassword.setVisibility(View.VISIBLE);
+                txtTrackerIMEI.setVisibility(View.GONE);
+                lblTrackerIMEI.setVisibility(View.GONE);
                 break;
+
             case "st940":
                 //Set text values
                 lblTrackerID.setText(resources.getString(R.string.lblSuntechID));
@@ -414,7 +539,14 @@ public class DefaultSettingsActivity extends AppCompatActivity {
 
                 //Change input type to allow text
                 txtTrackerID.setInputType(InputType.TYPE_CLASS_NUMBER);
+
+                //Set password visibility
+                txtTrackerPassword.setVisibility(View.GONE);
+                lblTrackerPassword.setVisibility(View.GONE);
+                txtTrackerIMEI.setVisibility(View.GONE);
+                lblTrackerIMEI.setVisibility(View.GONE);
                 break;
+
             default:
                 //Set text values
                 lblTrackerID.setText(resources.getString(R.string.lblPhoneNumber));
@@ -423,6 +555,12 @@ public class DefaultSettingsActivity extends AppCompatActivity {
 
                 //Change input type to allow text
                 txtTrackerID.setInputType(InputType.TYPE_CLASS_PHONE);
+
+                //Set password visibility
+                txtTrackerPassword.setVisibility(View.VISIBLE);
+                lblTrackerPassword.setVisibility(View.VISIBLE);
+                txtTrackerIMEI.setVisibility(View.VISIBLE);
+                lblTrackerIMEI.setVisibility(View.VISIBLE);
 
                 break;
         }

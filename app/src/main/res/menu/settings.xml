@@ -13,6 +13,14 @@
         android:visible="false"/>
 
     <item
+        android:id="@+id/action_contacts"
+        android:icon="@drawable/ic_perm_contact_calendar_white_24dp"
+        android:orderInCategory="1"
+        android:title="@string/menu_contacts"
+        app:showAsAction="ifRoom"
+        android:visible="false"/>
+
+    <item
         android:orderInCategory="2"
         app:showAsAction="ifRoom"
         android:id="@+id/action_add"

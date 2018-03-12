@@ -45,22 +45,25 @@
     <!-- Default settings activity -->
     <string name="title_activity_settings">Novo rastreador</string>
     <string name="lblBasicConfig">Configurações básicas</string>
-    <string name="lblTrackerName">Nome do rastreador:</string>
-    <string name="txtTrackerName">(Nome)</string>
-    <string name="lblTrackerDescription">Descrição (opcional):</string>
+    <string name="lblTrackerName">Nome de identificação:</string>
+    <string name="txtTrackerDescriptionHint">(opcional)</string>
+    <string name="lblTrackerDescription">Descrição do rastreador:</string>
     <string name="lblModel">Modelo</string>
-    <string name="model_tk102b">TK 102B</string>
-    <string name="model_st940">ST 940</string>
-    <string name="model_spot">SPOT Trace</string>
-    <string name="model_pt39">PT-39</string>
-    <string name="model_gt02">GT-02</string>
-    <string name="lblTrackerIdentification">Identificação do rastreador</string>
+    <string name="model_tk102b">Coban TK102B</string>
+    <string name="model_tk1102">Powerpack TK1102</string>
+    <string name="model_st940">Suntech ST940</string>
+    <string name="model_spot">Spot TRACE</string>
+    <string name="model_tk306">Coban TK306B</string>
+    <string name="model_pt39">TechGPS PT39</string>
+    <string name="model_gt02">Coban TK110</string>
+    <string name="lblTrackerIdentification">Informações do rastreador</string>
+    <string name="lblPassword">Senha de configuração:</string>
     <string name="lblPhoneNumber">Número de telefone:</string>
-    <string name="txtPhoneNumberHint">67 9999 8888</string>
-    <string name="lblPhoneNumberSubtitle">Informe o número de telefone vinculado ao cartão SIM inserido no rastreador.</string>
+    <string name="txtPhoneNumberHint">6799998888</string>
+    <string name="lblPhoneNumberSubtitle">Informe o número de telefone, IMEI (somente para modo GPRS) e a senha utilizada para configuração do rastreador.</string>
     <string name="lblFeedID">Identificador (Feed ID):</string>
     <string name="txtFieldIDHint">0I48pmHmVsrh88oe38f0etUjB8pJglLOp</string>
-    <string name="lblFeedIDSubtitle">O campo acima deve ser preenchido com o valor do FEED ID, disponível na página de compartilhamento da SPOT.</string>
+    <string name="lblFeedIDSubtitle">Os campos acima devem ser preenchidos com o valor do FEED ID e da senha utilizados na página de compartilhamento da SPOT.</string>
     <string name="lblSuntechID">Identificador (6 dígitos):</string>
     <string name="txtSuntechHint">696478</string>
     <string name="lblSuntechSubtitle">Informe o número de identificação do aparelho. Por padrão, o número é composto pelos 6 últimos dígitos do IMEI.</string>
@@ -121,6 +124,19 @@
     <string name="cbFunctioning">Notificação de funcionamento</string>
     <string name="lblFunctioning">Caso habilitada, ainda que o rastreador não detecte nenhum movimento, uma vez por dia ele enviará sua localização para confirmar o seu funcionamento.</string>
 
+    <string name="title_tracker_tk1102_settings">Configurações - TK 1102</string>
+    <string name="swProtocol">Ativar modo GPRS</string>
+    <string name="lblProtocol">Ao ativar este modo, o rastreador para de utilizar o modo de mensagens (SMS) e passa a utilizar o modo de dados (GPRS) para comunicação mais rápida com o servidor.</string>
+    <string name="swGPSAlert">Ativar alerta de ponto cego GPS</string>
+    <string name="lblGPSAlert">Este alerta, caso ativado, será enviado pelo rastreador caso ocorra a perda de sinal GPS.</string>
+    <string name="swSleep">Modo baixo consumo de bateria</string>
+    <string name="lblSleep">Neste modo, o rastreador desligará os LEDs e o módulo GPS, porém ficará disponível para receber novos comandos por SMS ou GPRS.</string>
+    <string name="swDeepSleep">Modo mínimo consumo de bateria</string>
+    <string name="lblDeepSleep">Neste modo, o rastreador desligará os LEDs, módulo GPS e o módulo GSM ficando indisponível por um tempo pré-determinado ou até que seja detectada uma vibração.</string>
+    <string name="cbGPSLow">Notificação de sinal GPS perdido </string>
+    <string name="lblUpdateTime">Se parado, enviar localização a cada: </string>
+    <string name="lblUpdateDistance">Em movimento, enviar localização a cada: </string>
+
 
     <!--  Detail activity -->
     <string name="transition_drawable">BackgroundTransition</string>
@@ -174,7 +190,7 @@
     <string name="txtConfigRequest">Realizando solicitação</string>
     <string name="txtConfigStatus">Aguardando resposta do servidor</string>
     <string name="menu_trackers">Dispositivos rastreadores</string>
-    <string name="menu_add">Adicionar novo</string>
+    <string name="menu_add">Adicionar rastreador</string>
     <string name="menu_refresh">Atualizar lista</string>
     <string name="menu_search">Pesquisar por nome</string>
     <string name="menu_notifications">Opções de notificação</string>
@@ -199,6 +215,11 @@
     <string name="menu_search_hint">Nome, modelo ou número</string>
     <string name="menu_turn_off">Desligar temporariamente</string>
     <string name="imgStar">Fixar no topo</string>
+    <string name="app_description">Sistema de Rastreamento - DPF/NVI/MS</string>
+    <string name="menu_contacts">Buscar lista de contato</string>
+    <string name="txtPasswordHint">123456</string>
+    <string name="lblTrackerIMEI">IMEI do dispositivo:</string>
+    <string name="txtTrackerIMEIHint">(opcional)</string>
 
     <string-array name="weekdays">
         <item>Domingo</item>

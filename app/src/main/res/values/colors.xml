@@ -3,7 +3,7 @@
     <color name="colorPrimary">#4286F5</color>
     <color name="colorPrimaryDark">#3367D4</color>
     <color name="colorAccent">#fcdf09</color>
-    <color name="colorSelected">#5abfc0c4</color>
+    <color name="colorSelected">#50a7c5f7</color>
 
     <color name="ToolbarTextColor">#FFF</color>
     <color name="SecondaryTextColor">#000</color>
